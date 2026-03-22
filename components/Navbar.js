@@ -1,16 +1,28 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser, SignInButton } from "@clerk/nextjs";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const { isSignedIn } = useUser();
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setToolsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   return (
@@ -31,13 +43,47 @@ export default function Navbar() {
       </Link>
 
       <div className="flex items-center gap-8 text-sm">
-        <a href="#tools" className="text-dark-100 hover:text-gold-400 transition-colors">
-          Tools
-        </a>
-        <a href="#pricing" className="text-dark-100 hover:text-gold-400 transition-colors">
+        {/* Free Tools Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setToolsOpen(!toolsOpen)}
+            className="text-dark-100 hover:text-gold-400 transition-colors bg-transparent border-none cursor-pointer font-sans text-sm flex items-center gap-1"
+          >
+            Free Tools
+            <span className="text-xs">{toolsOpen ? "▲" : "▼"}</span>
+          </button>
+          {toolsOpen && (
+            <div className="absolute top-10 left-0 bg-dark-800 border border-white/10 rounded-lg shadow-xl p-2 min-w-[220px] animate-fade-in">
+              <Link
+                href="/tools/hardness"
+                onClick={() => setToolsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-white/5 no-underline text-dark-50 transition-colors"
+              >
+                <span>🔧</span>
+                <div>
+                  <div className="text-sm font-medium">Hardness Converter</div>
+                  <div className="text-xs text-dark-300">HRC, HV, HB, HRB</div>
+                </div>
+              </Link>
+              <Link
+                href="/tools/unit-converter"
+                onClick={() => setToolsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-white/5 no-underline text-dark-50 transition-colors"
+              >
+                <span>📐</span>
+                <div>
+                  <div className="text-sm font-medium">Unit Converter</div>
+                  <div className="text-xs text-dark-300">MPa, ksi, J, ft·lb, °C</div>
+                </div>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <a href="#pricing" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">
           Pricing
         </a>
-        <a href="#about" className="text-dark-100 hover:text-gold-400 transition-colors">
+        <a href="#about" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">
           About
         </a>
 
