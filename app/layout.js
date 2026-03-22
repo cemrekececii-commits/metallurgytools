@@ -1,23 +1,19 @@
 import { ClerkProvider } from "@clerk/nextjs";
+import { LanguageProvider } from "@/lib/LanguageContext";
 import "./globals.css";
 
 export const metadata = {
-  title: "MetallurgyTools — AI-Powered Metallurgical Engineering Tools",
+  title: "MetallurgyTools — Yapay Zeka Destekli Metalurji Mühendislik Araçları",
   description:
-    "Professional-grade computational tools for steel metallurgy. Grain size analysis, corrosion assessment, phase diagram simulation.",
+    "Çelik metalurjisi için profesyonel hesaplama araçları. Tane boyutu analizi, korozyon değerlendirmesi, faz diyagramı simülasyonu.",
   keywords: [
-    "metallurgy",
-    "steel",
-    "grain size",
-    "ASTM E112",
-    "corrosion",
-    "phase diagram",
-    "Fe-C",
-    "engineering tools",
+    "metalurji", "metallurgy", "steel", "çelik", "grain size", "tane boyutu",
+    "ASTM E112", "corrosion", "korozyon", "phase diagram", "faz diyagramı",
+    "Fe-C", "hardness", "sertlik", "engineering tools",
   ],
   openGraph: {
     title: "MetallurgyTools",
-    description: "AI-Powered Metallurgical Engineering Tools",
+    description: "Yapay Zeka Destekli Metalurji Mühendislik Araçları",
     url: "https://metallurgytools.com",
     siteName: "MetallurgyTools",
     type: "website",
@@ -27,8 +23,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body>{children}</body>
+      <html lang="tr">
+        <body>
+          <LanguageProvider>{children}</LanguageProvider>
+        </body>
       </html>
     </ClerkProvider>
   );
