@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
-// ASTM E140 approximate conversion table (simplified)
 const HARDNESS_TABLE = [
   { hrc: 68, hv: 940, hb: null, hrb: null, mpa: null },
   { hrc: 67, hv: 900, hb: null, hrb: null, mpa: null },
@@ -95,7 +93,7 @@ const SCALES = [
   { key: "hrb", label: "HRB (Rockwell B)", unit: "HRB", min: 58, max: 100 },
   { key: "hv", label: "HV (Vickers)", unit: "HV", min: 111, max: 940 },
   { key: "hb", label: "HB (Brinell)", unit: "HB", min: 111, max: 421 },
-  { key: "mpa", label: "Çekme Dayanımı (Approx.)", unit: "MPa", min: 310, max: 2393 },
+  { key: "mpa", label: "Tensile Strength (Approx.)", unit: "MPa", min: 310, max: 2393 },
 ];
 
 export default function HardnessConverter() {
@@ -106,9 +104,7 @@ export default function HardnessConverter() {
   const handleConvert = () => {
     const val = parseFloat(inputValue);
     if (isNaN(val)) return;
-
-    const row = findClosest(val, fromScale);
-    setResult(row);
+    setResult(findClosest(val, fromScale));
   };
 
   const handleKeyDown = (e) => {
@@ -119,11 +115,17 @@ export default function HardnessConverter() {
     <div className="min-h-screen">
       <nav className="border-b border-white/[0.06] px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-dark-200 hover:text-gold-400 transition-colors text-sm no-underline">← Dashboard</Link>
+          <Link href="/" className="flex items-center gap-2.5 no-underline text-dark-50">
+            <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-500 rounded-md flex items-center justify-center text-lg font-bold text-dark-800 font-mono">M</div>
+            <span className="font-semibold text-lg tracking-tight">MetallurgyTools</span>
+          </Link>
           <div className="w-px h-5 bg-white/10" />
-          <span className="font-semibold">🔧 Hardness Converter</span>
+          <span className="text-dark-200 text-sm">🔧 Hardness Converter</span>
         </div>
-        <UserButton afterSignOutUrl="/" />
+        <div className="flex items-center gap-4">
+          <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded border border-green-500/30">FREE</span>
+          <Link href="/pricing" className="text-gold-400 text-sm no-underline hover:underline">Upgrade →</Link>
+        </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -133,89 +135,50 @@ export default function HardnessConverter() {
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Input */}
           <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6">
             <h2 className="text-sm font-semibold text-dark-100 mb-4">GİRİŞ</h2>
-
             <div className="mb-4">
               <label className="text-xs text-dark-300 block mb-1">Kaynak Ölçek</label>
-              <select
-                value={fromScale}
-                onChange={(e) => { setFromScale(e.target.value); setResult(null); }}
-                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none"
-              >
-                {SCALES.map((s) => (
-                  <option key={s.key} value={s.key}>{s.label}</option>
-                ))}
+              <select value={fromScale} onChange={(e) => { setFromScale(e.target.value); setResult(null); }}
+                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none">
+                {SCALES.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
               </select>
             </div>
-
             <div className="mb-4">
-              <label className="text-xs text-dark-300 block mb-1">
-                Değer ({SCALES.find((s) => s.key === fromScale)?.unit})
-              </label>
-              <input
-                type="number"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
+              <label className="text-xs text-dark-300 block mb-1">Değer ({SCALES.find((s) => s.key === fromScale)?.unit})</label>
+              <input type="number" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                 placeholder={`Örn: ${fromScale === "hrc" ? "45" : fromScale === "hv" ? "450" : fromScale === "hb" ? "200" : fromScale === "hrb" ? "85" : "800"}`}
-                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none"
-              />
+                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none" />
             </div>
-
             <div className="mb-6 text-xs text-dark-300">
               Geçerli aralık: {SCALES.find((s) => s.key === fromScale)?.min} – {SCALES.find((s) => s.key === fromScale)?.max} {SCALES.find((s) => s.key === fromScale)?.unit}
             </div>
-
-            <button
-              onClick={handleConvert}
-              disabled={!inputValue}
-              className={`w-full py-3 rounded-lg text-sm font-semibold transition-all font-sans border-none ${
-                inputValue
-                  ? "bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 cursor-pointer hover:shadow-lg hover:shadow-gold-400/20"
-                  : "bg-white/5 text-dark-300 cursor-not-allowed"
-              }`}
-            >
+            <button onClick={handleConvert} disabled={!inputValue}
+              className={`w-full py-3 rounded-lg text-sm font-semibold transition-all font-sans border-none ${inputValue ? "bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 cursor-pointer hover:shadow-lg hover:shadow-gold-400/20" : "bg-white/5 text-dark-300 cursor-not-allowed"}`}>
               Çevir
             </button>
           </div>
 
-          {/* Results */}
           <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6">
             <h2 className="text-sm font-semibold text-dark-100 mb-4">SONUÇLAR</h2>
-
             {result ? (
               <div className="space-y-3 animate-fade-in">
                 {SCALES.map((s) => {
                   const val = result[s.key];
                   const isSource = s.key === fromScale;
                   return (
-                    <div
-                      key={s.key}
-                      className={`rounded-lg p-4 flex justify-between items-center ${
-                        isSource
-                          ? "bg-gold-400/10 border border-gold-400/20"
-                          : "bg-dark-800"
-                      }`}
-                    >
-                      <div>
-                        <div className="text-xs text-dark-300">{s.label}</div>
-                      </div>
-                      <div className={`text-xl font-bold font-mono ${
-                        isSource ? "text-gold-400" : val !== null ? "text-dark-50" : "text-dark-300"
-                      }`}>
+                    <div key={s.key} className={`rounded-lg p-4 flex justify-between items-center ${isSource ? "bg-gold-400/10 border border-gold-400/20" : "bg-dark-800"}`}>
+                      <div className="text-xs text-dark-300">{s.label}</div>
+                      <div className={`text-xl font-bold font-mono ${isSource ? "text-gold-400" : val !== null ? "text-dark-50" : "text-dark-300"}`}>
                         {val !== null ? val : "—"}
                         <span className="text-xs ml-1 font-normal text-dark-300">{val !== null ? s.unit : ""}</span>
                       </div>
                     </div>
                   );
                 })}
-
                 <div className="mt-4 p-3 bg-dark-800 rounded-lg">
                   <div className="text-xs text-dark-300 font-mono">
-                    ⚠ Yaklaşık değerlerdir. ASTM E140 dönüşüm tablosuna dayalıdır.
-                    Farklı malzeme gruplarında (östenitik çelikler, dökme demir vb.) sapma olabilir.
+                    ⚠ Yaklaşık değerlerdir. ASTM E140 dönüşüm tablosuna dayalıdır. Farklı malzeme gruplarında sapma olabilir.
                   </div>
                 </div>
               </div>
@@ -223,29 +186,28 @@ export default function HardnessConverter() {
               <div className="flex flex-col items-center justify-center h-64 text-dark-300">
                 <div className="text-4xl mb-3">🔧</div>
                 <div className="text-sm">Bir sertlik değeri girin ve Çevir'e tıklayın</div>
-                <div className="text-xs text-dark-300 mt-1">Tüm ölçekler aynı anda gösterilir</div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Reference info */}
         <div className="mt-8 bg-white/[0.02] border border-white/[0.06] rounded-xl p-6">
           <h3 className="text-sm font-semibold text-dark-100 mb-3">Referans Bilgisi</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-dark-300">
-            <div>
-              <span className="text-dark-100 font-medium">HRC (Rockwell C):</span> Sertleştirilmiş çelikler, 20-68 HRC aralığı. 150 kgf yük, elmas konik uç.
-            </div>
-            <div>
-              <span className="text-dark-100 font-medium">HRB (Rockwell B):</span> Yumuşak çelikler ve bakır alaşımları, 58-100 HRB. 100 kgf yük, 1/16" çelik bilye.
-            </div>
-            <div>
-              <span className="text-dark-100 font-medium">HV (Vickers):</span> Tüm malzemeler, mikro ve makro sertlik. Elmas piramit uç, iz köşegeni ölçümü.
-            </div>
-            <div>
-              <span className="text-dark-100 font-medium">HB (Brinell):</span> Döküm ve yumuşak çelikler, 10mm tungsten karbür bilye. ASTM E10.
-            </div>
+            <div><span className="text-dark-100 font-medium">HRC (Rockwell C):</span> Sertleştirilmiş çelikler, 20-68 HRC. 150 kgf yük, elmas konik uç.</div>
+            <div><span className="text-dark-100 font-medium">HRB (Rockwell B):</span> Yumuşak çelikler, 58-100 HRB. 100 kgf yük, 1/16" çelik bilye.</div>
+            <div><span className="text-dark-100 font-medium">HV (Vickers):</span> Tüm malzemeler. Elmas piramit uç, iz köşegeni ölçümü.</div>
+            <div><span className="text-dark-100 font-medium">HB (Brinell):</span> Döküm ve yumuşak çelikler. 10mm tungsten karbür bilye. ASTM E10.</div>
           </div>
+        </div>
+
+        {/* CTA Banner */}
+        <div className="mt-8 bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-xl p-6 text-center">
+          <h3 className="text-lg font-semibold mb-2">Daha fazla araç mı istiyorsunuz?</h3>
+          <p className="text-dark-300 text-sm mb-4">Grain Size Analyzer, Corrosion Calculator, Fe-C Phase Diagram ve daha fazlası için üye olun.</p>
+          <Link href="/pricing" className="inline-block bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-2.5 text-sm font-semibold no-underline hover:shadow-lg hover:shadow-gold-400/20 transition-all">
+            Planları İncele →
+          </Link>
         </div>
       </div>
     </div>
