@@ -2,70 +2,165 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
-
-const HARDNESS_TABLE = [
-  { hrc: 68, hv: 940, hb: null, hrb: null, mpa: null },
-  { hrc: 65, hv: 832, hb: null, hrb: null, mpa: 2393 },
-  { hrc: 62, hv: 746, hb: null, hrb: null, mpa: 2186 },
-  { hrc: 60, hv: 697, hb: null, hrb: null, mpa: 2048 },
-  { hrc: 58, hv: 653, hb: null, hrb: null, mpa: 1924 },
-  { hrc: 56, hv: 613, hb: null, hrb: null, mpa: 1800 },
-  { hrc: 54, hv: 577, hb: null, hrb: null, mpa: 1689 },
-  { hrc: 52, hv: 544, hb: null, hrb: null, mpa: 1579 },
-  { hrc: 50, hv: 513, hb: null, hrb: null, mpa: 1482 },
-  { hrc: 48, hv: 484, hb: null, hrb: null, mpa: 1386 },
-  { hrc: 46, hv: 458, hb: null, hrb: null, mpa: 1296 },
-  { hrc: 45, hv: 446, hb: 421, hrb: null, mpa: 1255 },
-  { hrc: 43, hv: 423, hb: 400, hrb: null, mpa: 1172 },
-  { hrc: 41, hv: 402, hb: 381, hrb: null, mpa: 1096 },
-  { hrc: 40, hv: 392, hb: 371, hrb: null, mpa: 1062 },
-  { hrc: 38, hv: 372, hb: 353, hrb: null, mpa: 1000 },
-  { hrc: 36, hv: 354, hb: 336, hrb: null, mpa: 951 },
-  { hrc: 34, hv: 337, hb: 319, hrb: null, mpa: 903 },
-  { hrc: 32, hv: 321, hb: 301, hrb: null, mpa: 862 },
-  { hrc: 30, hv: 306, hb: 286, hrb: null, mpa: 820 },
-  { hrc: 28, hv: 292, hb: 271, hrb: null, mpa: 779 },
-  { hrc: 26, hv: 278, hb: 258, hrb: null, mpa: 738 },
-  { hrc: 24, hv: 266, hb: 247, hrb: 99.5, mpa: 696 },
-  { hrc: 22, hv: 254, hb: 237, hrb: 98.5, mpa: 669 },
-  { hrc: 20, hv: 243, hb: 226, hrb: 97, mpa: 641 },
-  { hrc: null, hv: 230, hb: 217, hrb: 95.5, mpa: 614 },
-  { hrc: null, hv: 213, hb: 207, hrb: 93.5, mpa: 579 },
-  { hrc: null, hv: 196, hb: 197, hrb: 91, mpa: 538 },
-  { hrc: null, hv: 180, hb: 183, hrb: 87.5, mpa: 503 },
-  { hrc: null, hv: 166, hb: 170, hrb: 84, mpa: 462 },
-  { hrc: null, hv: 154, hb: 156, hrb: 79.5, mpa: 434 },
-  { hrc: null, hv: 142, hb: 143, hrb: 74.5, mpa: 393 },
-  { hrc: null, hv: 131, hb: 131, hrb: 69, mpa: 365 },
-  { hrc: null, hv: 121, hb: 121, hrb: 64, mpa: 338 },
-  { hrc: null, hv: 111, hb: 111, hrb: 58, mpa: 310 },
-];
-
-function findClosest(value, key) {
-  const valid = HARDNESS_TABLE.filter((r) => r[key] !== null);
-  let closest = valid[0]; let minDiff = Math.abs(valid[0][key] - value);
-  for (const row of valid) { const diff = Math.abs(row[key] - value); if (diff < minDiff) { minDiff = diff; closest = row; } }
-  return closest;
-}
+import { convertHardness, convertMpaToPsi } from "@/lib/hardnessData";
 
 const SCALES = [
-  { key: "hrc", label: "HRC (Rockwell C)", unit: "HRC", min: 20, max: 68 },
-  { key: "hrb", label: "HRB (Rockwell B)", unit: "HRB", min: 58, max: 100 },
-  { key: "hv", label: "HV (Vickers)", unit: "HV", min: 111, max: 940 },
-  { key: "hb", label: "HB (Brinell)", unit: "HB", min: 111, max: 421 },
-  { key: "mpa", label: "Tensile Strength", unit: "MPa", min: 310, max: 2393 },
+  { key: "hbw", label: "Brinell (HBW)" },
+  { key: "hv", label: "Vickers (HV)" },
+  { key: "hrc", label: "Rockwell C (HRC)" },
+  { key: "hrb", label: "Rockwell B (HRB)" },
+  { key: "hrf", label: "Rockwell F (HRF)" },
+  { key: "hra", label: "Rockwell A (HRA)" },
+  { key: "hrd", label: "Rockwell D (HRD)" },
+  { key: "hr15n", label: "Superficial 15N (HR15N)" },
+  { key: "hr30n", label: "Superficial 30N (HR30N)" },
+  { key: "hr45n", label: "Superficial 45N (HR45N)" },
 ];
 
-export default function HardnessConverter() {
-  const [fromScale, setFromScale] = useState("hrc");
-  const [inputValue, setInputValue] = useState("");
-  const [result, setResult] = useState(null);
-  const { t, lang, switchLang } = useLang();
+const MATERIAL_GROUPS_EN = [
+  { key: "carbon_steel", label: "Carbon Steel (Table A.1)" },
+  { key: "low_alloy_steel", label: "Low Alloy Steel" },
+  { key: "structural_steel", label: "Structural Steel" },
+  { key: "qt_steel_qt_condition", label: "Q&T Steel — Q&T Condition (Table B.2)" },
+  { key: "qt_steel_untreated_condition", label: "Q&T Steel — Untreated/Normalized (Table B.3)" },
+  { key: "unsupported", label: "Other / Unsupported" },
+];
+const MATERIAL_GROUPS_TR = [
+  { key: "carbon_steel", label: "Karbon Çeliği (Tablo A.1)" },
+  { key: "low_alloy_steel", label: "Düşük Alaşımlı Çelik" },
+  { key: "structural_steel", label: "Yapı Çeliği" },
+  { key: "qt_steel_qt_condition", label: "SV&T Çelik — SV&T Durumu (Tablo B.2)" },
+  { key: "qt_steel_untreated_condition", label: "SV&T Çelik — İşlemsiz/Normalize (Tablo B.3)" },
+  { key: "unsupported", label: "Diğer / Desteklenmeyen" },
+];
 
-  const handleConvert = () => { const val = parseFloat(inputValue); if (!isNaN(val)) setResult(findClosest(val, fromScale)); };
+const STATUS_COLORS = {
+  exact: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  interpolated: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  out_of_range: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  unsupported: "bg-white/5 text-dark-300 border-white/10",
+};
+
+const T = {
+  tr: {
+    title: "Sertlik Dönüşümü ve Mukavemet Referansı",
+    subtitle: "Sertlik skalası karşılaştırması ve sınırlı mukavemet tahmini için mühendislik referans aracı",
+    badge: "Standartlara Dayalı | Kapsamı Sınırlı | Mühendislik Kullanımı",
+    inputTitle: "Girdi Parametreleri",
+    hardnessValue: "Sertlik Değeri",
+    inputScale: "Girdi Skalası",
+    materialGroup: "Malzeme Grubu",
+    showStrength: "Çekme mukavemeti referansını göster",
+    displayUnits: "Birimler",
+    convert: "Dönüştür",
+    reset: "Sıfırla",
+    results: "Dönüşüm Sonuçları",
+    awaiting: "Girdi Bekleniyor",
+    awaitingDesc: "Dönüşüm sonuçlarını görmek için soldaki panelden parametreleri seçin.",
+    uts: "Çekme Mukavemeti (UTS)",
+    approx: "Yalnızca yaklaşık referans",
+    utsWarn: "Bu değer çekme testinin yerine geçmez.",
+    exact: "Tam Eşleşme",
+    interpolated: "İnterpolasyonlu",
+    out_of_range: "Aralık Dışı",
+    unsupported: "Mevcut Değil",
+    warningTitle: "Mühendislik Geçerliliği ve Sınırlamalar",
+    w1: "Sertlik dönüşüm değerleri, tablolanmış bir noktayla doğrudan eşleşmediği sürece yaklaşıktır.",
+    w2: "Dönüşümler alaşım sistemine, mikroyapıya ve metalürjik duruma bağlıdır.",
+    w3: "Çekme mukavemeti eşdeğerliği yalnızca sınırlı çelik grupları için referans tahmini olarak geçerlidir.",
+    w4: "Sertifikasyon veya tasarıma yönelik kritik kararlar için orijinal test yöntemini kullanın.",
+    notesTitle: "Teknik Notlar",
+    n1t: "İz Bırakma Yöntemleri", n1: "Farklı sertlik skalaları farklı iz bırakıcılar ve yükler kullanır. Plastik deformasyona karşı farklı fiziksel tepkileri ölçerler.",
+    n2t: "Mikroyapı Etkisi", n2: "Sertlik-mukavemet ilişkisi mikroyapıya bağlıdır. SV&T çelikler genellikle normalize çeliklerden farklı dönüşüm eğrileri gösterir.",
+    n3t: "Soğuk İşlem ve Isıl İşlem", n3: "Ağır soğuk işlem sertlik-mukavemet ilişkisini bozar. Dönüşümler östenitik olmayan çelikler için en güvenilirdir.",
+    refTitle: "Referans Temeli",
+    refDesc: "Bu araç kabul görmüş standartları takip eder. Nihai uygulama lisanslı referanslara karşı kontrol edilmelidir.",
+    disclaimer: "Bu araç yalnızca belirtilen kapsam dahilinde mühendislik referans değerleri sağlar. Onaylı test sonuçlarının yerine geçmez.",
+    mpa: "MPa", psi: "psi", both: "Her İkisi (MPa / psi)",
+    free: "ÜCRETSİZ", upgrade: "Yükselt →",
+    wantMore: "Daha fazla araç mı istiyorsunuz?",
+    viewPlans: "Planları İncele →",
+    copy: "Sonuçları Kopyala", copied: "Kopyalandı!",
+    scaleHelp: "HBW = Brinell (Tungsten Karbür Bilye) | HV = Vickers (Elmas Piramit) | HRC/HRB = Rockwell",
+  },
+  en: {
+    title: "Hardness Conversion and Strength Reference",
+    subtitle: "Engineering reference tool for hardness scale comparison and limited strength estimation",
+    badge: "Standards-based | Scope-limited | Engineering use",
+    inputTitle: "Input Parameters",
+    hardnessValue: "Hardness Value",
+    inputScale: "Input Scale",
+    materialGroup: "Material Group",
+    showStrength: "Show approximate tensile strength reference",
+    displayUnits: "Display Units",
+    convert: "Convert",
+    reset: "Reset",
+    results: "Conversion Results",
+    awaiting: "Awaiting Input",
+    awaitingDesc: "Enter a hardness value and select parameters on the left to view conversion results.",
+    uts: "Tensile Strength (UTS)",
+    approx: "Approximate reference only",
+    utsWarn: "This value is not a substitute for tensile testing.",
+    exact: "Exact Match",
+    interpolated: "Interpolated",
+    out_of_range: "Out of Range",
+    unsupported: "Not Available",
+    warningTitle: "Engineering Validity & Limitations",
+    w1: "Hardness conversion values are approximate unless directly matched to a tabulated point.",
+    w2: "Conversions depend heavily on alloy system, microstructure, and metallurgical condition.",
+    w3: "Tensile strength equivalence is valid only for limited steel groups and only as a reference estimate.",
+    w4: "For certification or design-critical decisions, use the original test method and applicable standard.",
+    notesTitle: "Technical Notes",
+    n1t: "Indentation Methods", n1: "Different hardness scales use different indenters and loads. They measure different physical responses to plastic deformation.",
+    n2t: "Microstructure Influence", n2: "The hardness-strength relationship changes depending on whether the microstructure is ferrite-pearlite, bainite, or tempered martensite.",
+    n3t: "Cold Work & Heat Treatment", n3: "Heavy cold work distorts the hardness-to-strength relationship. Conversions are generally most reliable for non-austenitic steels.",
+    refTitle: "Reference Basis",
+    refDesc: "This tool is structured to follow recognized standards. Final implementation should be checked against licensed references.",
+    disclaimer: "This tool provides engineering reference values only within stated scope. It is not a replacement for certified test results.",
+    mpa: "MPa", psi: "psi", both: "Both (MPa / psi)",
+    free: "FREE", upgrade: "Upgrade →",
+    wantMore: "Want more tools?",
+    viewPlans: "View Plans →",
+    copy: "Copy Results", copied: "Copied!",
+    scaleHelp: "HBW = Brinell (WC Ball) | HV = Vickers (Diamond Pyramid) | HRC/HRB = Rockwell Scales",
+  },
+};
+
+export default function HardnessConverter() {
+  const { lang, switchLang } = useLang();
+  const t = T[lang] || T.en;
+  const matGroups = lang === "tr" ? MATERIAL_GROUPS_TR : MATERIAL_GROUPS_EN;
+
+  const [inputScale, setInputScale] = useState("hv");
+  const [inputValue, setInputValue] = useState("");
+  const [material, setMaterial] = useState("carbon_steel");
+  const [showStrength, setShowStrength] = useState(true);
+  const [units, setUnits] = useState("both");
+  const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleConvert = () => {
+    const val = parseFloat(inputValue);
+    if (isNaN(val) || val <= 0) return;
+    setResult(convertHardness(val, inputScale, material));
+  };
+
+  const handleReset = () => { setResult(null); setInputValue(""); };
+
+  const handleCopy = () => {
+    if (!result) return;
+    const lines = SCALES.map(s => `${s.label}: ${result[s.key]?.value ?? "—"}`);
+    if (result.uts_mpa?.value) lines.push(`UTS: ${result.uts_mpa.value} MPa`);
+    navigator.clipboard.writeText(lines.join("\n"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const statusLabel = (status) => t[status] || status;
 
   return (
     <div className="min-h-screen">
+      {/* Nav */}
       <nav className="border-b border-white/[0.06] px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2.5 no-underline text-dark-50">
@@ -73,7 +168,7 @@ export default function HardnessConverter() {
             <span className="font-semibold text-lg tracking-tight">MetallurgyTools</span>
           </Link>
           <div className="w-px h-5 bg-white/10" />
-          <span className="text-dark-200 text-sm">🔧 {t.hardnessShort}</span>
+          <span className="text-dark-200 text-sm">🔧</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center bg-white/[0.05] rounded-full p-0.5 border border-white/10">
@@ -85,66 +180,176 @@ export default function HardnessConverter() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-2xl font-bold tracking-tight mb-2">{t.hardnessTitle}</h1>
-        <p className="text-dark-300 text-sm mb-8">{t.hardnessSubtitle}</p>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <h1 className="text-2xl font-bold tracking-tight mb-1">{t.title}</h1>
+        <p className="text-dark-300 text-sm mb-2">{t.subtitle}</p>
+        <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1 text-xs text-green-400 mb-6">
+          <span>✓</span> {t.badge}
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6">
-            <h2 className="text-sm font-semibold text-dark-100 mb-4">{t.input}</h2>
-            <div className="mb-4">
-              <label className="text-xs text-dark-300 block mb-1">{t.sourceScale}</label>
-              <select value={fromScale} onChange={(e) => { setFromScale(e.target.value); setResult(null); }}
-                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none">
-                {SCALES.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
-              </select>
+        {/* Warning */}
+        <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 mb-8">
+          <h3 className="text-sm font-semibold text-orange-400 mb-3">⚠ {t.warningTitle}</h3>
+          <div className="space-y-1.5 text-xs text-dark-200">
+            <p>• {t.w1}</p><p>• {t.w2}</p><p>• {t.w3}</p>
+            <p className="text-orange-400 font-medium mt-2">• {t.w4}</p>
+          </div>
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          {/* Input Panel */}
+          <div className="lg:col-span-4">
+            <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6 sticky top-20">
+              <h2 className="text-sm font-semibold text-dark-100 mb-5">{t.inputTitle}</h2>
+
+              <div className="mb-4">
+                <label className="text-xs text-dark-300 block mb-1">{t.inputScale}</label>
+                <select value={inputScale} onChange={e => { setInputScale(e.target.value); setResult(null); }}
+                  className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none">
+                  {SCALES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="text-xs text-dark-300 block mb-1">{t.hardnessValue}</label>
+                <input type="number" value={inputValue} onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleConvert()}
+                  placeholder="e.g. 250" className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none font-mono" />
+              </div>
+
+              <div className="mb-4">
+                <label className="text-xs text-dark-300 block mb-1">{t.materialGroup}</label>
+                <select value={material} onChange={e => setMaterial(e.target.value)}
+                  className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none">
+                  {matGroups.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+                </select>
+              </div>
+
+              <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                <input type="checkbox" checked={showStrength} onChange={e => setShowStrength(e.target.checked)}
+                  className="accent-yellow-500" />
+                <span className="text-xs text-dark-200">{t.showStrength}</span>
+              </label>
+
+              <div className="mb-5">
+                <label className="text-xs text-dark-300 block mb-1">{t.displayUnits}</label>
+                <div className="flex gap-2">
+                  {[["mpa",t.mpa],["psi",t.psi],["both",t.both]].map(([k,l]) => (
+                    <button key={k} onClick={() => setUnits(k)}
+                      className={`px-3 py-1.5 rounded text-xs border cursor-pointer font-sans transition-all ${units === k ? "bg-gold-400/15 border-gold-400/40 text-gold-400" : "bg-white/[0.03] border-white/[0.08] text-dark-300"}`}>{l}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={handleConvert} disabled={!inputValue}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all font-sans border-none ${inputValue ? "bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 cursor-pointer" : "bg-white/5 text-dark-300 cursor-not-allowed"}`}>{t.convert}</button>
+                <button onClick={handleReset}
+                  className="px-4 py-2.5 rounded-lg text-sm font-medium bg-white/5 text-dark-200 border border-white/10 cursor-pointer font-sans hover:bg-white/10">{t.reset}</button>
+              </div>
+
+              <p className="text-[10px] text-dark-300 mt-4 font-mono">{t.scaleHelp}</p>
             </div>
-            <div className="mb-4">
-              <label className="text-xs text-dark-300 block mb-1">{t.value} ({SCALES.find((s) => s.key === fromScale)?.unit})</label>
-              <input type="number" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleConvert()}
-                placeholder={fromScale === "hrc" ? "45" : fromScale === "hv" ? "450" : "200"}
-                className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none" />
-            </div>
-            <div className="mb-6 text-xs text-dark-300">{t.validRange}: {SCALES.find((s) => s.key === fromScale)?.min} – {SCALES.find((s) => s.key === fromScale)?.max} {SCALES.find((s) => s.key === fromScale)?.unit}</div>
-            <button onClick={handleConvert} disabled={!inputValue}
-              className={`w-full py-3 rounded-lg text-sm font-semibold transition-all font-sans border-none ${inputValue ? "bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 cursor-pointer hover:shadow-lg hover:shadow-gold-400/20" : "bg-white/5 text-dark-300 cursor-not-allowed"}`}>{t.convert}</button>
           </div>
 
-          <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6">
-            <h2 className="text-sm font-semibold text-dark-100 mb-4">{t.results}</h2>
+          {/* Results Panel */}
+          <div className="lg:col-span-8">
             {result ? (
-              <div className="space-y-3 animate-fade-in">
-                {SCALES.map((s) => {
-                  const val = result[s.key]; const isSource = s.key === fromScale;
-                  return (<div key={s.key} className={`rounded-lg p-4 flex justify-between items-center ${isSource ? "bg-gold-400/10 border border-gold-400/20" : "bg-dark-800"}`}>
-                    <div className="text-xs text-dark-300">{s.label}</div>
-                    <div className={`text-xl font-bold font-mono ${isSource ? "text-gold-400" : val !== null ? "text-dark-50" : "text-dark-300"}`}>{val !== null ? val : "—"}<span className="text-xs ml-1 font-normal text-dark-300">{val !== null ? s.unit : ""}</span></div>
-                  </div>);
-                })}
-                <div className="mt-4 p-3 bg-dark-800 rounded-lg"><div className="text-xs text-dark-300 font-mono">⚠ {t.approxWarning}</div></div>
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-6">
+                <div className="flex justify-between items-center mb-5">
+                  <h2 className="text-sm font-semibold text-dark-100">{t.results}</h2>
+                  <button onClick={handleCopy}
+                    className="px-3 py-1.5 rounded text-xs bg-white/5 border border-white/10 text-dark-200 cursor-pointer font-sans hover:bg-white/10">
+                    {copied ? "✓ " + t.copied : t.copy}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  {SCALES.map(s => {
+                    const r = result[s.key];
+                    if (!r) return null;
+                    const isInput = s.key === inputScale;
+                    return (
+                      <div key={s.key} className={`rounded-lg p-3.5 border ${isInput ? "bg-gold-400/10 border-gold-400/30" : "bg-dark-800 border-white/[0.06]"}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-xs text-dark-300">{s.label}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded border ${STATUS_COLORS[r.status]}`}>{statusLabel(r.status)}</span>
+                        </div>
+                        <div className={`text-xl font-bold font-mono ${isInput ? "text-gold-400" : r.value !== null ? "text-dark-50" : "text-dark-300"}`}>
+                          {r.value !== null ? r.value : "—"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* UTS */}
+                {showStrength && (
+                  <div className="border-t border-white/[0.06] pt-5">
+                    <h3 className="text-sm font-semibold text-dark-100 mb-3">{t.uts}</h3>
+                    {result.uts_mpa?.value ? (
+                      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                        <div className="flex items-baseline gap-3 mb-2">
+                          {(units === "mpa" || units === "both") && (
+                            <span className="text-2xl font-bold font-mono text-blue-400">{result.uts_mpa.value} MPa</span>
+                          )}
+                          {(units === "psi" || units === "both") && (
+                            <span className={`font-bold font-mono ${units === "both" ? "text-lg text-dark-200" : "text-2xl text-blue-400"}`}>
+                              {units === "both" ? "/ " : ""}{convertMpaToPsi(result.uts_mpa.value).toLocaleString()} psi
+                            </span>
+                          )}
+                        </div>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${STATUS_COLORS[result.uts_mpa.status]}`}>{statusLabel(result.uts_mpa.status)}</span>
+                        <p className="text-xs text-dark-300 mt-2">⚠ {t.approx}. {t.utsWarn}</p>
+                      </div>
+                    ) : (
+                      <div className="bg-dark-800 rounded-lg p-4 text-dark-300 text-sm">
+                        {t.unsupported}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-dark-300">
-                <div className="text-4xl mb-3">🔧</div><div className="text-sm">{t.enterValue}</div>
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-12 flex flex-col items-center justify-center h-full text-center">
+                <div className="text-4xl mb-4">⚙️</div>
+                <h3 className="text-xl font-bold text-dark-300 mb-2">{t.awaiting}</h3>
+                <p className="text-dark-300 text-sm max-w-sm">{t.awaitingDesc}</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-8 bg-white/[0.02] border border-white/[0.06] rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-dark-100 mb-3">{t.refInfo}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-dark-300">
-            <div><span className="text-dark-100 font-medium">HRC:</span> {t.hrcRef}</div>
-            <div><span className="text-dark-100 font-medium">HRB:</span> {t.hrbRef}</div>
-            <div><span className="text-dark-100 font-medium">HV:</span> {t.hvRef}</div>
-            <div><span className="text-dark-100 font-medium">HB:</span> {t.hbRef}</div>
+        {/* Technical Notes */}
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 mb-6">
+          <h3 className="text-sm font-semibold text-dark-100 mb-4">{t.notesTitle}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[[t.n1t,t.n1],[t.n2t,t.n2],[t.n3t,t.n3]].map(([title,content],i) => (
+              <div key={i} className="bg-dark-800 rounded-lg p-4">
+                <div className="text-gold-400 text-xs font-semibold mb-2">{title}</div>
+                <div className="text-dark-300 text-xs leading-relaxed">{content}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-xl p-6 text-center">
-          <h3 className="text-lg font-semibold mb-2">{t.wantMore}</h3>
-          <p className="text-dark-300 text-sm mb-4">{t.wantMoreDesc}</p>
-          <Link href="/pricing" className="inline-block bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-2.5 text-sm font-semibold no-underline hover:shadow-lg hover:shadow-gold-400/20 transition-all">{t.viewPlans}</Link>
+        {/* References */}
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 mb-6">
+          <h3 className="text-sm font-semibold text-dark-100 mb-2">{t.refTitle}</h3>
+          <p className="text-dark-300 text-xs mb-3">{t.refDesc}</p>
+          <div className="text-xs text-dark-200 space-y-1 font-mono">
+            <div>• ASTM E140 — Standard Hardness Conversion Tables for Metals</div>
+            <div>• ISO 18265 — Metallic materials — Conversion of hardness values</div>
+            <div>• ASTM E10 / E18 / E92 / E384 — Relevant test method references</div>
+          </div>
+        </div>
+
+        {/* Disclaimer Footer */}
+        <div className="text-center text-xs text-dark-300 py-4 border-t border-white/[0.06]">
+          <p className="font-medium mb-1">{t.disclaimer}</p>
+          <p className="text-dark-400">© {new Date().getFullYear()} MetallurgyTools. All rights reserved.</p>
         </div>
       </div>
     </div>
