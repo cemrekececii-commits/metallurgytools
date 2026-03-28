@@ -4,8 +4,7 @@ export default clerkMiddleware();
 
 export const config = {
   matcher: [
-    "/((?!.*\\..*|_next|tools/hardness|tools/unit-converter).*)",
+    "/((?!.*\\..*|_next|tools/.*).*)",
     "/",
   ],
 };
-```
