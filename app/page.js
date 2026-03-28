@@ -298,17 +298,41 @@ export default function HomePage() {
                   : "Share your requests for new metallurgical tools, suggestions for existing tools, or general feedback."}
               </p>
             </div>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
               const form = e.target;
-              const name = form.fname.value;
-              const email = form.femail.value;
-              const type = form.ftype.value;
-              const message = form.fmessage.value;
-              const subject = encodeURIComponent(`[MetallurgyTools] ${type}: ${message.substring(0, 50)}...`);
-              const body = encodeURIComponent(`İsim: ${name}\nE-posta: ${email}\nTür: ${type}\n\nMesaj:\n${message}`);
-              window.open(`mailto:cemrekececii@gmail.com?subject=${subject}&body=${body}`);
-              form.reset();
+              const btn = form.querySelector("button[type=submit]");
+              btn.disabled = true;
+              btn.textContent = lang === "tr" ? "Gönderiliyor..." : "Sending...";
+              try {
+                const res = await fetch("/api/feedback", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: form.fname.value,
+                    email: form.femail.value,
+                    type: form.ftype.value,
+                    message: form.fmessage.value,
+                  }),
+                });
+                if (res.ok) {
+                  form.reset();
+                  btn.textContent = lang === "tr" ? "✅ Gönderildi! Teşekkürler." : "✅ Sent! Thank you.";
+                  btn.className = "w-full bg-green-500/20 text-green-400 rounded-lg py-3 text-sm font-semibold border border-green-500/30 font-sans";
+                  setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = lang === "tr" ? "📩 Gönder" : "📩 Send Feedback";
+                    btn.className = "w-full bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg py-3 text-sm font-semibold cursor-pointer hover:shadow-lg hover:shadow-gold-400/20 transition-all border-none font-sans";
+                  }, 3000);
+                } else { throw new Error(); }
+              } catch {
+                btn.textContent = lang === "tr" ? "❌ Hata oluştu. Tekrar deneyin." : "❌ Error. Please try again.";
+                btn.disabled = false;
+                setTimeout(() => {
+                  btn.textContent = lang === "tr" ? "📩 Gönder" : "📩 Send Feedback";
+                  btn.className = "w-full bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg py-3 text-sm font-semibold cursor-pointer hover:shadow-lg hover:shadow-gold-400/20 transition-all border-none font-sans";
+                }, 3000);
+              }
             }} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
