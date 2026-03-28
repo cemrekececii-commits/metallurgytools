@@ -1,391 +1,441 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
 
-// ─── Calculations ───────────────────────────────────────
-function calcTmin(P, D, S, E, W, Y) {
-  const den = 2 * (S * E * W) + P * Y;
-  return den > 0 ? (P * D) / den : 0;
+const WIRE_ROD_CRITERIA = [
+  { name: "General Purpose", minG: 5 },
+  { name: "High Strength", minG: 6 },
+  { name: "Cold Heading (CHQ)", minG: 6 },
+  { name: "Spring Wire", minG: 7 },
+];
+const SCALE_CONFIGS = { 100: 100, 200: 80, 500: 30 };
+const MEAS_COLOR = "#4ade80";
+const THEME_COLOR = "#00d4ff";
+
+function getGrainCategory(g) {
+  if (g < 1) return "Extra Coarse";
+  if (g < 4) return "Coarse";
+  if (g < 6) return "Medium";
+  if (g < 10) return "Fine";
+  return "Very Fine";
 }
 
-function calcCorrosionRates(tOrig, tPrev, tCurr, installDate, prevDate, currDate) {
-  const yrsService = Math.max(0, (currDate - installDate) / (365.25 * 86400000));
-  const yrsBetween = Math.max(0, (currDate - prevDate) / (365.25 * 86400000));
-  const ltcr = yrsService > 0 ? (tOrig - tCurr) / yrsService : 0;
-  const stcr = yrsBetween > 0 ? (tPrev - tCurr) / yrsBetween : 0;
-  return { ltcr, stcr, yrsService, yrsBetween };
+function calcStats(lines, pxPerUm) {
+  if (!lines.length || !pxPerUm) return { count: 0, avgD: 0, avgA: 0, G: 0, cat: "N/A" };
+  const diams = lines.map(l => l.lenPx / pxPerUm);
+  const avgD = diams.reduce((s, d) => s + d, 0) / diams.length;
+  const avgDmm = avgD / 1000;
+  const areas = diams.map(d => (Math.PI * d * d) / 4);
+  const avgA = areas.reduce((s, a) => s + a, 0) / areas.length;
+  let G = 0;
+  if (avgDmm > 0) { const Na = 1 / (avgDmm * avgDmm); G = 3.322 * Math.log10(Na) - 2.954; }
+  return { count: lines.length, avgD: +avgD.toFixed(2), avgA: +avgA.toFixed(2), G: +G.toFixed(2), cat: getGrainCategory(G) };
 }
 
-function calcRemainingLife(tCurr, tMin, cr, ca) {
-  if (tCurr < tMin + ca) return 0;
-  if (cr <= 0) return 999;
-  return (tCurr - (tMin + ca)) / cr;
+function detectScaleBar(img) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const sw = Math.floor(img.naturalWidth * 0.5);
+  const sh = Math.floor(img.naturalHeight * 0.25);
+  const sx = img.naturalWidth - sw, sy = img.naturalHeight - sh;
+  canvas.width = sw; canvas.height = sh;
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+  const data = ctx.getImageData(0, 0, sw, sh).data;
+  let maxRun = 0;
+  for (let y = 0; y < sh; y++) {
+    let run = 0;
+    for (let x = 0; x < sw; x++) {
+      const i = (y * sw + x) * 4;
+      if (data[i] > 150 && data[i + 1] < 100 && data[i + 2] < 100) run++;
+      else { if (run > maxRun) maxRun = run; run = 0; }
+    }
+    if (run > maxRun) maxRun = run;
+  }
+  return maxRun > 20 ? maxRun : null;
 }
 
-// ─── Translations ───────────────────────────────────────
 const TR = {
-  title: "Korozyon Hızı ve Kalan Ömür Hesaplayıcı",
-  subtitle: "API 570 / ASME B31.3 / API 579 Değerlendirme Aracı",
-  designData: "Tasarım ve Malzeme Verileri", inspectionData: "Muayene ve Kalınlık Verileri",
-  results: "Hesaplama Sonuçları", warnings: "Mühendislik Uyarıları",
-  trendChart: "Korozyon Trendi ve Ömür Projeksiyonu",
-  diameter: "Dış Çap (D)", pressure: "Tasarım Basıncı (P)", stress: "İzin Verilen Gerilme (S)",
-  efficiency: "Kaynak Dikiş Verimi (E)", weldFactor: "Kaynak Dayanım Faktörü (W)",
-  yCoeff: "Y Katsayısı", ca: "Korozyon Payı",
-  tOrig: "Orijinal Kalınlık", tPrev: "Önceki Kalınlık", tCurr: "Mevcut Kalınlık",
-  installDate: "Kurulum Tarihi", prevDate: "Önceki Muayene Tarihi", currDate: "Mevcut Muayene Tarihi",
-  nextInterval: "Hedef Muayene Aralığı",
-  tmin: "Min. Gerekli Kalınlık (t_min)", ltcr: "Uzun Dönem KH", stcr: "Kısa Dönem KH",
-  remainingLife: "Kalan Ömür", govRate: "Geçerli Korozyon Hızı",
-  reset: "Temizle", exportTxt: "Rapor (TXT)", help: "Bilgi",
-  free: "ÜCRETSİZ", year: "yıl", mmYear: "mm/yıl",
-  disclaimer: "Bu değerlendirme, işletme tarafından yazılı olarak beyan edilen hat bilgileri ile TS EN ISO 9712 Level 2 yetkinliğindeki NDT personeli tarafından gerçekleştirilen ultrasonik et kalınlığı ölçüm verileri esas alınarak gerçekleştirilmiştir.",
-  criticalMsg: "Acil onarım veya değişim gereklidir. Mevcut kalınlık, minimum gerekli kalınlık + korozyon payı sınırının altındadır.",
-  warnInterval: "Muayene sıklığını artırın. Kalan ömür, planlanan muayene aralığından daha azdır.",
-  warnLocalized: "Olası lokalize korozyon veya proses değişikliği. STCR, LTCR'den önemli ölçüde yüksektir.",
-  warnThickness: "Mevcut kalınlık önceki kalınlıktan daha büyük. Ölçüm doğruluğunu kontrol edin.",
-  okMsg: "Boru hattı hizmete devam etmek için uygundur. Kritik bir uyarı tespit edilmedi.",
-  helpTitle: "Hesaplama Standartları",
-  measurement: "Ölçüm", forecast: "Tahmin", minThickness: "Min. Kalınlık",
+  title: "ASTM E112 Tane Boyutu Analiz\u00f6r\u00fc",
+  subtitle: "Kesi\u015fim y\u00f6ntemiyle ASTM tane boyutu numaras\u0131 hesaplama.",
+  upload: "G\u00f6r\u00fcnt\u00fc Y\u00fckle", mag: "B\u00fcy\u00fctme", undo: "Geri Al", clearAll: "T\u00fcm\u00fcn\u00fc Sil", fit: "SI\u011eDIR",
+  grainSize: "ASTM TANE BOYUTU NUMARASI", avgDiam: "ORT. \u00c7AP", avgArea: "ORT. ALAN",
+  criteria: "TEL \u00c7UBUK KABUL KR\u0130TERLER\u0130", grade: "Kalite / Tip", reqMin: "Min G", status: "Durum",
+  measurements: "\u00d6L\u00c7\u00dcM VER\u0130LER\u0130", noData: "Hen\u00fcz \u00f6l\u00e7\u00fcm yap\u0131lmad\u0131. G\u00f6r\u00fcnt\u00fc \u00fczerinde \u00e7izgi \u00e7ekin.",
+  diameter: "\u00c7ap (\u03bcm)", area: "Alan (\u03bcm\u00b2)", action: "\u0130\u015flem",
+  exportTxt: "Rapor (TXT)", exportPng: "G\u00f6r\u00fcnt\u00fc (PNG)",
+  calibAuto: "Otomatik", calibDefault: "Varsay\u0131lan (1px=1\u03bcm)",
+  instructions: "Sol T\u0131k: \u00d6l\u00e7\u00fcm | Sa\u011f T\u0131k: Kayd\u0131r | Tekerlek: Zoom",
+  free: "\u00dcCRET\u0130Z", upgrade: "Y\u00fckselt \u2192", placeholder: "Analiz i\u00e7in mikroyap\u0131 g\u00f6r\u00fcnt\u00fcs\u00fc y\u00fckleyin",
+  pass: "GE\u00c7T\u0130", fail: "KALDI",
 };
 const EN = {
-  title: "Corrosion Rate & Remaining Life Calculator",
-  subtitle: "API 570 / ASME B31.3 / API 579 Assessment Tool",
-  designData: "Design & Material Data", inspectionData: "Inspection & Thickness Data",
-  results: "Calculation Results", warnings: "Engineering Warnings",
-  trendChart: "Corrosion Trend & Life Projection",
-  diameter: "Outer Diameter (D)", pressure: "Design Pressure (P)", stress: "Allowable Stress (S)",
-  efficiency: "Weld Joint Efficiency (E)", weldFactor: "Weld Strength Factor (W)",
-  yCoeff: "Y Coefficient", ca: "Corrosion Allowance",
-  tOrig: "Original Thickness", tPrev: "Previous Thickness", tCurr: "Current Thickness",
-  installDate: "Installation Date", prevDate: "Previous Inspection Date", currDate: "Current Inspection Date",
-  nextInterval: "Target Inspection Interval",
-  tmin: "Min. Required Thickness (t_min)", ltcr: "Long Term CR", stcr: "Short Term CR",
-  remainingLife: "Remaining Life", govRate: "Governing Corrosion Rate",
-  reset: "Reset", exportTxt: "Report (TXT)", help: "Info",
-  free: "FREE", year: "years", mmYear: "mm/year",
-  disclaimer: "This assessment is based on pipeline data declared in writing by the operator and ultrasonic thickness measurement data performed by NDT personnel with TS EN ISO 9712 Level 2 competence.",
-  criticalMsg: "Immediate repair or replacement required. Current thickness is below t_min + CA limit.",
-  warnInterval: "Increase inspection frequency. Remaining life is less than planned inspection interval.",
-  warnLocalized: "Possible localized corrosion or process change. STCR is significantly higher than LTCR.",
-  warnThickness: "Current thickness is greater than previous. Check measurement accuracy.",
-  okMsg: "Pipeline is fit for continued service. No critical warnings detected.",
-  helpTitle: "Calculation Standards",
-  measurement: "Measurement", forecast: "Forecast", minThickness: "Min. Thickness",
+  title: "ASTM E112 Grain Size Analyzer",
+  subtitle: "Calculate ASTM grain size number using intercept method.",
+  upload: "Upload Image", mag: "Magnification", undo: "Undo", clearAll: "Clear All", fit: "FIT",
+  grainSize: "ASTM GRAIN SIZE NUMBER", avgDiam: "AVG DIAMETER", avgArea: "AVG AREA",
+  criteria: "WIRE ROD ACCEPTANCE CRITERIA", grade: "Grade / Type", reqMin: "Req. Min G", status: "Status",
+  measurements: "MEASUREMENT DATA", noData: "No grains measured yet. Drag on image to measure.",
+  diameter: "Diameter (\u03bcm)", area: "Area (\u03bcm\u00b2)", action: "Action",
+  exportTxt: "Export TXT", exportPng: "Export PNG",
+  calibAuto: "Auto", calibDefault: "Default (1px=1\u03bcm)",
+  instructions: "L-Click: Measure | R-Click: Pan | Wheel: Zoom",
+  free: "FREE", upgrade: "Upgrade \u2192", placeholder: "Upload a microstructure image to begin analysis",
+  pass: "PASS", fail: "FAIL",
 };
 
-const defaults = {
-  diameter: 219.1, pressure: 1.5, stress: 138, efficiency: 0.85, weldFactor: 1.0,
-  yCoefficient: 0.72, tOriginal: 7.1, tPrevious: 6.9, tCurrent: 6.3, corrosionAllowance: 1,
-  installationDate: "1977-01-01", previousDate: "2021-01-01", currentDate: "2026-01-01",
-  nextInspectionInterval: 5,
-};
-
-function InputField({ label, name, value, unit, type = "number", step = "any", onChange }) {
-  return (
-    <div>
-      <label className="block text-[10px] text-dark-300 font-bold uppercase tracking-wider mb-1">{label}</label>
-      <div className="relative">
-        <input type={type} name={name} value={value} onChange={onChange} step={step}
-          className="w-full bg-dark-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-dark-50 font-mono focus:border-gold-400/50 focus:outline-none" />
-        {unit && <span className="absolute right-2.5 top-2 text-dark-300 text-xs">{unit}</span>}
-      </div>
-    </div>
-  );
-}
-
-// ─── Simple SVG Chart ───────────────────────────────────
-function TrendChart({ data, tMin, t }) {
-  if (!data.length) return null;
-  const W = 600, H = 200, PL = 50, PR = 20, PT = 15, PB = 35;
-  const cw = W - PL - PR, ch = H - PT - PB;
-
-  const allY = data.map(d => d.val).concat([tMin]);
-  const minY = Math.min(...allY) - 0.5;
-  const maxY = Math.max(...allY) + 0.5;
-
-  const toX = (i) => PL + (i / (data.length - 1)) * cw;
-  const toY = (v) => PT + ((maxY - v) / (maxY - minY)) * ch;
-
-  const measured = data.filter(d => d.type === "measured");
-  const forecast = data.filter(d => d.type === "forecast");
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
-      {/* Grid */}
-      {[0, 1, 2, 3, 4].map(i => {
-        const y = PT + (i / 4) * ch;
-        const val = maxY - (i / 4) * (maxY - minY);
-        return <g key={i}><line x1={PL} y1={y} x2={W - PR} y2={y} stroke="#334155" strokeDasharray="3,3" /><text x={PL - 5} y={y + 3} textAnchor="end" fill="#94a3b8" fontSize="9">{val.toFixed(1)}</text></g>;
-      })}
-
-      {/* t_min line */}
-      <line x1={PL} y1={toY(tMin)} x2={W - PR} y2={toY(tMin)} stroke="#ef4444" strokeWidth="1.5" strokeDasharray="5,3" />
-      <text x={W - PR + 2} y={toY(tMin) + 3} fill="#ef4444" fontSize="8">t_min</text>
-
-      {/* Measured line */}
-      {measured.length > 1 && <polyline fill="none" stroke="#4ade80" strokeWidth="2.5"
-        points={measured.map((d, i) => `${toX(data.indexOf(d))},${toY(d.val)}`).join(" ")} />}
-
-      {/* Forecast dashed line */}
-      {forecast.length > 0 && measured.length > 0 && (
-        <line x1={toX(data.indexOf(measured[measured.length - 1]))} y1={toY(measured[measured.length - 1].val)}
-          x2={toX(data.indexOf(forecast[forecast.length - 1]))} y2={toY(forecast[forecast.length - 1].val)}
-          stroke="#94a3b8" strokeWidth="2" strokeDasharray="6,4" />
-      )}
-
-      {/* Points */}
-      {data.map((d, i) => (
-        <g key={i}>
-          <circle cx={toX(i)} cy={toY(d.val)} r="4" fill={d.type === "measured" ? "#4ade80" : "#94a3b8"} stroke="white" strokeWidth="1.5" />
-          <text x={toX(i)} y={H - 5} textAnchor="middle" fill="#94a3b8" fontSize="8">{d.label}</text>
-          <text x={toX(i)} y={toY(d.val) - 8} textAnchor="middle" fill={d.type === "measured" ? "#4ade80" : "#94a3b8"} fontSize="8" fontWeight="bold">{d.val.toFixed(1)}</text>
-        </g>
-      ))}
-
-      {/* Axis labels */}
-      <text x={5} y={H / 2} textAnchor="middle" fill="#94a3b8" fontSize="9" transform={`rotate(-90,10,${H / 2})`}>mm</text>
-    </svg>
-  );
-}
-
-// ─── Main Component ─────────────────────────────────────
-export default function CorrosionCalculator() {
+export default function GrainSizeAnalyzer() {
   const { lang, switchLang } = useLang();
   const t = lang === "tr" ? TR : EN;
-  const [data, setData] = useState(defaults);
-  const [showHelp, setShowHelp] = useState(false);
 
-  const onChange = (e) => {
-    const { name, value, type } = e.target;
-    setData(p => ({ ...p, [name]: type === "number" ? parseFloat(value) || 0 : value }));
+  const [imageSrc, setImageSrc] = useState(null);
+  const [mag, setMag] = useState(100);
+  const [lines, setLines] = useState([]);
+  const [calib, setCalib] = useState({ barPx: 0, pxPerUm: 1, detected: false });
+  const [view, setView] = useState({ s: 1, x: 0, y: 0 });
+  const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
+  const [lineStart, setLineStart] = useState(null);
+  const [lineEnd, setLineEnd] = useState(null);
+  const lastMouse = useRef(null);
+  const fileInputRef = useRef(null);
+  const canvasRef = useRef(null);
+  const imgRef = useRef(typeof window !== "undefined" ? new Image() : null);
+  const containerRef = useRef(null);
+
+  const stats = useMemo(() => calcStats(lines, calib.pxPerUm), [lines, calib.pxPerUm]);
+
+  const toImg = (cx, cy) => ({ x: (cx - view.x) / view.s, y: (cy - view.y) / view.s });
+
+  const fitToScreen = useCallback(() => {
+    if (!containerRef.current || !imgRef.current?.complete) return;
+    const { width: cw, height: ch } = containerRef.current.getBoundingClientRect();
+    const { naturalWidth: iw, naturalHeight: ih } = imgRef.current;
+    if (!iw || !ih) return;
+    const s = Math.min(cw / iw, ch / ih) * 0.95;
+    setView({ s, x: (cw - iw * s) / 2, y: (ch - ih * s) / 2 });
+  }, []);
+
+  const runCalib = useCallback(() => {
+    if (!imgRef.current?.complete || !imageSrc) return;
+    const px = detectScaleBar(imgRef.current);
+    const barUm = SCALE_CONFIGS[mag] || 100;
+    if (px) setCalib({ barPx: px, pxPerUm: px / barUm, detected: true });
+    else setCalib({ barPx: 0, pxPerUm: 1, detected: false });
+  }, [imageSrc, mag]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver(entries => {
+      for (const e of entries) setCanvasSize({ w: e.contentRect.width, h: e.contentRect.height });
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!imageSrc || !img) return;
+    const onLoad = () => { runCalib(); setTimeout(fitToScreen, 50); };
+    if (img.complete && img.naturalWidth > 0) onLoad();
+    else img.onload = onLoad;
+  }, [imageSrc, runCalib, fitToScreen]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx || !imageSrc) return;
+    if (canvas.width !== canvasSize.w || canvas.height !== canvasSize.h) {
+      canvas.width = canvasSize.w; canvas.height = canvasSize.h;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(view.x, view.y);
+    ctx.scale(view.s, view.s);
+    ctx.imageSmoothingEnabled = view.s < 1;
+    if (imgRef.current) ctx.drawImage(imgRef.current, 0, 0);
+    const lw = 2 / view.s, fs = Math.max(12, 24 / view.s), r = 4 / view.s;
+    ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.font = `${fs}px Arial`;
+    lines.forEach((line, i) => {
+      ctx.beginPath(); ctx.strokeStyle = MEAS_COLOR;
+      ctx.moveTo(line.start.x, line.start.y); ctx.lineTo(line.end.x, line.end.y); ctx.stroke();
+      ctx.fillStyle = MEAS_COLOR; ctx.beginPath();
+      ctx.arc(line.start.x, line.start.y, r, 0, Math.PI * 2);
+      ctx.arc(line.end.x, line.end.y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = lw * 1.5;
+      ctx.strokeText(`#${i + 1}`, line.start.x + 10 / view.s, line.start.y);
+      ctx.fillText(`#${i + 1}`, line.start.x + 10 / view.s, line.start.y);
+    });
+    if (isDrawing && lineStart && lineEnd) {
+      ctx.beginPath(); ctx.strokeStyle = THEME_COLOR; ctx.lineWidth = lw * 1.5;
+      ctx.moveTo(lineStart.x, lineStart.y); ctx.lineTo(lineEnd.x, lineEnd.y); ctx.stroke();
+    }
+    ctx.restore();
+  }, [lines, lineEnd, calib, view, canvasSize, imageSrc, isDrawing, lineStart]);
+
+  const handleUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const src = ev.target?.result;
+      setImageSrc(src);
+      if (imgRef.current) imgRef.current.src = src;
+      setLines([]);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const results = useMemo(() => {
-    const tMin = calcTmin(data.pressure, data.diameter, data.stress, data.efficiency, data.weldFactor, data.yCoefficient);
-    const installD = new Date(data.installationDate), prevD = new Date(data.previousDate), currD = new Date(data.currentDate);
-    const { ltcr, stcr, yrsService, yrsBetween } = calcCorrosionRates(data.tOriginal, data.tPrevious, data.tCurrent, installD, prevD, currD);
-    const cr = Math.max(ltcr, stcr, 0);
-    const rl = calcRemainingLife(data.tCurrent, tMin, cr, data.corrosionAllowance);
+  const handleWheel = (e) => {
+    if (!imageSrc) return;
+    const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    setView(v => {
+      const ns = Math.max(0.1, Math.min(50, v.s * factor));
+      const wx = (mx - v.x) / v.s, wy = (my - v.y) / v.s;
+      return { s: ns, x: mx - wx * ns, y: my - wy * ns };
+    });
+  };
 
-    const warnings = [];
-    if (data.tCurrent < tMin + data.corrosionAllowance)
-      warnings.push({ type: "critical", msg: `${t.criticalMsg} (${(tMin + data.corrosionAllowance).toFixed(3)} mm)` });
-    if (rl < data.nextInspectionInterval && rl > 0)
-      warnings.push({ type: "warning", msg: `${t.warnInterval} (${rl.toFixed(1)} < ${data.nextInspectionInterval} ${t.year})` });
-    if (stcr > ltcr * 1.5 && stcr > 0.05)
-      warnings.push({ type: "warning", msg: t.warnLocalized });
-    if (data.tCurrent > data.tPrevious)
-      warnings.push({ type: "info", msg: t.warnThickness });
-    if (!warnings.length)
-      warnings.push({ type: "ok", msg: t.okMsg });
-
-    return { tMin, ltcr, stcr, cr, rl, yrsService, yrsBetween, warnings };
-  }, [data, t]);
-
-  const chartData = useMemo(() => {
-    const pts = [
-      { label: new Date(data.installationDate).getFullYear().toString(), val: data.tOriginal, type: "measured" },
-      { label: new Date(data.previousDate).getFullYear().toString(), val: data.tPrevious, type: "measured" },
-      { label: new Date(data.currentDate).getFullYear().toString(), val: data.tCurrent, type: "measured" },
-    ];
-    if (results.rl > 0 && results.rl < 999) {
-      const projYear = Math.round(new Date(data.currentDate).getFullYear() + results.rl);
-      pts.push({ label: `${projYear}`, val: +results.tMin.toFixed(2), type: "forecast" });
+  const handleMouseDown = (e) => {
+    if (!imageSrc) return;
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault(); setIsPanning(true);
+      lastMouse.current = { x: e.clientX, y: e.clientY };
+    } else if (e.button === 0) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const pos = toImg(e.clientX - rect.left, e.clientY - rect.top);
+      setIsDrawing(true); setLineStart(pos); setLineEnd(pos);
     }
-    return pts;
-  }, [data, results]);
+  };
+
+  const handleMouseMove = (e) => {
+    if (isPanning && lastMouse.current) {
+      const dx = e.clientX - lastMouse.current.x, dy = e.clientY - lastMouse.current.y;
+      setView(v => ({ ...v, x: v.x + dx, y: v.y + dy }));
+      lastMouse.current = { x: e.clientX, y: e.clientY };
+    } else if (isDrawing) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setLineEnd(toImg(e.clientX - rect.left, e.clientY - rect.top));
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isPanning) { setIsPanning(false); lastMouse.current = null; }
+    else if (isDrawing && lineStart && lineEnd) {
+      const dx = lineEnd.x - lineStart.x, dy = lineEnd.y - lineStart.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 0.5) setLines(p => [...p, { id: Date.now().toString(), start: lineStart, end: lineEnd, lenPx: dist }]);
+      setIsDrawing(false); setLineStart(null); setLineEnd(null);
+    }
+  };
 
   const exportReport = () => {
-    const txt = `${lang === "tr" ? "BORU BÜTÜNLÜĞÜ DEĞERLENDİRME RAPORU" : "PIPE INTEGRITY ASSESSMENT REPORT"}\n${"=".repeat(40)}\n${t.subtitle}\n\n${t.designData}\n${"-".repeat(30)}\n${t.diameter}: ${data.diameter} mm\n${t.pressure}: ${data.pressure} MPa\n${t.stress}: ${data.stress} MPa\n${t.efficiency}: ${data.efficiency}\n${t.weldFactor}: ${data.weldFactor}\n${t.yCoeff}: ${data.yCoefficient}\n${t.ca}: ${data.corrosionAllowance} mm\n\n${t.inspectionData}\n${"-".repeat(30)}\n${t.tOrig}: ${data.tOriginal} mm (${data.installationDate})\n${t.tPrev}: ${data.tPrevious} mm (${data.previousDate})\n${t.tCurr}: ${data.tCurrent} mm (${data.currentDate})\n\n${t.results}\n${"-".repeat(30)}\n${t.tmin}: ${results.tMin.toFixed(3)} mm\n${t.ltcr}: ${results.ltcr.toFixed(4)} ${t.mmYear}\n${t.stcr}: ${results.stcr.toFixed(4)} ${t.mmYear}\n${t.govRate}: ${results.cr.toFixed(4)} ${t.mmYear}\n${t.remainingLife}: ${results.rl === 999 ? "> 1000" : results.rl.toFixed(1)} ${t.year}\n\n${t.warnings}\n${"-".repeat(30)}\n${results.warnings.map(w => `[${w.type.toUpperCase()}] ${w.msg}`).join("\n")}\n\n${t.disclaimer}`;
-    const blob = new Blob([txt], { type: "text/plain" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "corrosion_report.txt"; a.click();
+    const text = `ASTM E112 GRAIN SIZE REPORT\n${"=".repeat(30)}\nMag: ${mag}X\nCalib: ${calib.detected ? "Auto" : "Default"} (${calib.pxPerUm.toFixed(2)} px/\u03bcm)\n\nRESULTS\n-------\nG = ${stats.G}\nCategory: ${stats.cat}\nAvg Diameter: ${stats.avgD} \u03bcm\nAvg Area: ${stats.avgA} \u03bcm\u00b2\nCount: ${stats.count}\n\nCRITERIA\n--------\n${WIRE_ROD_CRITERIA.map(c => `${c.name} (Min G=${c.minG}): ${stats.G >= c.minG ? "PASS" : "FAIL"}`).join("\n")}\n\nRAW DATA\n--------\n${lines.map((l, i) => `#${i + 1}: ${(l.lenPx / calib.pxPerUm).toFixed(2)} \u03bcm`).join("\n")}`;
+    const blob = new Blob([text], { type: "text/plain" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "grain_report.txt"; a.click();
   };
 
-  const warnStyle = { critical: "bg-red-500/10 border-red-500/20 text-red-400", warning: "bg-orange-500/10 border-orange-500/20 text-orange-400", info: "bg-blue-500/10 border-blue-500/20 text-blue-400", ok: "bg-green-500/10 border-green-500/20 text-green-400" };
-  const warnIcon = { critical: "🚨", warning: "⚠️", info: "ℹ️", ok: "✅" };
+  const exportImage = () => {
+    if (!imgRef.current) return;
+    const iw = imgRef.current.naturalWidth, ih = imgRef.current.naturalHeight;
+    const tc = document.createElement("canvas"); tc.width = iw; tc.height = ih;
+    const ctx = tc.getContext("2d"); if (!ctx) return;
+    ctx.drawImage(imgRef.current, 0, 0);
+    ctx.lineWidth = 4; ctx.font = "32px Arial";
+    lines.forEach((l, i) => {
+      ctx.beginPath(); ctx.strokeStyle = MEAS_COLOR;
+      ctx.moveTo(l.start.x, l.start.y); ctx.lineTo(l.end.x, l.end.y); ctx.stroke();
+      ctx.fillStyle = MEAS_COLOR; ctx.beginPath();
+      ctx.arc(l.start.x, l.start.y, 8, 0, Math.PI * 2); ctx.arc(l.end.x, l.end.y, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000";
+      ctx.strokeText(`#${i + 1}`, l.start.x + 15, l.start.y); ctx.fillText(`#${i + 1}`, l.start.x + 15, l.start.y);
+    });
+    const a = document.createElement("a"); a.href = tc.toDataURL("image/png"); a.download = "analyzed_micro.png"; a.click();
+  };
 
   return (
-    <div className="min-h-screen">
-      {/* Nav */}
-      <nav className="border-b border-white/[0.06] px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2.5 no-underline text-dark-50">
-            <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-500 rounded-md flex items-center justify-center text-lg font-bold text-dark-800 font-mono">M</div>
-            <span className="font-semibold text-lg tracking-tight">MetallurgyTools</span>
+    <div className="flex flex-col h-screen">
+      <nav className="flex-none border-b border-white/[0.06] px-4 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 no-underline text-dark-50">
+            <div className="w-7 h-7 bg-gradient-to-br from-gold-400 to-gold-500 rounded flex items-center justify-center text-sm font-bold text-dark-800 font-mono">M</div>
+            <span className="font-semibold text-sm tracking-tight">MetallurgyTools</span>
           </Link>
-          <div className="w-px h-5 bg-white/10" />
-          <span className="text-dark-200 text-sm">⚗️ Corrosion</span>
+          <div className="w-px h-4 bg-white/10" />
+          <span className="text-dark-200 text-xs">{"\ud83d\udd2c"} {t.title}</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowHelp(true)} className="px-2.5 py-1 rounded-lg text-xs bg-white/5 border border-white/10 text-dark-200 cursor-pointer font-sans hover:bg-white/10">📖 {t.help}</button>
-          <button onClick={() => setData(defaults)} className="px-2.5 py-1 rounded-lg text-xs bg-white/5 border border-white/10 text-dark-200 cursor-pointer font-sans hover:bg-white/10">↺ {t.reset}</button>
-          <button onClick={exportReport} className="px-2.5 py-1 rounded-lg text-xs bg-white/5 border border-white/10 text-dark-200 cursor-pointer font-sans hover:bg-white/10">📄 {t.exportTxt}</button>
+          <div className="flex bg-dark-800 rounded-lg p-0.5 border border-white/10">
+            {[100, 200, 500].map(m => (
+              <button key={m} onClick={() => setMag(m)}
+                className={`px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-sans transition-all ${mag === m ? "bg-gold-400 text-dark-800" : "bg-transparent text-dark-300 hover:text-dark-50"}`}>
+                {m}X
+              </button>
+            ))}
+          </div>
+          <input type="file" accept="image/*" ref={fileInputRef} style={{ display: "none" }} onChange={handleUpload} />
+          <button onClick={() => fileInputRef.current?.click()}
+            className="cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg text-xs text-dark-200 transition-colors flex items-center gap-1.5 font-sans">
+            {"\ud83d\udcc1"} {t.upload}
+          </button>
           <div className="flex items-center bg-white/[0.05] rounded-full p-0.5 border border-white/10">
-            <button onClick={() => switchLang("tr")} className={`px-2.5 py-1 rounded-full text-xs font-medium border-none cursor-pointer font-sans ${lang === "tr" ? "bg-gold-400 text-dark-800" : "bg-transparent text-dark-300"}`}>TR</button>
-            <button onClick={() => switchLang("en")} className={`px-2.5 py-1 rounded-full text-xs font-medium border-none cursor-pointer font-sans ${lang === "en" ? "bg-gold-400 text-dark-800" : "bg-transparent text-dark-300"}`}>EN</button>
+            <button onClick={() => switchLang("tr")} className={`px-2 py-0.5 rounded-full text-[10px] font-medium border-none cursor-pointer font-sans ${lang === "tr" ? "bg-gold-400 text-dark-800" : "bg-transparent text-dark-300"}`}>TR</button>
+            <button onClick={() => switchLang("en")} className={`px-2 py-0.5 rounded-full text-[10px] font-medium border-none cursor-pointer font-sans ${lang === "en" ? "bg-gold-400 text-dark-800" : "bg-transparent text-dark-300"}`}>EN</button>
           </div>
           <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded border border-green-500/30">{t.free}</span>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        <h1 className="text-2xl font-bold tracking-tight mb-1">{t.title}</h1>
-        <p className="text-dark-300 text-sm mb-6">{t.subtitle}</p>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT: Inputs */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* Design Data */}
-            <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
-              <div className="bg-white/[0.02] px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
-                <span>⚙️</span><h2 className="text-sm font-semibold text-dark-100">{t.designData}</h2>
-              </div>
-              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                <InputField label={t.diameter} name="diameter" value={data.diameter} unit="mm" onChange={onChange} />
-                <InputField label={t.pressure} name="pressure" value={data.pressure} unit="MPa" onChange={onChange} />
-                <InputField label={t.stress} name="stress" value={data.stress} unit="MPa" onChange={onChange} />
-                <InputField label={t.efficiency} name="efficiency" value={data.efficiency} unit="—" onChange={onChange} />
-                <InputField label={t.weldFactor} name="weldFactor" value={data.weldFactor} unit="—" onChange={onChange} />
-                <InputField label={t.yCoeff} name="yCoefficient" value={data.yCoefficient} unit="—" onChange={onChange} />
-                <InputField label={t.ca} name="corrosionAllowance" value={data.corrosionAllowance} unit="mm" onChange={onChange} />
-              </div>
-            </div>
-
-            {/* Inspection Data */}
-            <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
-              <div className="bg-white/[0.02] px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
-                <span>📏</span><h2 className="text-sm font-semibold text-dark-100">{t.inspectionData}</h2>
-              </div>
-              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                <InputField label={t.tOrig} name="tOriginal" value={data.tOriginal} unit="mm" onChange={onChange} />
-                <InputField label={t.installDate} name="installationDate" value={data.installationDate} type="date" onChange={onChange} />
-                <div />
-                <InputField label={t.tPrev} name="tPrevious" value={data.tPrevious} unit="mm" onChange={onChange} />
-                <InputField label={t.prevDate} name="previousDate" value={data.previousDate} type="date" onChange={onChange} />
-                <div />
-                <InputField label={t.tCurr} name="tCurrent" value={data.tCurrent} unit="mm" onChange={onChange} />
-                <InputField label={t.currDate} name="currentDate" value={data.currentDate} type="date" onChange={onChange} />
-                <InputField label={t.nextInterval} name="nextInspectionInterval" value={data.nextInspectionInterval} unit={t.year} onChange={onChange} />
-              </div>
-            </div>
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 relative flex flex-col bg-black/40" ref={containerRef}>
+          <div className="absolute top-3 left-3 z-10 flex gap-1.5">
+            <button onClick={() => setLines(p => p.slice(0, -1))} disabled={!lines.length}
+              className="bg-dark-800/90 text-dark-200 px-2.5 py-1.5 rounded text-xs border border-white/10 cursor-pointer font-sans hover:bg-dark-800 disabled:opacity-40">{t.undo}</button>
+            <button onClick={() => setLines([])} disabled={!lines.length}
+              className="bg-dark-800/90 text-dark-200 px-2.5 py-1.5 rounded text-xs border border-white/10 cursor-pointer font-sans hover:bg-dark-800 disabled:opacity-40">{t.clearAll}</button>
           </div>
 
-          {/* RIGHT: Results */}
-          <div className="lg:col-span-5 space-y-5">
-            <div className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
-              <div className="bg-gold-400/10 px-5 py-3 border-b border-gold-400/20 flex items-center gap-2">
-                <span>📊</span><h2 className="text-sm font-semibold text-gold-400">{t.results}</h2>
-              </div>
-              <div className="p-5 space-y-4">
-                {/* t_min */}
-                <div className="bg-dark-800 rounded-xl p-4 border border-white/[0.06]">
-                  <div className="text-[10px] text-dark-300 uppercase font-bold tracking-wider mb-0.5">{t.tmin}</div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black font-mono text-dark-50">{results.tMin.toFixed(3)}</span>
-                    <span className="text-dark-300 text-sm">mm</span>
-                  </div>
-                </div>
-
-                {/* LTCR / STCR */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-dark-800 rounded-lg p-3 border border-white/[0.06]">
-                    <div className="text-[10px] text-dark-300 uppercase font-bold mb-0.5">{t.ltcr}</div>
-                    <div className="text-lg font-bold font-mono text-dark-50">{results.ltcr.toFixed(4)}</div>
-                    <div className="text-[10px] text-dark-300">{t.mmYear}</div>
-                  </div>
-                  <div className="bg-dark-800 rounded-lg p-3 border border-white/[0.06]">
-                    <div className="text-[10px] text-dark-300 uppercase font-bold mb-0.5">{t.stcr}</div>
-                    <div className="text-lg font-bold font-mono text-dark-50">{results.stcr.toFixed(4)}</div>
-                    <div className="text-[10px] text-dark-300">{t.mmYear}</div>
-                  </div>
-                </div>
-
-                {/* Remaining Life */}
-                <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
-                  <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider mb-0.5">{t.remainingLife}</div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black font-mono text-blue-400">{results.rl === 999 ? "> 1000" : results.rl.toFixed(1)}</span>
-                    <span className="text-blue-300 font-medium">{t.year}</span>
-                  </div>
-                  <div className="text-[10px] text-blue-300 mt-1">{t.govRate}: {results.cr.toFixed(4)} {t.mmYear}</div>
-                </div>
-              </div>
+          {imageSrc && (
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 flex gap-0.5 bg-dark-800/90 p-0.5 rounded-lg border border-white/10">
+              <button onClick={() => setView(v => { const ns = v.s / 1.2; const cw2 = canvasSize.w / 2, ch2 = canvasSize.h / 2; return { s: ns, x: v.x + (cw2 - v.x) * (1 - 1 / 1.2), y: v.y + (ch2 - v.y) * (1 - 1 / 1.2) }; })}
+                className="p-1.5 hover:bg-white/10 rounded text-dark-200 cursor-pointer bg-transparent border-none text-sm">{"\u2212"}</button>
+              <button onClick={fitToScreen} className="px-2 py-1 hover:bg-white/10 rounded text-[10px] font-bold text-dark-200 cursor-pointer bg-transparent border-none font-sans">{t.fit}</button>
+              <button onClick={() => setView(v => { const ns = v.s * 1.2; const cw2 = canvasSize.w / 2, ch2 = canvasSize.h / 2; return { s: ns, x: v.x + (cw2 - v.x) * (1 - 1.2), y: v.y + (ch2 - v.y) * (1 - 1.2) }; })}
+                className="p-1.5 hover:bg-white/10 rounded text-dark-200 cursor-pointer bg-transparent border-none text-sm">+</button>
             </div>
+          )}
 
-            {/* Warnings */}
-            <div className="space-y-2">
-              {results.warnings.map((w, i) => (
-                <div key={i} className={`p-3 rounded-xl border flex items-start gap-2 ${warnStyle[w.type]}`}>
-                  <span className="shrink-0">{warnIcon[w.type]}</span>
-                  <p className="text-sm leading-relaxed">{w.msg}</p>
+          <div className="flex-1 relative overflow-hidden" style={{ cursor: imageSrc ? "crosshair" : "default" }}>
+            {!imageSrc ? (
+              <div className="flex items-center justify-center h-full text-dark-300">
+                <div className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center">
+                  <div className="text-4xl mb-4 opacity-40">{"\ud83d\udd2c"}</div>
+                  <p className="text-sm">{t.placeholder}</p>
                 </div>
-              ))}
+              </div>
+            ) : (
+              <canvas ref={canvasRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onWheel={handleWheel}
+                onContextMenu={e => e.preventDefault()} className="block outline-none" />
+            )}
+          </div>
+
+          <div className="bg-dark-800 text-[10px] text-dark-300 px-3 py-1.5 border-t border-white/[0.06] flex justify-between">
+            <span>{t.instructions}</span>
+            <div className="flex gap-4">
+              <span>{t.mag}: {mag}X</span>
+              <span>Zoom: {(view.s * 100).toFixed(0)}%</span>
+              <span>Calib: {calib.detected ? <span className="text-green-400">{t.calibAuto} ({calib.barPx}px)</span> : <span className="text-yellow-500">{t.calibDefault}</span>}</span>
             </div>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="mt-6 bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden">
-          <div className="bg-white/[0.02] px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
-            <span>📉</span><h2 className="text-sm font-semibold text-dark-100">{t.trendChart}</h2>
-          </div>
-          <div className="p-5">
-            <TrendChart data={chartData} tMin={results.tMin} t={t} />
-            <div className="flex gap-6 justify-center mt-3 text-xs text-dark-300">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-green-400 inline-block rounded" /> {t.measurement}</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-dark-300 inline-block rounded" style={{ borderTop: "2px dashed" }} /> {t.forecast}</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" style={{ borderTop: "2px dashed" }} /> {t.minThickness}</span>
+        <div className="w-80 bg-white/[0.02] border-l border-white/[0.06] flex flex-col overflow-hidden">
+          <div className="p-5 border-b border-white/[0.06]">
+            <div className="text-[10px] text-gold-400 uppercase font-bold tracking-wider mb-1">{t.grainSize}</div>
+            <div className="text-4xl font-black text-dark-50 font-mono">G = {stats.G}</div>
+            <div className="mt-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-dark-200 border border-white/10">{stats.cat}</div>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="bg-dark-800 p-2.5 rounded border border-white/[0.06]">
+                <div className="text-[10px] text-dark-300 uppercase">{t.avgDiam}</div>
+                <div className="text-base font-mono text-dark-50">{stats.avgD} <span className="text-xs text-dark-300">{"\u03bcm"}</span></div>
+              </div>
+              <div className="bg-dark-800 p-2.5 rounded border border-white/[0.06]">
+                <div className="text-[10px] text-dark-300 uppercase">{t.avgArea}</div>
+                <div className="text-base font-mono text-dark-50">{stats.avgA} <span className="text-xs text-dark-300">{"\u03bcm\u00b2"}</span></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Disclaimer */}
-        <div className="mt-5 bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-xs text-dark-300 flex items-start gap-2">
-          <span className="shrink-0">ℹ️</span>
-          <p className="leading-relaxed">{t.disclaimer}</p>
-        </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="bg-dark-800 rounded-lg p-3 border border-white/[0.06]">
+              <div className="text-gold-400 font-bold text-[10px] uppercase tracking-wider mb-2">{t.criteria}</div>
+              <table className="w-full text-xs">
+                <thead><tr className="text-dark-300 border-b border-white/[0.06]">
+                  <th className="text-left py-1.5 font-medium">{t.grade}</th>
+                  <th className="text-center py-1.5 font-medium">{t.reqMin}</th>
+                  <th className="text-center py-1.5 font-medium">{t.status}</th>
+                </tr></thead>
+                <tbody>
+                  {WIRE_ROD_CRITERIA.map(c => {
+                    const pass = lines.length > 0 && stats.G >= c.minG;
+                    return (
+                      <tr key={c.name} className="border-b border-white/[0.03]">
+                        <td className="py-1.5 text-dark-100">{c.name}</td>
+                        <td className="py-1.5 text-center text-dark-200">{c.minG}</td>
+                        <td className="py-1.5 text-center">
+                          {!lines.length ? <span className="text-dark-300">{"\u2014"}</span> :
+                            pass ? <span className="text-green-400 font-bold">{t.pass}</span> :
+                            <span className="text-red-400 font-bold">{t.fail}</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-        {/* References */}
-        <div className="mt-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
-          <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">
-            <div>• ASME B31.3 — Process Piping</div>
-            <div>• API 570 — Piping Inspection Code</div>
-            <div>• API 579-1/ASME FFS-1 — Fitness-For-Service</div>
+            <div className="bg-dark-800 rounded-lg border border-white/[0.06] overflow-hidden">
+              <div className="px-3 py-2 border-b border-white/[0.06]">
+                <div className="text-[10px] text-dark-200 font-bold uppercase tracking-wider">{t.measurements}</div>
+              </div>
+              <div className="max-h-48 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-dark-800"><tr className="text-dark-300">
+                    <th className="px-3 py-1.5 text-left">#</th>
+                    <th className="px-3 py-1.5 text-left">{t.diameter}</th>
+                    <th className="px-3 py-1.5 text-left">{t.area}</th>
+                    <th className="px-3 py-1.5 text-right">{t.action}</th>
+                  </tr></thead>
+                  <tbody>
+                    {!lines.length ? (
+                      <tr><td colSpan={4} className="px-3 py-6 text-center text-dark-300 italic text-[11px]">{t.noData}</td></tr>
+                    ) : lines.map((l, i) => {
+                      const d = l.lenPx / calib.pxPerUm;
+                      const a = (Math.PI * d * d) / 4;
+                      return (
+                        <tr key={l.id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                          <td className="px-3 py-1.5 font-mono text-dark-300">{i + 1}</td>
+                          <td className="px-3 py-1.5 text-dark-50 font-medium">{d.toFixed(1)}</td>
+                          <td className="px-3 py-1.5 text-dark-200">{a.toFixed(1)}</td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button onClick={() => setLines(p => p.filter(x => x.id !== l.id))}
+                              className="text-red-400 hover:text-red-300 bg-transparent border-none cursor-pointer text-sm">{"\u2715"}</button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  {lines.length > 0 && (
+                    <tfoot className="sticky bottom-0 bg-dark-800 border-t border-white/10 font-bold">
+                      <tr>
+                        <td className="px-3 py-1.5 text-gold-400">AVG</td>
+                        <td className="px-3 py-1.5 text-dark-50">{stats.avgD.toFixed(1)}</td>
+                        <td className="px-3 py-1.5 text-dark-200">{stats.avgA.toFixed(1)}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 border-t border-white/[0.06] flex gap-2">
+            <button onClick={exportReport} disabled={!lines.length}
+              className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-dark-200 py-2 rounded text-xs cursor-pointer font-sans disabled:opacity-40">{t.exportTxt}</button>
+            <button onClick={exportImage} disabled={!imageSrc}
+              className="flex-1 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 font-bold py-2 rounded text-xs cursor-pointer font-sans border-none disabled:opacity-40">{t.exportPng}</button>
           </div>
         </div>
       </div>
-
-      {/* Help Modal */}
-      {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowHelp(false)}>
-          <div className="bg-dark-800 border border-white/10 rounded-xl p-6 max-w-2xl mx-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-dark-50">📖 {t.helpTitle}</h3>
-              <button onClick={() => setShowHelp(false)} className="text-dark-300 hover:text-dark-50 cursor-pointer bg-transparent border-none text-lg font-bold font-sans">✕</button>
-            </div>
-            <div className="space-y-4 text-sm text-dark-200 leading-relaxed">
-              <div>
-                <h4 className="text-gold-400 font-bold mb-1">ASME B31.3</h4>
-                <p>t = (P × D) / (2 × (S × E × W + P × Y))</p>
-              </div>
-              <div>
-                <h4 className="text-gold-400 font-bold mb-1">API 570 — Corrosion Rates</h4>
-                <p>LTCR = (t_original − t_current) / Service Years</p>
-                <p>STCR = (t_previous − t_current) / Inspection Interval</p>
-              </div>
-              <div>
-                <h4 className="text-gold-400 font-bold mb-1">Remaining Life</h4>
-                <p>RL = (t_current − (t_min + CA)) / Max(LTCR, STCR)</p>
-              </div>
-            </div>
-            <button onClick={() => setShowHelp(false)} className="mt-5 w-full py-2 rounded-lg bg-gold-400/20 text-gold-400 text-sm font-semibold border border-gold-400/30 cursor-pointer font-sans hover:bg-gold-400/30">
-              {lang === "tr" ? "Kapat" : "Close"}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
