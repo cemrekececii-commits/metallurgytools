@@ -2,12 +2,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { SignUpButton } from "@clerk/nextjs";
+import { SignUpButton, useUser } from "@clerk/nextjs";
 import { useLang } from "@/lib/LanguageContext";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("grain-size");
   const { t, lang } = useLang();
+  const { isSignedIn } = useUser();
 
   const TOOLS = [
     { id: "grain-size", name: t.grainSize, shortName: t.grainSizeShort, desc: t.grainSizeDesc, icon: "\ud83d\udd2c", tags: ["ASTM E112", "Metallography", "AI-Powered"], status: "live", route: "/tools/grain-size", free: false },
@@ -50,6 +51,44 @@ export default function HomePage() {
 
   const features = lang === "tr" ? featuresTR : featuresEN;
 
+  // Tool button component - shows Link if signed in, SignUpButton if not
+  const ToolButton = ({ tool }) => {
+    if (tool.status !== "live" || !tool.route) {
+      return (
+        <div className="inline-flex items-center gap-2 bg-white/5 text-dark-300 rounded-lg px-6 py-3 text-sm font-medium border border-white/10">
+          {"\ud83d\udd12"} {t.comingSoon || "YAKINDA"}
+        </div>
+      );
+    }
+
+    if (tool.free) {
+      return (
+        <Link href={tool.route}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg px-6 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-500/25 transition-all">
+          {tool.icon} {lang === "tr" ? "\u00dccretsiz A\u00e7 \u2192" : "Open Free \u2192"}
+        </Link>
+      );
+    }
+
+    // Premium tool: if signed in, go directly; if not, show sign up
+    if (isSignedIn) {
+      return (
+        <Link href={tool.route}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/25 transition-all">
+          {tool.icon} {lang === "tr" ? "Arac\u0131 A\u00e7 \u2192" : "Open Tool \u2192"}
+        </Link>
+      );
+    }
+
+    return (
+      <SignUpButton mode="modal">
+        <button className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-3 text-sm font-semibold cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/25 transition-all border-none font-sans">
+          {"\ud83d\udd10"} {lang === "tr" ? "Giri\u015f Yap ve Kullan \u2192" : "Sign In to Use \u2192"}
+        </button>
+      </SignUpButton>
+    );
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -71,9 +110,15 @@ export default function HomePage() {
             {lang === "tr" ? heroDescTR : heroDescEN}
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
-            <SignUpButton mode="modal">
-              <button className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold cursor-pointer hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all border-none font-sans">{t.startTrial}</button>
-            </SignUpButton>
+            {isSignedIn ? (
+              <a href="#tools" className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold no-underline hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all">
+                {lang === "tr" ? "Ara\u00e7lara Git \u2192" : "Go to Tools \u2192"}
+              </a>
+            ) : (
+              <SignUpButton mode="modal">
+                <button className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold cursor-pointer hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all border-none font-sans">{t.startTrial}</button>
+              </SignUpButton>
+            )}
             <a href="#tools" className="border border-white/15 rounded-lg px-8 py-3.5 text-base font-medium hover:border-gold-400/50 transition-colors no-underline text-dark-50">{t.viewTools}</a>
           </div>
         </div>
@@ -156,26 +201,7 @@ export default function HomePage() {
                 <span key={tag} className="bg-gold-400/10 border border-gold-400/20 rounded-md px-3 py-1 text-xs text-gold-400 font-mono">{tag}</span>
               ))}
             </div>
-
-            {/* Button Logic */}
-            {activeTool.status === "live" && activeTool.route ? (
-              activeTool.free ? (
-                <Link href={activeTool.route}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg px-6 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-500/25 transition-all">
-                  {activeTool.icon} {lang === "tr" ? "\u00dccretsiz A\u00e7 \u2192" : "Open Free \u2192"}
-                </Link>
-              ) : (
-                <SignUpButton mode="modal">
-                  <button className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-3 text-sm font-semibold cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/25 transition-all border-none font-sans">
-                    {"\ud83d\udd10"} {lang === "tr" ? "Giri\u015f Yap ve Kullan \u2192" : "Sign In to Use \u2192"}
-                  </button>
-                </SignUpButton>
-              )
-            ) : (
-              <div className="inline-flex items-center gap-2 bg-white/5 text-dark-300 rounded-lg px-6 py-3 text-sm font-medium border border-white/10">
-                {"\ud83d\udd12"} {t.comingSoon || "YAKINDA"}
-              </div>
-            )}
+            <ToolButton tool={activeTool} />
           </div>
         )}
       </section>
@@ -239,11 +265,17 @@ export default function HomePage() {
               )}
             </div>
             <div className="text-center mt-8">
-              <SignUpButton mode="modal">
-                <button className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold cursor-pointer hover:shadow-xl hover:shadow-gold-400/25 transition-all border-none font-sans">
-                  {lang === "tr" ? "\u00dccretsiz Deneyin" : "Try for Free"}
-                </button>
-              </SignUpButton>
+              {isSignedIn ? (
+                <a href="#tools" className="inline-block bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold no-underline hover:shadow-xl hover:shadow-gold-400/25 transition-all">
+                  {lang === "tr" ? "Ara\u00e7lara Git" : "Go to Tools"}
+                </a>
+              ) : (
+                <SignUpButton mode="modal">
+                  <button className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold cursor-pointer hover:shadow-xl hover:shadow-gold-400/25 transition-all border-none font-sans">
+                    {lang === "tr" ? "\u00dccretsiz Deneyin" : "Try for Free"}
+                  </button>
+                </SignUpButton>
+              )}
             </div>
           </div>
         </div>
