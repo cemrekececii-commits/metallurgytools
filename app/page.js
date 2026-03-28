@@ -18,6 +18,7 @@ export default function HomePage() {
     { id: "unit-converter", name: t.unitConverter, shortName: t.unitConverterShort, desc: t.unitConverterDesc, icon: "📐", tags: ["MPa-ksi", "J-ft·lb", "°C-°F"], status: "live", route: "/tools/unit-converter", free: true },
     { id: "sem-eds", name: lang === "tr" ? "SEM-EDS Analizi" : "SEM-EDS Analysis", shortName: "SEM-EDS", desc: lang === "tr" ? "SEM-EDS spektrum çakışma analizi ve metalürjik yorumlama." : "SEM-EDS spectrum overlap analysis and metallurgical interpretation.", icon: "🔬", tags: ["SEM-EDS", "Peak Overlap", "AI"], status: "live", route: "/tools/sem-eds", free: false },
     { id: "dbtt", name: t.dbtt, shortName: t.dbttShort, desc: t.dbttDesc, icon: "❄️", tags: ["Charpy", "S355", "API 5L"], status: "live", route: "/tools/dbtt", free: false },
+    { id: "carbon-equivalent", name: lang === "tr" ? "Karbon Eşdeğeri Hesaplayıcı" : "Carbon Equivalent Calculator", shortName: "CE Calc", desc: lang === "tr" ? "CE(IIW), CET, Pcm, CEN kaynak kabiliyeti değerlendirmesi ve ön ısıtma tahmini." : "CE(IIW), CET, Pcm, CEN weldability assessment and preheat estimation.", icon: "🔥", tags: ["CE(IIW)", "Pcm", "EN 1011-2", "Preheat"], status: "live", route: "/tools/carbon-equivalent", free: false },
     { id: "inclusion", name: t.inclusion, shortName: t.inclusionShort, desc: t.inclusionDesc, icon: "🔎", tags: ["SEM-EDS", "ASTM E45", "AI"], status: "coming", route: null, free: false },
   ];
 
@@ -125,7 +126,7 @@ export default function HomePage() {
 
         <div className="relative z-10 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
           {[
-            { val: "5+", label: lang === "tr" ? "Aktif Mühendislik Aracı" : "Active Engineering Tools" },
+            { val: "8+", label: lang === "tr" ? "Aktif Mühendislik Aracı" : "Active Engineering Tools" },
             { val: "10+", label: lang === "tr" ? "Sertlik Ölçeği Desteği" : "Hardness Scale Support" },
             { val: "6", label: lang === "tr" ? "Teknik Makale" : "Technical Articles" },
             { val: "TR/EN", label: lang === "tr" ? "Çift Dil Desteği" : "Bilingual Support" },
@@ -277,6 +278,78 @@ export default function HomePage() {
                 </SignUpButton>
               )}
             </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* FEEDBACK / SUGGESTIONS */}
+      <section id="feedback" className="py-20 px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-8">
+            <div className="text-center mb-6">
+              <div className="text-3xl mb-3">💡</div>
+              <h2 className="text-2xl font-bold tracking-tight mb-2">
+                {lang === "tr" ? "Görüş, Öneri ve İstekleriniz" : "Feedback & Feature Requests"}
+              </h2>
+              <p className="text-dark-300 text-sm">
+                {lang === "tr" 
+                  ? "Yeni metalurjik araç talepleri, mevcut araçlara öneriler veya genel görüşlerinizi bizimle paylaşın."
+                  : "Share your requests for new metallurgical tools, suggestions for existing tools, or general feedback."}
+              </p>
+            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.target;
+              const name = form.fname.value;
+              const email = form.femail.value;
+              const type = form.ftype.value;
+              const message = form.fmessage.value;
+              const subject = encodeURIComponent(`[MetallurgyTools] ${type}: ${message.substring(0, 50)}...`);
+              const body = encodeURIComponent(`İsim: ${name}\nE-posta: ${email}\nTür: ${type}\n\nMesaj:\n${message}`);
+              window.open(`mailto:cemrekececii@gmail.com?subject=${subject}&body=${body}`);
+              form.reset();
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-dark-300 font-semibold uppercase tracking-wider mb-1.5">
+                    {lang === "tr" ? "Adınız" : "Your Name"}
+                  </label>
+                  <input name="fname" required placeholder={lang === "tr" ? "İsim Soyisim" : "Full Name"}
+                    className="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs text-dark-300 font-semibold uppercase tracking-wider mb-1.5">
+                    {lang === "tr" ? "E-posta" : "Email"}
+                  </label>
+                  <input name="femail" type="email" required placeholder="email@example.com"
+                    className="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-dark-300 font-semibold uppercase tracking-wider mb-1.5">
+                  {lang === "tr" ? "Tür" : "Type"}
+                </label>
+                <select name="ftype" className="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none cursor-pointer">
+                  <option value={lang === "tr" ? "Yeni Araç Talebi" : "New Tool Request"}>{lang === "tr" ? "🔧 Yeni Araç Talebi" : "🔧 New Tool Request"}</option>
+                  <option value={lang === "tr" ? "Mevcut Araç Önerisi" : "Existing Tool Suggestion"}>{lang === "tr" ? "💡 Mevcut Araç Önerisi" : "💡 Existing Tool Suggestion"}</option>
+                  <option value={lang === "tr" ? "Hata Bildirimi" : "Bug Report"}>{lang === "tr" ? "🐛 Hata Bildirimi" : "🐛 Bug Report"}</option>
+                  <option value={lang === "tr" ? "Genel Görüş" : "General Feedback"}>{lang === "tr" ? "💬 Genel Görüş" : "💬 General Feedback"}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-dark-300 font-semibold uppercase tracking-wider mb-1.5">
+                  {lang === "tr" ? "Mesajınız" : "Your Message"}
+                </label>
+                <textarea name="fmessage" required rows={4}
+                  placeholder={lang === "tr" ? "Hangi metalurjik aracı görmek istersiniz? Mevcut araçlarda neyi iyileştirelim?" : "What metallurgical tool would you like to see? What should we improve?"}
+                  className="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-dark-50 focus:border-gold-400/50 focus:outline-none resize-none" />
+              </div>
+              <button type="submit"
+                className="w-full bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg py-3 text-sm font-semibold cursor-pointer hover:shadow-lg hover:shadow-gold-400/20 transition-all border-none font-sans">
+                {lang === "tr" ? "📩 Gönder" : "📩 Send Feedback"}
+              </button>
+            </form>
           </div>
         </div>
       </section>
