@@ -1,9 +1,10 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/lib/LanguageContext";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 export const metadata = {
-  title: "MetallurgyTools — Yapay Zeka Destekli Metalurji Mühendislik Araçları",
+  title: "MetallurgyTools – Yapay Zeka Destekli Metalurji Mühendislik Araçları",
   description:
     "Çelik metalurjisi için profesyonel hesaplama araçları. Tane boyutu analizi, korozyon değerlendirmesi, faz diyagramı simülasyonu.",
   keywords: [
@@ -25,7 +26,10 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="tr">
         <body>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <Navbar />
+            {children}
+          </LanguageProvider>
         </body>
       </html>
     </ClerkProvider>
