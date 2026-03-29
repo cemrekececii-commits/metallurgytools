@@ -50,7 +50,7 @@ export default function Navbar() {
                 <span>🔧</span><div><div className="text-sm font-medium">{t.hardnessShort}</div><div className="text-xs text-dark-300">HRC, HV, HB, HRB</div></div>
               </Link>
               <Link href="/tools/unit-converter" onClick={() => setToolsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-white/5 no-underline text-dark-50 transition-colors">
-                <span>📐</span><div><div className="text-sm font-medium">{t.unitConverterShort}</div><div className="text-xs text-dark-300">MPa, ksi, J, ft·lb, °C</div></div>
+                <span>🔍</span><div><div className="text-sm font-medium">{t.unitConverterShort}</div><div className="text-xs text-dark-300">MPa, ksi, J, ft·lb, °C</div></div>
               </Link>
             </div>
           )}
@@ -59,6 +59,11 @@ export default function Navbar() {
         {/* Knowledge Base */}
         <Link href="/knowledge" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">
           {lang === "tr" ? "Bilgi Bankası" : "Knowledge"}
+        </Link>
+
+        {/* Mechanical Tests */}
+        <Link href="/mechanical-tests" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">
+          {lang === "tr" ? "Mekanik Testler" : "Mech. Tests"}
         </Link>
 
         <a href="/#pricing" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">{t.pricing}</a>
