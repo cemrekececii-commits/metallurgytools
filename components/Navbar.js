@@ -66,13 +66,14 @@ export default function Navbar() {
           {lang === "tr" ? "Mekanik Testler" : "Mech. Tests"}
         </Link>
 
-        <a href="/#pricing" className="text-dark-100 hover:text-gold-400 transition-colors no-underline">{t.pricing}</a>
-
+        {/* Dashboard veya Giriş */}
         {isSignedIn ? (
           <Link href="/dashboard" className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-md px-5 py-2 text-sm font-semibold hover:shadow-lg hover:shadow-gold-400/20 transition-all">{t.dashboard}</Link>
         ) : (
           <SignInButton mode="modal">
-            <button className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-md px-5 py-2 text-sm font-semibold cursor-pointer hover:shadow-lg hover:shadow-gold-400/20 transition-all border-none font-sans">{t.getStarted}</button>
+            <button className="border border-white/15 text-dark-100 rounded-md px-5 py-2 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans">
+              {lang === "tr" ? "Giriş Yap" : "Sign In"}
+            </button>
           </SignInButton>
         )}
       </div>
