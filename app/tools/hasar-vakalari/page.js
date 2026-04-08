@@ -309,8 +309,6 @@ export default function HasarVakalariPage() {
           </div>
           </>
         )}
-
-        )}
       </div>
     </div>
   );
