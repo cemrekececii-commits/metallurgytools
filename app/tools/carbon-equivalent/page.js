@@ -341,11 +341,11 @@ export default function CarbonEquivalentCalc() {
           <ToolBriefing
             title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
             steps={lang === "tr"
-              ? [{ icon: "①", color: "#3b82f6", title: "Çelik Kalitesi Seç veya Manuel Gir", desc: "Hazır çelik kalitelerinden (S235JR, S355J2, X65 vb.) birini seç veya "Custom" ile kendi bileşimini gir." },
+              ? [{ icon: "①", color: "#3b82f6", title: "Çelik Kalitesi Seç veya Manuel Gir", desc: "Hazır çelik kalitelerinden (S235JR, S355J2, X65 vb.) birini seç veya \"Custom\" ile kendi bileşimini gir." },
               { icon: "②", color: "#f59e0b", title: "Kimyasal Bileşimi Kontrol Et", desc: "C, Si, Mn, Ni, Cr, Mo, V, Cu, Nb, B değerlerini yüzde ağırlık olarak gir. Et kalınlığını (mm) belirle." },
               { icon: "③", color: "#8b5cf6", title: "Hesapla Butonuna Bas", desc: "CE(IIW), CET, Pcm ve CEN değerleri otomatik hesaplanır." },
               { icon: "④", color: "#10b981", title: "Sonuçları Değerlendir", desc: "Kaynak kabiliyeti derecelendirmesi, önerilen ön ısıtma sıcaklığı ve HAZ sertlik tahmini görüntülenir." }]
-              : [{ icon: "①", color: "#3b82f6", title: "Select Steel Grade or Enter Manually", desc: "Choose from preset grades (S235JR, S355J2, X65 etc.) or select "Custom" to enter your own composition." },
+              : [{ icon: "①", color: "#3b82f6", title: "Select Steel Grade or Enter Manually", desc: "Choose from preset grades (S235JR, S355J2, X65 etc.) or select \"Custom\" to enter your own composition." },
               { icon: "②", color: "#f59e0b", title: "Check Chemical Composition", desc: "Enter C, Si, Mn, Ni, Cr, Mo, V, Cu, Nb, B values in weight percent. Set wall thickness (mm)." },
               { icon: "③", color: "#8b5cf6", title: "Click Calculate", desc: "CE(IIW), CET, Pcm and CEN values are computed automatically." },
               { icon: "④", color: "#10b981", title: "Evaluate Results", desc: "Weldability rating, recommended preheat temperature and HAZ hardness estimate are displayed." }]
