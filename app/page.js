@@ -18,7 +18,11 @@ export default function HomePage() {
     { id: "sem-eds", name: lang === "tr" ? "SEM-EDS Analizi" : "SEM-EDS Analysis", shortName: "SEM-EDS", desc: lang === "tr" ? "SEM-EDS spektrum çakışma analizi ve metalürjik yorumlama." : "SEM-EDS spectrum overlap analysis and metallurgical interpretation.", icon: "🔬", tags: ["SEM-EDS", "Peak Overlap"], status: "live", route: "/tools/sem-eds" },
     { id: "dbtt", name: t.dbtt, shortName: t.dbttShort, desc: t.dbttDesc, icon: "❄️", tags: ["Charpy", "S355", "API 5L"], status: "live", route: "/tools/dbtt" },
     { id: "carbon-equivalent", name: lang === "tr" ? "Karbon Eşdeğeri Hesaplayıcı" : "Carbon Equivalent Calculator", shortName: "CE Calc", desc: lang === "tr" ? "CE(IIW), CET, Pcm, CEN kaynak kabiliyeti değerlendirmesi." : "CE(IIW), CET, Pcm, CEN weldability assessment.", icon: "🔥", tags: ["CE(IIW)", "Pcm", "EN 1011-2"], status: "live", route: "/tools/carbon-equivalent" },
-    { id: "inclusion", name: t.inclusion, shortName: t.inclusionShort, desc: t.inclusionDesc, icon: "🔎", tags: ["SEM-EDS", "ASTM E45"], status: "coming", route: null },
+    { id: "inclusion", name: t.inclusion, shortName: t.inclusionShort, desc: t.inclusionDesc, icon: "🔎", tags: ["SEM-EDS", "ASTM E45"], status: "live", route: "/tools/inclusion" },
+    { id: "cct-ttt", name: lang === "tr" ? "CCT/TTT Diyagram Yorumlayıcı" : "CCT/TTT Diagram Interpreter", shortName: "CCT/TTT", desc: lang === "tr" ? "Bileşime dayalı kritik sıcaklıklar, faz fraksiyonu tahmini ve soğuma eğrisi analizi." : "Composition-based critical temperatures, phase fraction prediction and cooling curve analysis.", icon: "🌡️", tags: ["CCT", "TTT", "Ms", "Ae3"], status: "live", route: "/tools/cct-ttt" },
+    { id: "preheat", name: lang === "tr" ? "Kaynak Ön Isıtma Hesaplayıcı" : "Weld Preheat Calculator", shortName: lang === "tr" ? "Ön Isıtma" : "Preheat", desc: lang === "tr" ? "EN 1011-2 ve AWS D1.1 bazlı ön ısıtma sıcaklığı hesaplama ve kaynak kabiliyeti değerlendirmesi." : "EN 1011-2 and AWS D1.1 based preheat temperature calculation and weldability assessment.", icon: "🔥", tags: ["EN 1011-2", "AWS D1.1", "CE", "CET"], status: "live", route: "/tools/preheat" },
+    { id: "tensile-specimen", name: lang === "tr" ? "Çekme Numunesi L₀ Hesaplayıcı" : "Tensile Specimen L₀ Calculator", shortName: lang === "tr" ? "L₀ Hesap" : "L₀ Calc", desc: lang === "tr" ? "EN ISO 6892-1 ve ASTM E8/E8M'e göre ölçüm uzunluğu, paralel uzunluk ve toplam numune boyu hesabı." : "Gauge length, parallel length and total specimen length per EN ISO 6892-1 and ASTM E8/E8M.", icon: "↕", tags: ["EN ISO 6892-1", "ASTM E8", "L₀", "Lc"], status: "live", route: "/tools/tensile-specimen" },
+    { id: "inclusion-atlas", name: lang === "tr" ? "İnklüzyon Atlası" : "Inclusion Atlas", shortName: lang === "tr" ? "İnklüzyon" : "Inc. Atlas", desc: lang === "tr" ? "MnS, Al₂O₃, TiN, kalsiyum alüminat, silikat, Nb(C,N) ve spinel inklüzyonlarının morfoloji, EDS ve proses kaynağı referansı." : "Reference atlas for MnS, Al₂O₃, TiN, calcium aluminates, silicates, Nb(C,N) and spinel — morphology, EDS and process source.", icon: "📖", tags: ["ASTM E45", "SEM-EDS", "MnS", "TiN"], status: "live", route: "/tools/inclusion-atlas" },
   ];
 
   const featuresTR = [
@@ -27,7 +31,7 @@ export default function HomePage() {
     { icon: "🔬", title: "Metalografik Doğrulama", desc: "Her araç, optik ve elektron mikroskobu verileriyle doğrulanmış. Laboratuvar pratiğiyle uyumlu." },
     { icon: "🧪", title: "Hasar Analizi Odaklı", desc: "Müşteri şikayeti numunelerinden kök neden analizine, inklüzyon karakterizasyonundan kırılma mekaniğine." },
     { icon: "🌍", title: "Küresel Erişim", desc: "Türkçe ve İngilizce dil desteği. Dünyanın her yerindeki metalurji mühendisleri için tasarlanmış." },
-    { icon: "📊", title: "50.000+ Test Verisi", desc: "İçerik ve algoritmalar, onbinlerce gerçek üretim testi verisiyle kalibre edilmiştir." },
+    { icon: "📊", title: "350.000+ Test Verisi", desc: "İçerik ve algoritmalar, 350.000'i aşkın gerçek üretim testi verisiyle kalibre edilmiştir." },
   ];
   const featuresEN = [
     { icon: "🏭", title: "From the Industry", desc: "Designed with real field experience — from BOF steelmaking to continuous casting, rolling lines to quality control laboratories." },
@@ -35,75 +39,155 @@ export default function HomePage() {
     { icon: "🔬", title: "Metallographically Validated", desc: "Every tool validated against optical and electron microscopy data." },
     { icon: "🧪", title: "Failure Analysis Focused", desc: "From customer complaint root cause analysis to inclusion characterization and fracture mechanics." },
     { icon: "🌍", title: "Global Access", desc: "Turkish and English language support. Browser-based platform for metallurgical engineers worldwide." },
-    { icon: "📊", title: "50,000+ Test Data Points", desc: "Content and algorithms calibrated with tens of thousands of real production test data." },
+    { icon: "📊", title: "350,000+ Test Data Points", desc: "Content and algorithms calibrated against over 350,000 real production test data points." },
   ];
 
   const features = lang === "tr" ? featuresTR : featuresEN;
   const activeTool = TOOLS.find((tool) => tool.id === activeTab);
+
+  // Category images for active tool panel
+  const TOOL_IMAGES = {
+    "grain-size":         "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    "phase-diagram":      "https://images.unsplash.com/photo-1532094349884-543290f27de4?w=600&auto=format&fit=crop&q=80",
+    "cct-ttt":            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    "inclusion":          "https://images.unsplash.com/photo-1532094349884-543290f27de4?w=600&auto=format&fit=crop&q=80",
+    "sem-eds":            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    "hardness":           "https://images.unsplash.com/photo-1565043589-a03e91538c4b?w=600&auto=format&fit=crop&q=80",
+    "dbtt":               "https://images.unsplash.com/photo-1565043589-a03e91538c4b?w=600&auto=format&fit=crop&q=80",
+    "tensile-specimen":   "https://images.unsplash.com/photo-1565043589-a03e91538c4b?w=600&auto=format&fit=crop&q=80",
+    "corrosion":          "https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=600&auto=format&fit=crop&q=80",
+    "carbon-equivalent":  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop&q=80",
+    "preheat":            "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop&q=80",
+    "unit-converter":     "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&auto=format&fit=crop&q=80",
+  };
 
   return (
     <div className="min-h-screen">
 
       {/* HERO */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(212,175,55,0.08)_0%,transparent_70%)] pointer-events-none" />
+        {/* Hero background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <img
+            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&auto=format&fit=crop&q=80"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover"
+            style={{ opacity: 0.08 }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(3,7,18,0.7) 0%,rgba(3,7,18,0.3) 40%,rgba(3,7,18,0.9) 100%)" }} />
+        </div>
+        {/* Subtle radial glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[radial-gradient(circle,rgba(30,64,175,0.08)_0%,transparent_70%)] pointer-events-none" />
+
         <div className="relative z-10 max-w-4xl">
 
-          <div className="inline-flex items-center gap-2 bg-gold-400/10 border border-gold-400/20 rounded-full px-4 py-1.5 text-xs text-gold-400 font-mono mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            {lang === "tr" ? "18+ Yıl Saha Deneyimi · 50.000+ Test Verisi · Tüm Araçlar Ücretsiz" : "18+ Years Field Experience · 50,000+ Test Data · All Tools Free"}
+          {/* Top badge */}
+          <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-mono mb-8" style={{ background: "rgba(30,64,175,0.12)", border: "1px solid rgba(59,130,246,0.25)", color: "#93c5fd" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            {lang === "tr" ? "20+ Yıl Saha Deneyimi · 350.000+ Test Verisi · Ücretsiz Başla" : "20+ Years Field Experience · 350,000+ Test Data · Start Free"}
           </div>
 
+          {/* Main headline */}
           <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tighter mb-6">
             {lang === "tr" ? (
               <>
-                Uzman Metalurjistlerin{" "}
+                Metalurji Mühendisinin{" "}
                 <span className="bg-gradient-to-r from-gold-400 via-gold-200 to-gold-500 bg-clip-text text-transparent">
-                  Saha Verisiyle
-                </span>{" "}
-                Geliştirilen Araçlar
+                  Dijital Alet Cantasi
+                </span>
               </>
             ) : (
               <>
-                Tools Built on{" "}
+                The Metallurgist&#39;s{" "}
                 <span className="bg-gradient-to-r from-gold-400 via-gold-200 to-gold-500 bg-clip-text text-transparent">
-                  Real Field Data
-                </span>{" "}
-                by Expert Metallurgists
+                  Digital Toolkit
+                </span>
               </>
             )}
           </h1>
 
-          <p className="text-base md:text-lg text-dark-200 max-w-3xl mx-auto mb-6 leading-relaxed">
+          {/* Subtitle */}
+          <p className="text-base md:text-lg text-dark-200 max-w-3xl mx-auto mb-10 leading-relaxed">
             {lang === "tr"
-              ? "Entegre demir-çelik tesisinde 18 yılı aşkın sürede biriktirilen 50.000'den fazla mekanik test verisi ve uluslararası standart uygulaması deneyimine dayanan profesyonel hesaplama platformu."
-              : "A professional computation platform grounded in 18+ years of integrated steel plant experience — built on 50,000+ mechanical test data points and applied international standards."}
+              ? "Hesaplama araclari, bilgi bankasi ve uzman danismanlik — hepsi tek platformda. Entegre demir-celik tesisinde 20 yili askin saha deneyimi ve 350.000+ mekanik test verisiyle gelistirilmistir."
+              : "Computation tools, knowledge base, and expert consultation — all in one platform. Built on 20+ years of integrated steel plant experience and 350,000+ mechanical test data points."}
           </p>
 
-          <div className="inline-flex items-center gap-2 text-xs text-green-400 font-mono border border-green-400/20 bg-green-400/5 rounded-full px-4 py-2 mb-10">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            {lang === "tr" ? "Tüm araçlar şu an ücretsiz — kayıt gerekmez" : "All tools currently free — no registration required"}
+          {/* Three pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-10">
+            {/* Pillar 1: Tools */}
+            <a href="#tools" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)" }}>
+              <div className="text-2xl mb-2">🔧</div>
+              <h3 className="text-sm font-bold text-gold-400 mb-1">
+                {lang === "tr" ? "Araclari Kullan" : "Use the Tools"}
+              </h3>
+              <p className="text-xs text-dark-300 leading-relaxed">
+                {lang === "tr"
+                  ? "Tane boyutu, sertlik, CCT/TTT, karbon esdegeri, SEM-EDS ve daha fazlasi — uluslararasi standartlara uygun."
+                  : "Grain size, hardness, CCT/TTT, carbon equivalent, SEM-EDS and more — standards-compliant."}
+              </p>
+            </a>
+
+            {/* Pillar 2: Knowledge */}
+            <Link href="/knowledge" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
+              <div className="text-2xl mb-2">📚</div>
+              <h3 className="text-sm font-bold mb-1" style={{ color: "#93c5fd" }}>
+                {lang === "tr" ? "Bilgi Bankasi" : "Knowledge Base"}
+              </h3>
+              <p className="text-xs text-dark-300 leading-relaxed">
+                {lang === "tr"
+                  ? "Fe-C faz diyagrami, celik mikroyapilari, mekanik test rehberi, korozyon mekanizmalari ve daha fazlasi."
+                  : "Fe-C phase diagram, steel microstructures, mechanical testing guide, corrosion mechanisms and more."}
+              </p>
+            </Link>
+
+            {/* Pillar 3: Consultation */}
+            <Link href="/consultation" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)" }}>
+              <div className="text-2xl mb-2">👨‍🔬</div>
+              <h3 className="text-sm font-bold mb-1" style={{ color: "#6ee7b7" }}>
+                {lang === "tr" ? "Uzman Danismanligi" : "Expert Consultation"}
+              </h3>
+              <p className="text-xs text-dark-300 leading-relaxed">
+                {lang === "tr"
+                  ? "Metalurjik sorunlariniza cozum arayin — hasar analizi, proses optimizasyonu, kalite problemleri."
+                  : "Seek solutions to metallurgical problems — failure analysis, process optimization, quality issues."}
+              </p>
+            </Link>
           </div>
 
+          {/* CTA Buttons */}
+          <div className="flex gap-3 justify-center flex-wrap mb-4">
+            {/* Primary: Consultation — large, glowing */}
+            <Link href="/consultation" className="relative group bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white rounded-xl px-10 py-4 text-base font-bold no-underline hover:-translate-y-0.5 transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 flex items-center gap-3">
+              <span className="text-xl">🩺</span>
+              {lang === "tr" ? "Uzman Metalurjiste Danıs" : "Consult an Expert Metallurgist"}
+              <span className="text-blue-200 text-lg">→</span>
+            </Link>
+          </div>
           <div className="flex gap-3 justify-center flex-wrap">
-            <a href="#tools" className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3.5 text-base font-semibold no-underline hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all">
-              {lang === "tr" ? "Araçları Keşfet →" : "Explore Tools →"}
+            <a href="#tools" className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all">
+              {lang === "tr" ? "Araclari Kesfet →" : "Explore Tools →"}
             </a>
-            <Link href="/mechanical-tests" className="border border-white/15 rounded-lg px-8 py-3.5 text-base font-medium hover:border-gold-400/50 transition-colors no-underline text-dark-50">
+            <Link href="/mechanical-tests" className="rounded-lg px-8 py-3 text-sm font-medium hover:border-gold-400/50 transition-colors no-underline text-dark-50" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
               {lang === "tr" ? "Mekanik Test Rehberi" : "Mechanical Test Guide"}
+            </Link>
+            <Link href="/knowledge" className="rounded-lg px-8 py-3 text-sm font-medium hover:border-blue-400/50 transition-colors no-underline" style={{ border: "1px solid rgba(59,130,246,0.2)", color: "#93c5fd" }}>
+              {lang === "tr" ? "Bilgi Bankasi" : "Knowledge Base"}
             </Link>
           </div>
         </div>
 
+        {/* Stats */}
         <div className="relative z-10 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
           {[
-            { val: "18+", label: lang === "tr" ? "Yıl Endüstriyel Deneyim" : "Years Industry Experience" },
-            { val: "50K+", label: lang === "tr" ? "Analiz Edilmiş Test Verisi" : "Analyzed Test Data Points" },
-            { val: "12+", label: lang === "tr" ? "Akademik Yayın" : "Academic Publications" },
-            { val: "ÜCRETSİZ", label: lang === "tr" ? "Tüm Araçlar Açık" : "All Tools Free" },
+            { val: "20+", label: lang === "tr" ? "Yil Endustriyel Deneyim" : "Years Industry Experience", color: "#D4AF37" },
+            { val: "350K+", label: lang === "tr" ? "Analiz Edilmis Test Verisi" : "Analyzed Test Data Points", color: "#D4AF37" },
+            { val: "13+", label: lang === "tr" ? "Profesyonel Arac" : "Professional Tools", color: "#60a5fa" },
+            { val: "12+", label: lang === "tr" ? "Akademik Yayin" : "Academic Publications", color: "#D4AF37" },
           ].map((s, i) => (
             <div key={i} className="text-center">
-              <div className="text-2xl md:text-3xl font-bold font-mono text-gold-400">{s.val}</div>
+              <div className="text-2xl md:text-3xl font-bold font-mono" style={{ color: s.color }}>{s.val}</div>
               <div className="text-xs text-dark-300 mt-1">{s.label}</div>
             </div>
           ))}
@@ -135,14 +219,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CONSULTATION BANNER */}
+      <section className="py-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(30,64,175,0.15) 0%, rgba(16,185,129,0.08) 100%)", border: "1px solid rgba(59,130,246,0.2)" }}>
+            <div className="absolute right-0 top-0 w-80 h-80 bg-[radial-gradient(circle,rgba(59,130,246,0.1)_0%,transparent_70%)] pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 p-8 md:p-10">
+              <div className="flex-shrink-0 text-5xl">🩺</div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-bold mb-2 text-white">
+                  {lang === "tr" ? "Metalurjik Sorununuza Uzman Cozum" : "Expert Solutions for Your Metallurgical Problems"}
+                </h3>
+                <p className="text-sm text-dark-200 leading-relaxed max-w-xl">
+                  {lang === "tr"
+                    ? "Hasar analizi, kirilma mekanigi, proses optimizasyonu, inkluzyon karakterizasyonu veya kalite problemi — deneyimli metalurji muhendislerimiz sizin icin burada."
+                    : "Failure analysis, fracture mechanics, process optimization, inclusion characterization or quality problems — our experienced metallurgical engineers are here for you."}
+                </p>
+              </div>
+              <Link href="/consultation" className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl px-8 py-3.5 text-sm font-bold no-underline hover:-translate-y-0.5 transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 whitespace-nowrap">
+                {lang === "tr" ? "Danismanlik Talep Et →" : "Request Consultation →"}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TOOLS */}
       <section id="tools" className="py-24 px-6 max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">{t.toolsSuiteTitle}</h2>
           <p className="text-dark-300 text-base max-w-md mx-auto">{t.toolsSuiteDesc}</p>
-          <div className="mt-4 inline-flex items-center gap-2 text-xs text-green-400 font-mono border border-green-400/20 bg-green-400/5 rounded-full px-4 py-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            {lang === "tr" ? "Tüm araçlar ücretsiz — giriş gerekmez" : "All tools free — no login required"}
+          <div className="mt-4 inline-flex items-center gap-2 text-xs text-gold-400 font-mono border border-gold-400/25 bg-gold-400/5 rounded-full px-4 py-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
+            {lang === "tr"
+              ? "Üye ol · Starter planla 5 ücretsiz kullanım kazan"
+              : "Sign up · Get 5 free uses per tool with the Starter plan"}
           </div>
         </div>
 
@@ -157,29 +268,49 @@ export default function HomePage() {
         </div>
 
         {activeTool && (
-          <div className="bg-gradient-to-br from-white/[0.03] to-gold-400/[0.03] border border-white/[0.08] rounded-2xl p-10 animate-fade-in">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="text-5xl">{activeTool.icon}</div>
-              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded border border-green-500/30 font-semibold">
-                {lang === "tr" ? "ÜCRETSİZ" : "FREE"}
-              </span>
-            </div>
-            <h3 className="text-2xl font-semibold tracking-tight mb-3">{activeTool.name}</h3>
-            <p className="text-dark-200 text-base leading-relaxed mb-5 max-w-xl">{activeTool.desc}</p>
-            <div className="flex gap-2 flex-wrap mb-6">
-              {activeTool.tags.map((tag) => (
-                <span key={tag} className="bg-gold-400/10 border border-gold-400/20 rounded-md px-3 py-1 text-xs text-gold-400 font-mono">{tag}</span>
-              ))}
-            </div>
-            {activeTool.status === "live" && activeTool.route ? (
-              <Link href={activeTool.route} className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/25 transition-all">
-                {activeTool.icon} {lang === "tr" ? "Aracı Aç →" : "Open Tool →"}
-              </Link>
-            ) : (
-              <div className="inline-flex items-center gap-2 bg-white/5 text-dark-300 rounded-lg px-6 py-3 text-sm font-medium border border-white/10">
-                🔒 {t.comingSoon || "Yakında"}
+          <div className="bg-gradient-to-br from-white/[0.03] to-gold-400/[0.03] border border-white/[0.08] rounded-2xl overflow-hidden animate-fade-in">
+            <div className="flex">
+              {/* Content */}
+              <div className="flex-1 p-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-5xl">{activeTool.icon}</div>
+                  <span className="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded border border-green-500/30 font-semibold">
+                    {lang === "tr" ? "ÜCRETSİZ" : "FREE"}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-semibold tracking-tight mb-3">{activeTool.name}</h3>
+                <p className="text-dark-200 text-base leading-relaxed mb-5 max-w-xl">{activeTool.desc}</p>
+                <div className="flex gap-2 flex-wrap mb-6">
+                  {activeTool.tags.map((tag) => (
+                    <span key={tag} className="bg-gold-400/10 border border-gold-400/20 rounded-md px-3 py-1 text-xs text-gold-400 font-mono">{tag}</span>
+                  ))}
+                </div>
+                {activeTool.status === "live" && activeTool.route ? (
+                  <Link href={activeTool.route} className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/25 transition-all">
+                    {activeTool.icon} {lang === "tr" ? "Aracı Aç →" : "Open Tool →"}
+                  </Link>
+                ) : (
+                  <div className="inline-flex items-center gap-2 bg-white/5 text-dark-300 rounded-lg px-6 py-3 text-sm font-medium border border-white/10">
+                    🔒 {t.comingSoon || "Yakında"}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Tool image panel */}
+              <div className="hidden md:block w-52 relative overflow-hidden shrink-0">
+                <img
+                  src={TOOL_IMAGES[activeTool.id] || "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&auto=format&fit=crop&q=80"}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-full object-cover"
+                  style={{ opacity: 0.45 }}
+                />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(90deg,rgba(10,10,15,0.85) 0%,rgba(10,10,15,0.2) 60%,rgba(10,10,15,0.5) 100%)" }} />
+                <div className="absolute bottom-4 left-0 right-0 text-center">
+                  <span className="font-mono text-[10px] text-gold-400/60 uppercase tracking-widest">{activeTool.tags[0]}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </section>
@@ -195,13 +326,13 @@ export default function HomePage() {
               {lang === "tr" ? (
                 <>
                   <p>MetallurgyTools, entegre demir-çelik tesislerinde görev yapan uzman metalurji mühendisleri tarafından geliştirilmektedir. Çelik üretiminin her aşamasında — BOF çelik yapımından sürekli dökme, sıcak haddeleme hatlarından mekanik test laboratuvarlarına kadar — edinilen gerçek saha deneyimine dayanmaktadır.</p>
-                  <p>Platformdaki her araç, uluslararası standartlarla (ASTM, ISO, API, ASME) uyumlu olarak tasarlanmış ve 50.000'i aşkın gerçek üretim test verisiyle doğrulanmıştır.</p>
+                  <p>Platformdaki her araç, uluslararası standartlarla (ASTM, ISO, API, ASME) uyumlu olarak tasarlanmış ve 350.000'i aşkın gerçek üretim test verisiyle doğrulanmıştır.</p>
                   <p>Hedefimiz, dünya genelindeki metalurji mühendislerine günlük iş akışlarında kullanabilecekleri pratik, güvenilir ve standartlara uygun dijital araçlar sunmaktır.</p>
                 </>
               ) : (
                 <>
                   <p>MetallurgyTools is developed by expert metallurgical engineers working in integrated iron and steel plants, grounded in real-world experience across every stage of steel production.</p>
-                  <p>Every tool is designed in compliance with international standards (ASTM, ISO, API, ASME) and validated against more than 50,000 real production data points.</p>
+                  <p>Every tool is designed in compliance with international standards (ASTM, ISO, API, ASME) and validated against more than 350,000 real production data points.</p>
                   <p>Our goal is to provide metallurgical engineers worldwide with practical, reliable, and standards-compliant digital tools for their daily workflows.</p>
                 </>
               )}

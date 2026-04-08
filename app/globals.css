@@ -4,10 +4,34 @@
 
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap");
 
+/* ── Dark theme (default) — RGB triplets for Tailwind alpha support ── */
 :root {
+  --dark-50:  232 230 225;
+  --dark-100: 160 160 160;
+  --dark-200: 136 136 136;
+  --dark-300: 102 102 102;
+  --dark-400:  51  51  51;
+  --dark-500:  26  26  46;
+  --dark-600:  20  20  31;
+  --dark-700:  15  15  24;
+  --dark-800:  10  10  15;
+  --dark-900:   5   5   8;
   --gold-400: #d4af37;
   --gold-500: #b8860b;
-  --dark-800: #0a0a0f;
+}
+
+/* ── Light theme — same palette semantics, inverted luminance ── */
+html.light {
+  --dark-50:   20  20  31;   /* primary text  → near-black           */
+  --dark-100:  34  34  64;   /* secondary text                        */
+  --dark-200:  51  51  85;
+  --dark-300:  85  85 112;
+  --dark-400: 136 136 160;   /* muted / placeholder                   */
+  --dark-500: 200 200 216;   /* subtle surface                        */
+  --dark-600: 228 228 236;   /* borders                               */
+  --dark-700: 240 240 246;   /* card background                       */
+  --dark-800: 248 248 252;   /* main page background                  */
+  --dark-900: 255 255 255;   /* highest surface (deepest bg → white)  */
 }
 
 html {
@@ -15,19 +39,20 @@ html {
 }
 
 body {
-  background: var(--dark-800);
-  color: #e8e6e1;
+  background: rgb(var(--dark-800));
+  color: rgb(var(--dark-50));
   font-family: "DM Sans", "Segoe UI", sans-serif;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0f;
+  background: rgb(var(--dark-800));
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: rgb(var(--dark-400));
   border-radius: 3px;
 }
 

@@ -154,6 +154,9 @@ export default function PhaseDiagramSimulator() {
   const coolingRef = useRef(false);
   const pauseRef = useRef(false);
   const svgRef = useRef(null);
+  const isPanRef = useRef(false);
+  const panLastRef = useRef(null);
+  const hasDraggedRef = useRef(false);
 
   const regions = useMemo(() => getPhaseRegions(), []);
   const lines = useMemo(() => getPhaseLines(), []);
@@ -202,22 +205,43 @@ export default function PhaseDiagramSimulator() {
     else { if (temp < 900) setTemp(1200); setCooling(true); }
   };
 
-  const handleWheel = useCallback((e) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+  // Attach wheel listener imperatively with passive:false so e.preventDefault() works
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const handler = (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.15 : 0.87;
+      const rect = svg.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      setZoom(z => {
+        const ns = Math.max(1, Math.min(10, z.s * factor));
+        if (ns === z.s) return z;
+        const ntx = mx - (mx - z.tx) * (ns / z.s);
+        const nty = my - (my - z.ty) * (ns / z.s);
+        return { s: ns, tx: ntx, ty: nty };
+      });
+    };
+    svg.addEventListener("wheel", handler, { passive: false });
+    return () => svg.removeEventListener("wheel", handler);
+  }, []);
+
+  // Helper: screen px → SVG user-unit delta (accounts for viewBox scaling)
+  const svgScale = useCallback(() => {
     const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-    setZoom(z => {
-      const ns = Math.max(1, Math.min(10, z.s * factor));
-      if (ns === z.s) return z;
-      const ntx = mx - (mx - z.tx) * (ns / z.s);
-      const nty = my - (my - z.ty) * (ns / z.s);
-      return { s: ns, tx: ntx, ty: nty };
-    });
+    return rect ? BASE_W / rect.width : 1;
+  }, []);
+
+  const handleMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    isPanRef.current = true;
+    hasDraggedRef.current = false;
+    panLastRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
   const handleSvgClick = useCallback((e) => {
+    // Suppress click if mouse was dragged
+    if (hasDraggedRef.current) { hasDraggedRef.current = false; return; }
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
     const px = e.clientX - rect.left, py = e.clientY - rect.top;
@@ -229,9 +253,28 @@ export default function PhaseDiagramSimulator() {
   const handleSvgMove = useCallback((e) => {
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
+
+    // Pan when mouse is held and we are zoomed in
+    if (isPanRef.current && panLastRef.current && zoom.s > 1) {
+      const dx = e.clientX - panLastRef.current.x;
+      const dy = e.clientY - panLastRef.current.y;
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+        hasDraggedRef.current = true;
+        const sc = svgScale();
+        setZoom(z => ({ ...z, tx: z.tx + dx * sc, ty: z.ty + dy * sc }));
+        panLastRef.current = { x: e.clientX, y: e.clientY };
+      }
+      return; // skip hover tooltip while panning
+    }
+
     const px = e.clientX - rect.left, py = e.clientY - rect.top;
     setHover({ c: xInv(px, zoom).toFixed(2), t: Math.round(yInv(py, zoom)), x: px, y: py });
-  }, [zoom]);
+  }, [zoom, svgScale]);
+
+  const handleMouseUp = useCallback(() => {
+    isPanRef.current = false;
+    panLastRef.current = null;
+  }, []);
 
   const handleRegionClick = useCallback((r, e) => {
     e.stopPropagation();
@@ -361,9 +404,11 @@ export default function PhaseDiagramSimulator() {
                 </div>
               )}
 
-              <svg ref={svgRef} viewBox={`0 0 ${BASE_W} ${BASE_H}`} className="w-full" style={{ cursor: "crosshair" }}
+              <svg ref={svgRef} viewBox={`0 0 ${BASE_W} ${BASE_H}`} className="w-full select-none"
+                style={{ cursor: zoom.s > 1 ? (isPanRef.current ? "grabbing" : "grab") : "crosshair" }}
+                onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}
                 onClick={handleSvgClick} onMouseMove={handleSvgMove}
-                onMouseLeave={() => setHover(null)} onWheel={handleWheel}>
+                onMouseLeave={() => { setHover(null); isPanRef.current = false; panLastRef.current = null; }}>
 
                 <defs><clipPath id="chart-clip"><rect x={M.l} y={M.t} width={cw} height={ch} /></clipPath></defs>
                 <rect x={M.l} y={M.t} width={cw} height={ch} fill="#0f172a" />
@@ -446,9 +491,85 @@ export default function PhaseDiagramSimulator() {
             </div>
             <div className="mt-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
               <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">
-                <div>{"\u2022"} Callister & Rethwisch, Materials Science and Engineering, 10th Ed.</div>
-                <div>{"\u2022"} ASM Handbook Vol. 3: Alloy Phase Diagrams</div>
-                <div>{"\u2022"} Bhadeshia & Honeycombe, Steels: Microstructure and Properties</div>
+                <div>{"•"} Callister & Rethwisch, Materials Science and Engineering, 10th Ed.</div>
+                <div>{"•"} ASM Handbook Vol. 3: Alloy Phase Diagrams</div>
+                <div>{"•"} Bhadeshia & Honeycombe, Steels: Microstructure and Properties</div>
+              </div>
+            </div>
+
+            {/* ── HOW TO USE BRIEFING ── */}
+            <div className="mt-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/[0.06] bg-white/[0.02] flex items-center gap-2">
+                <span className="text-base">📋</span>
+                <span className="text-[10px] text-gold-400 font-mono font-bold uppercase tracking-widest">
+                  {lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-white/[0.04]">
+                {[
+                  {
+                    icon: "🖱️", color: "blue",
+                    title: lang === "tr" ? "Diyagram Üzerinde Nokta Seç" : "Select a Point on the Diagram",
+                    desc: lang === "tr"
+                      ? "Diyagram üzerine tıklayarak karbon içeriği (%C) ve sıcaklık (°C) değerini seçin. Sol panel anında güncellenir: faz bölgesi, kaldıraç kuralı oranları ve toplam denge fazları hesaplanır."
+                      : "Click anywhere on the diagram to select carbon content (wt%C) and temperature (°C). The left panel updates instantly: phase region, lever rule fractions, and total equilibrium phases are calculated.",
+                  },
+                  {
+                    icon: "🔍", color: "amber",
+                    title: lang === "tr" ? "Zoom & Kaydır" : "Zoom & Pan",
+                    desc: lang === "tr"
+                      ? "Fare tekerleği ile diyagramı yakınlaştırın veya uzaklaştırın — sayfa kayması olmadan yalnızca diyagram zoom yapar. Zoom sıfırlamak için sağ üstteki «Zoom Sıfırla» butonunu kullanın."
+                      : "Use the scroll wheel directly over the diagram to zoom in or out — only the diagram zooms, page scroll is blocked. Use the «Reset Zoom» button (top-right of diagram) to return to full view.",
+                  },
+                  {
+                    icon: "❄️", color: "blue",
+                    title: lang === "tr" ? "Soğuma Simülasyonu" : "Cooling Simulation",
+                    desc: lang === "tr"
+                      ? "«Soğumayı Başlat» butonuna basın. Seçilen karbon değerinde 1200°C'den itibaren denge soğuma simüle edilir. Her kritik faz dönüşüm sıcaklığında (A₁, A₃, Acm) diyagram kısa süre duraksayarak olayı vurgular."
+                      : "Press «Start Cooling» to simulate equilibrium cooling from 1200°C at the selected carbon content. The animation pauses briefly at each critical transformation temperature (A₁, A₃, Acm) and highlights the event.",
+                  },
+                  {
+                    icon: "📐", color: "green",
+                    title: lang === "tr" ? "Kaldıraç Kuralı & Faz Bölgeleri" : "Lever Rule & Phase Regions",
+                    desc: lang === "tr"
+                      ? "İki fazlı bölgelerde (α+γ, γ+Fe₃C, L+γ vb.) kaldıraç kuralı otomatik hesaplanır ve yüzde olarak gösterilir. Herhangi bir renkli faz bölgesine tıklayarak detaylı faz açıklamasına ulaşabilirsiniz."
+                      : "In two-phase regions (α+γ, γ+Fe₃C, L+γ, etc.) the lever rule is calculated automatically and displayed as percentages. Click any colored phase region to open a detailed description of that phase.",
+                  },
+                  {
+                    icon: "🔬", color: "purple",
+                    title: lang === "tr" ? "Mikroyapı Simülasyonu" : "Microstructure Simulation",
+                    desc: lang === "tr"
+                      ? "Sol alt köşedeki mikroyapı paneli, seçilen C% ve sıcaklığa göre gerçekçi Voronoi tane yapısı oluşturur: ferrit/perlit oranı, östenit, sıvı eriyik veya ledeburit görselleştirilir."
+                      : "The microstructure panel (bottom-left) generates a realistic Voronoi grain structure based on the selected C% and temperature — visualizing ferrite/pearlite ratio, austenite, liquid melt, or ledeburite.",
+                  },
+                  {
+                    icon: "📊", color: "gold",
+                    title: lang === "tr" ? "Karbon & Sıcaklık Slider'ları" : "Carbon & Temperature Sliders",
+                    desc: lang === "tr"
+                      ? "Sol paneldeki slider'lar ile 0–6.67%C ve 0–1600°C arasında manuel değer girebilirsiniz. Kritik noktalar (A₁=727°C, ötektoid=0.76%C, ötektik=4.3%C) sarı renkte gösterilmiştir."
+                      : "Use the sliders in the left panel to manually set carbon (0–6.67%C) and temperature (0–1600°C). Critical values are highlighted in yellow: A₁=727°C, eutectoid=0.76%C, eutectic=4.3%C.",
+                  },
+                ].map(({ icon, color, title, desc }) => {
+                  const border = {
+                    blue: "border-blue-500/20 bg-blue-500/5 text-blue-400",
+                    amber: "border-amber-500/20 bg-amber-500/5 text-amber-400",
+                    green: "border-green-500/20 bg-green-500/5 text-green-400",
+                    purple: "border-purple-500/20 bg-purple-500/5 text-purple-400",
+                    gold: "border-gold-400/20 bg-gold-400/5 text-gold-400",
+                  };
+                  return (
+                    <div key={title} className="p-4 flex gap-3">
+                      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center text-sm shrink-0 mt-0.5 ${border[color]}`}>
+                        {icon}
+                      </div>
+                      <div>
+                        <div className="text-dark-50 text-xs font-semibold mb-1">{title}</div>
+                        <p className="text-dark-300 text-[11px] leading-relaxed">{desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

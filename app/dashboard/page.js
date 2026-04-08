@@ -1,123 +1,153 @@
 "use client";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
-import { TOOLS, getUserPlan, hasToolAccess } from "@/lib/plans";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { STARTER_LIMIT, TOOL_LABELS } from "@/lib/planUtils";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
+  const [userData, setUserData] = useState(null);
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-dark-200">Loading...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetch("/api/user/me").then(r => r.json()).then(setUserData);
+    }
+  }, [isLoaded, user]);
 
-  const { plan, calculationsUsed } = getUserPlan(user);
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
+  if (!isLoaded) return (
+    <div style={{ background: "#0a0a0a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" }}>
+      Yükleniyor...
+    </div>
+  );
+
+  const plan = user?.publicMetadata?.plan || "starter";
+  const planExpires = user?.publicMetadata?.planExpiresAt;
+  const isPro = plan === "professional" && planExpires && new Date(planExpires) > new Date();
+  const toolUsage = userData?.toolUsage || {};
+  const usedToolCount = Object.keys(toolUsage).length;
+  const name = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "Mühendis";
 
   return (
-    <div className="min-h-screen">
-      {/* Dashboard Nav */}
-      <nav className="border-b border-white/[0.06] px-6 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 no-underline text-dark-50"
-        >
-          <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-500 rounded-md flex items-center justify-center text-lg font-bold text-dark-800 font-mono">
-            M
-          </div>
-          <span className="font-semibold text-lg tracking-tight">
-            MetallurgyTools
-          </span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-mono bg-gold-400/10 text-gold-400 px-3 py-1 rounded-full border border-gold-400/20 uppercase">
-            {plan}
-          </span>
-          <UserButton afterSignOutUrl="/" />
-        </div>
-      </nav>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui,sans-serif", paddingTop: 64 }}>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        {/* Welcome */}
-        <div className="mb-12">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">
-            Welcome back, {user?.firstName || "Engineer"}
+      {/* ── ACCOUNT SUB-BAR (sits below the global fixed Navbar) ── */}
+      <div style={{ background: "#111827", borderBottom: "1px solid #1e293b", padding: "0 28px", height: 52, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>
+          Panel &mdash; {name}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ background: isPro ? "#052e16" : "#1e1b4b", color: isPro ? "#4ade80" : "#818cf8", borderRadius: 20, padding: "3px 12px", fontSize: 11, fontWeight: 700 }}>
+            {isPro ? "PROFESSIONAL" : "STARTER"}
+          </span>
+          <Link href="/account" style={{ background: "#1e293b", border: "1px solid #334155", color: "#94a3b8", borderRadius: 7, padding: "6px 12px", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>
+            ⚙️ Hesap Ayarları
+          </Link>
+          <button onClick={handleSignOut} style={{ background: "#450a0a", border: "1px solid #7f1d1d", color: "#f87171", borderRadius: 7, padding: "6px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            🚪 Çıkış Yap
+          </button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px 80px" }}>
+
+        {/* ── WELCOME ── */}
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ color: "#f1f5f9", fontWeight: 800, fontSize: 26, margin: "0 0 6px" }}>
+            Hoş geldiniz, {name} 👋
           </h1>
-          <p className="text-dark-300">
-            {calculationsUsed} calculations used this period
+          <p style={{ color: "#64748b", fontSize: 14, margin: 0 }}>
+            {isPro
+              ? `Professional plan — ${planExpires ? `Bitiş: ${new Date(planExpires).toLocaleDateString("tr-TR")}` : "Sınırsız erişim"}`
+              : `Starter plan — Her araç için ${STARTER_LIMIT} kullanım hakkı`
+            }
           </p>
         </div>
 
-        {/* Trial banner */}
-        {plan === "free_trial" && (
-          <div className="bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-xl p-5 mb-10 flex items-center justify-between flex-wrap gap-4">
+        {/* ── UPGRADE BANNER (starter only) ── */}
+        {!isPro && (
+          <div style={{ background: "linear-gradient(135deg,#1e3a6e,#1e293b)", border: "1px solid #2563eb44", borderRadius: 12, padding: "20px 24px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div className="font-semibold text-gold-400 text-sm">
-                Free Trial Active
-              </div>
-              <div className="text-dark-200 text-sm mt-1">
-                Upgrade to unlock all tools and unlimited calculations.
-              </div>
+              <div style={{ color: "#60a5fa", fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Professional Plana Geç</div>
+              <div style={{ color: "#94a3b8", fontSize: 13 }}>Tüm araçlara sınırsız erişim · Aylık 1 ücretsiz danışmanlık · ₺415/ay</div>
             </div>
-            <Link
-              href="/pricing"
-              className="bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-5 py-2 text-sm font-semibold no-underline hover:shadow-lg hover:shadow-gold-400/20 transition-all"
-            >
-              Upgrade Now
+            <Link href="/pricing" style={{ background: "linear-gradient(135deg,#1d4ed8,#2563eb)", color: "#fff", borderRadius: 8, padding: "10px 22px", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+              Yükselt →
             </Link>
           </div>
         )}
 
-        {/* Tools Grid */}
-        <h2 className="text-xl font-semibold mb-6">Your Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {TOOLS.map((tool) => {
-            const hasAccess = hasToolAccess(plan, tool.id);
-            const isLive = tool.status === "live";
+        {/* ── STAT CARDS ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 40 }}>
+          {[
+            { label: "Plan", value: isPro ? "Professional" : "Starter", color: isPro ? "#4ade80" : "#818cf8" },
+            { label: "Kullanılan Araç", value: usedToolCount, color: "#60a5fa" },
+            { label: "Danışmanlık", value: isPro ? "Aylık 1 ücretsiz" : (user?.publicMetadata?.consultationFreeUsed ? "Kullanıldı" : "1 ücretsiz hak"), color: "#f59e0b" },
+          ].map(s => (
+            <div key={s.label} style={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 12, padding: "20px 22px" }}>
+              <div style={{ color: "#64748b", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{s.label}</div>
+              <div style={{ color: s.color, fontWeight: 800, fontSize: 22 }}>{s.value}</div>
+            </div>
+          ))}
+        </div>
 
-            return (
-              <div
-                key={tool.id}
-                className={`relative rounded-xl p-6 border transition-all ${
-                  hasAccess && isLive
-                    ? "bg-white/[0.03] border-white/[0.08] hover:border-gold-400/30 hover:-translate-y-0.5 cursor-pointer"
-                    : "bg-white/[0.01] border-white/[0.04] opacity-50"
-                }`}
-              >
-                {!isLive && (
-                  <div className="absolute top-4 right-4 bg-white/10 text-dark-300 text-[10px] font-mono px-2 py-0.5 rounded">
-                    COMING SOON
+        {/* ── TOOL USAGE TABLE (starter only) ── */}
+        {!isPro && Object.keys(toolUsage).length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>Araç Kullanım Durumu</h2>
+            <div style={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 12, overflow: "hidden" }}>
+              {Object.entries(toolUsage).map(([toolId, count], i) => {
+                const pct = Math.min(100, (count / STARTER_LIMIT) * 100);
+                const color = count >= STARTER_LIMIT ? "#ef4444" : count >= 3 ? "#f97316" : "#3b82f6";
+                return (
+                  <div key={toolId} style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 18px", borderBottom: i < Object.keys(toolUsage).length - 1 ? "1px solid #0f172a" : "none" }}>
+                    <div style={{ flex: 1, minWidth: 160, color: "#e2e8f0", fontSize: 13 }}>{TOOL_LABELS[toolId]?.tr || toolId}</div>
+                    <div style={{ flex: 2, maxWidth: 200 }}>
+                      <div style={{ height: 6, background: "#1e293b", borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
+                      </div>
+                    </div>
+                    <div style={{ color, fontSize: 13, fontWeight: 600, minWidth: 60, textAlign: "right" }}>
+                      {count} / {STARTER_LIMIT}
+                    </div>
+                    {count >= STARTER_LIMIT && (
+                      <Link href="/pricing" style={{ color: "#60a5fa", fontSize: 12, textDecoration: "none" }}>Yükselt</Link>
+                    )}
                   </div>
-                )}
-                {isLive && !hasAccess && (
-                  <div className="absolute top-4 right-4 bg-gold-400/20 text-gold-400 text-[10px] font-mono px-2 py-0.5 rounded">
-                    UPGRADE
-                  </div>
-                )}
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-                <div className="text-3xl mb-3">{tool.icon}</div>
-                <h3 className="text-base font-semibold mb-2">{tool.name}</h3>
-                <p className="text-dark-300 text-sm leading-relaxed mb-4">
-                  {tool.description}
-                </p>
-
-                {hasAccess && isLive ? (
-                  <Link
-                    href={tool.route}
-                    className="inline-flex items-center gap-1.5 text-gold-400 text-sm font-medium no-underline hover:gap-2.5 transition-all"
-                  >
-                    Open Tool →
-                  </Link>
-                ) : (
-                  <span className="text-dark-300 text-sm">
-                    {isLive ? "Requires upgrade" : "In development"}
-                  </span>
-                )}
-              </div>
-            );
-          })}
+        {/* ── QUICK LINKS ── */}
+        <h2 style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>Hızlı Erişim</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14 }}>
+          {[
+            { href: "/tools/carbon-equivalent", icon: "🔥", label: "Karbon Eşdeğeri" },
+            { href: "/tools/hardness",           icon: "🔧", label: "Sertlik Dönüşümü" },
+            { href: "/tools/grain-size",         icon: "🔬", label: "Tane Boyutu" },
+            { href: "/tools/hasar-vakalari",     icon: "📋", label: "Hasar Analizi Atlası" },
+            { href: "/mechanical-tests/cekme-testi",  icon: "📊", label: "Çekme Testi" },
+            { href: "/mechanical-tests/darbe-testi",  icon: "⚡", label: "Darbe Testi" },
+            { href: "/consultation",             icon: "💬", label: "Danışmanlık Talebi" },
+            { href: "/account",                  icon: "⚙️", label: "Hesap Ayarları" },
+          ].map(l => (
+            <Link key={l.href} href={l.href} style={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 10, padding: "16px 18px", textDecoration: "none", display: "flex", alignItems: "center", gap: 12, transition: "border-color .15s" }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = "#2563eb"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "#1e293b"}
+            >
+              <span style={{ fontSize: 20 }}>{l.icon}</span>
+              <span style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 500 }}>{l.label}</span>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

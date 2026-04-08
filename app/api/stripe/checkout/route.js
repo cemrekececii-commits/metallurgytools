@@ -1,66 +1,50 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
 import { stripe } from "@/lib/stripe-server";
 
-export async function POST(request) {
+export async function POST() {
   try {
     const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const user = await currentUser();
-    const { priceId } = await request.json();
+    const clerkUser = await currentUser();
+    const meta = clerkUser?.publicMetadata || {};
+    let customerId = meta.stripeCustomerId;
 
-    if (!priceId) {
-      return NextResponse.json({ error: "Price ID required" }, { status: 400 });
-    }
+    const email = clerkUser?.emailAddresses?.[0]?.emailAddress || "";
+    const name  = `${clerkUser?.firstName || ""} ${clerkUser?.lastName || ""}`.trim();
 
-    // Check if user already has a Stripe customer ID
-    let customerId = user?.publicMetadata?.stripeCustomerId;
-
-    // Create new Stripe customer if doesn't exist
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user?.emailAddresses?.[0]?.emailAddress,
-        name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
-        metadata: {
-          clerkUserId: userId,
-        },
+        email,
+        name,
+        metadata: { clerkUserId: userId },
       });
       customerId = customer.id;
+      // Save stripe customer ID
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(userId, {
+        publicMetadata: { ...meta, stripeCustomerId: customerId },
+      });
     }
 
-    // Create checkout session
+    const priceId = process.env.STRIPE_PRICE_PROFESSIONAL;
+    const appUrl  = process.env.NEXT_PUBLIC_APP_URL || "https://metallurgytools.com";
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
       mode: "subscription",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
-      subscription_data: {
-        trial_period_days: 7,
-        metadata: {
-          clerkUserId: userId,
-        },
-      },
-      metadata: {
-        clerkUserId: userId,
-      },
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${appUrl}/dashboard?payment=success`,
+      cancel_url:  `${appUrl}/pricing?payment=cancelled`,
+      subscription_data: { metadata: { clerkUserId: userId } },
+      metadata: { clerkUserId: userId },
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error("Checkout session error:", err);
-    return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
-    );
+    console.error("Checkout error:", err);
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 }
