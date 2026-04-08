@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 const TR = {
   title: "CCT/TTT Diyagramı Yorumlayıcısı",
@@ -475,7 +476,26 @@ export default function CCTTTInterpreter() {
           </div>
         )}
 
-        {/* Footer CTA */}
+        
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Kimyasal Bileşimi Gir", desc: "C, Mn, Si, Ni, Cr, Mo, V, Cu, Nb elementlerini ağırlık yüzdesi olarak gir." },
+              { icon: "②", color: "#f59e0b", title: "Östenit Tane Boyutunu Belirle", desc: "ASTM tane boyutu numarasını (G) gir. Varsayılan değer 8'dir." },
+              { icon: "③", color: "#8b5cf6", title: "Soğuma Hızını Ayarla", desc: "°C/s cinsinden soğuma hızını gir veya kaydırıcıyı kullan." },
+              { icon: "④", color: "#06b6d4", title: "Hesapla", desc: "Ae3, Ae1, Ms, Bs, Mf kritik sıcaklıkları ve faz fraksiyonları hesaplanır." },
+              { icon: "⑤", color: "#10b981", title: "CCT Diyagramını İncele", desc: "Şematik CCT diyagramı soğuma eğrisi ve faz bölgeleriyle birlikte görüntülenir." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Enter Chemical Composition", desc: "Input C, Mn, Si, Ni, Cr, Mo, V, Cu, Nb in weight percent." },
+              { icon: "②", color: "#f59e0b", title: "Set Austenite Grain Size", desc: "Enter ASTM grain size number (G). Default is 8." },
+              { icon: "③", color: "#8b5cf6", title: "Adjust Cooling Rate", desc: "Enter cooling rate in °C/s or use the slider." },
+              { icon: "④", color: "#06b6d4", title: "Calculate", desc: "Ae3, Ae1, Ms, Bs, Mf critical temperatures and phase fractions are computed." },
+              { icon: "⑤", color: "#10b981", title: "Review CCT Diagram", desc: "Schematic CCT diagram is displayed with cooling curve and phase regions." }]
+            }
+            formulas={[{ label: "Ae3 = f(C, Mn, Si, Ni, Cr)", color: "#60a5fa" }, { label: "Ms = 539 − 423C − 30.4Mn − ...", color: "#34d399" }, { label: "Bs = 830 − 270C − 90Mn − ...", color: "#a78bfa" }]}
+          />
+
+          {/* Footer CTA */}
         <div className="mt-8 bg-white/[0.03] border border-white/[0.08] rounded-xl p-6 text-center">
           <p className="text-sm text-dark-200 mb-3">{t.wantMore}</p>
           <Link href="/pricing" className="inline-block bg-gold-400/20 text-gold-400 px-6 py-2 rounded-lg text-sm font-semibold border border-gold-400/30 no-underline hover:bg-gold-400/30">{t.viewPlans}</Link>

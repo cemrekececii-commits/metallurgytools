@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 const TR = {
   title: "Çekme Numunesi L₀ Hesaplayıcısı",
@@ -514,7 +515,24 @@ export default function TensileSpecimenPage() {
           </div>
         </div>
 
-        <div className="mt-6 text-center">
+        
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Standart Seç", desc: "EN ISO 6892-1 veya ASTM E8/E8M standardını seç." },
+              { icon: "②", color: "#f59e0b", title: "Numune Tipini Belirle", desc: "Yuvarlak (silindirik) veya yassı (dikdörtgen kesitli) numune tipini seç." },
+              { icon: "③", color: "#8b5cf6", title: "Boyutları Gir", desc: "Çap veya genişlik/kalınlık değerlerini mm olarak gir." },
+              { icon: "④", color: "#10b981", title: "Sonuçları Oku", desc: "L₀ (ölçüm uzunluğu), Lc (paralel uzunluk), Lt (toplam uzunluk) ve S₀ (kesit alanı) hesaplanır." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Standard", desc: "Choose between EN ISO 6892-1 or ASTM E8/E8M standard." },
+              { icon: "②", color: "#f59e0b", title: "Select Specimen Type", desc: "Choose round (cylindrical) or flat (rectangular cross-section) specimen type." },
+              { icon: "③", color: "#8b5cf6", title: "Enter Dimensions", desc: "Input diameter or width/thickness values in mm." },
+              { icon: "④", color: "#10b981", title: "Read Results", desc: "L₀ (gauge length), Lc (parallel length), Lt (total length) and S₀ (cross-section area) are computed." }]
+            }
+            formulas={[{ label: "L₀ = k × √S₀ (k=5.65)", color: "#60a5fa" }, { label: "EN ISO 6892-1:2016", color: "#34d399" }, { label: "ASTM E8/E8M-22", color: "#a78bfa" }]}
+          />
+
+<div className="mt-6 text-center">
           <p className="text-xs text-dark-400 font-mono">
             {lang === "tr"
               ? "MetallurgyTools · EN ISO 6892-1:2016 · ASTM E8/E8M-22"

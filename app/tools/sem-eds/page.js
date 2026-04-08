@@ -2,6 +2,7 @@
 import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── X-RAY ENERGY DATABASE (keV) ───────────────────────
 // Source: Bearden, J.A. (1967) Rev. Mod. Phys. 39, 78-124
@@ -363,7 +364,24 @@ export default function SemEdsAnalyzer() {
               </div>
             )}
 
-            {/* References */}
+            
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Element Seç", desc: "Analiz etmek istediğin elementleri listeden seç (Fe, Mn, Cr, Al, Ca, S, O vb.)." },
+              { icon: "②", color: "#f59e0b", title: "Hızlandırma Voltajını Belirle", desc: "SEM hızlandırma voltajını (kV) gir. Varsayılan 20 kV'dur." },
+              { icon: "③", color: "#8b5cf6", title: "Analiz Et", desc: "Seçilen elementler arasındaki EDS pik çakışmaları (overlap) ve artefaktlar tespit edilir." },
+              { icon: "④", color: "#10b981", title: "Metalürjik Yorumu Oku", desc: "Çakışma bağlamı, inklüzyon tanımlama önerileri ve önlem stratejileri sunulur." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Elements", desc: "Choose elements to analyze from the list (Fe, Mn, Cr, Al, Ca, S, O etc.)." },
+              { icon: "②", color: "#f59e0b", title: "Set Accelerating Voltage", desc: "Enter SEM accelerating voltage (kV). Default is 20 kV." },
+              { icon: "③", color: "#8b5cf6", title: "Analyze", desc: "EDS peak overlaps and artifacts between selected elements are detected." },
+              { icon: "④", color: "#10b981", title: "Read Metallurgical Interpretation", desc: "Overlap context, inclusion identification suggestions and countermeasure strategies are provided." }]
+            }
+            formulas={[{ label: "Kα, Kβ, Lα X-ray Lines", color: "#60a5fa" }, { label: "ASTM E1508 — EDS Analysis", color: "#34d399" }]}
+          />
+
+          {/* References */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
               <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">
                 <div>{"\u2022"} Bearden, J.A. (1967) Rev. Mod. Phys. 39, 78-124 — X-ray Energies</div>

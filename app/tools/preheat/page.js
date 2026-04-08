@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── CE FORMULAS ────────────────────────────────────────
 function ceIIW(c) { return c.C + c.Mn/6 + (c.Cr+c.Mo+c.V)/5 + (c.Ni+c.Cu)/15; }
@@ -419,7 +420,24 @@ export default function PreheatCalc() {
               </div>
             )}
 
-            {/* References */}
+            
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Standart Seç", desc: "EN 1011-2 veya AWS D1.1 standardını seç." },
+              { icon: "②", color: "#f59e0b", title: "Kimyasal Bileşimi Gir", desc: "C, Si, Mn, Ni, Cr, Mo, V, Cu, Nb, B değerlerini gir." },
+              { icon: "③", color: "#8b5cf6", title: "Kaynak Parametrelerini Belirle", desc: "Et kalınlığı, ısı girdisi (kJ/mm) ve hidrojen seviyesini ayarla." },
+              { icon: "④", color: "#10b981", title: "Sonuçları Değerlendir", desc: "Minimum ön ısıtma sıcaklığı, CE değerleri ve PWHT gerekliliği hesaplanır." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Standard", desc: "Choose between EN 1011-2 or AWS D1.1 standard." },
+              { icon: "②", color: "#f59e0b", title: "Enter Chemical Composition", desc: "Input C, Si, Mn, Ni, Cr, Mo, V, Cu, Nb, B values." },
+              { icon: "③", color: "#8b5cf6", title: "Set Welding Parameters", desc: "Set wall thickness, heat input (kJ/mm) and hydrogen level." },
+              { icon: "④", color: "#10b981", title: "Evaluate Results", desc: "Minimum preheat temperature, CE values and PWHT requirement are computed." }]
+            }
+            formulas={[{ label: "EN 1011-2 Annex C/D", color: "#60a5fa" }, { label: "AWS D1.1 Table 3.2", color: "#34d399" }, { label: "Tp = f(CET, t, HD, Q)", color: "#a78bfa" }]}
+          />
+
+          {/* References */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
               <div className="text-[10px] text-dark-300 font-bold uppercase mb-1">{t.references}</div>
               <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">

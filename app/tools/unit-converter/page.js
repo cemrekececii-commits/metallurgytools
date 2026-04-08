@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 const CATEGORIES = {
   stress: { nameKey: "catStress", icon: "💪", units: { mpa: { label: "Megapascal (MPa)", factor: 1 }, ksi: { label: "ksi (kip/in²)", factor: 6.89476 }, nmm2: { label: "N/mm²", factor: 1 }, kgfmm2: { label: "kgf/mm²", factor: 9.80665 }, gpa: { label: "Gigapascal (GPa)", factor: 1000 } }, base: "mpa" },
@@ -110,7 +111,22 @@ export default function UnitConverter() {
           </div>
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-xl p-6 text-center">
+        
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Kategori Seç", desc: "Gerilme/Mukavemet, Enerji, Sıcaklık, Uzunluk veya Kuvvet kategorisinden birini seç." },
+              { icon: "②", color: "#f59e0b", title: "Kaynak Birimini Seç", desc: "Dönüştürmek istediğin birimi seç (MPa, ksi, J, ft·lb, °C, °F vb.)." },
+              { icon: "③", color: "#10b981", title: "Değer Gir ve Sonuçları Oku", desc: "Sayısal değeri gir — tüm birimlere anlık dönüşüm tablosu otomatik güncellenir." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Category", desc: "Choose from Stress/Strength, Energy, Temperature, Length or Force category." },
+              { icon: "②", color: "#f59e0b", title: "Select Source Unit", desc: "Pick the unit to convert from (MPa, ksi, J, ft·lb, °C, °F etc.)." },
+              { icon: "③", color: "#10b981", title: "Enter Value and Read Results", desc: "Input value — instant conversion table to all units updates automatically." }]
+            }
+            formulas={[{ label: "1 MPa = 0.145 ksi", color: "#60a5fa" }, { label: "1 J = 0.738 ft·lb", color: "#34d399" }, { label: "°F = °C × 9/5 + 32", color: "#a78bfa" }]}
+          />
+
+<div className="mt-8 bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-xl p-6 text-center">
           <h3 className="text-lg font-semibold mb-2">{t.wantMore}</h3>
           <p className="text-dark-300 text-sm mb-4">{t.wantMoreDesc}</p>
           <Link href="/pricing" className="inline-block bg-gradient-to-r from-gold-400 to-gold-500 text-dark-800 rounded-lg px-6 py-2.5 text-sm font-semibold no-underline hover:shadow-lg hover:shadow-gold-400/20 transition-all">{t.viewPlans}</Link>

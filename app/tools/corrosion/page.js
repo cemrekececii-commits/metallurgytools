@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── Calculations ───────────────────────────────────────
 function calcTmin(P, D, S, E, W, Y) {
@@ -358,7 +359,24 @@ export default function CorrosionCalculator() {
       </div>
 
       {/* Help Modal */}
-      {showHelp && (
+      
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Boru/Ekipman Bilgilerini Gir", desc: "Dış çap, orijinal et kalınlığı, mevcut et kalınlığı, önceki ölçüm kalınlığı ve servis yılını gir." },
+              { icon: "②", color: "#f59e0b", title: "Çalışma Koşullarını Belirle", desc: "Tasarım basıncı, tasarım sıcaklığı, malzeme SMYS ve kaynak faktörünü gir." },
+              { icon: "③", color: "#8b5cf6", title: "Korozyon Parametrelerini Ayarla", desc: "Korozyon payı (CA) ve muayene aralığını belirle." },
+              { icon: "④", color: "#10b981", title: "Sonuçları Değerlendir", desc: "LTCR, STCR korozyon hızları, kalan ömür, minimum et kalınlığı ve sonraki muayene tarihi hesaplanır." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Enter Pipe/Equipment Data", desc: "Input OD, original thickness, current thickness, previous thickness and service years." },
+              { icon: "②", color: "#f59e0b", title: "Set Operating Conditions", desc: "Enter design pressure, temperature, material SMYS and weld joint factor." },
+              { icon: "③", color: "#8b5cf6", title: "Adjust Corrosion Parameters", desc: "Set corrosion allowance (CA) and inspection interval." },
+              { icon: "④", color: "#10b981", title: "Evaluate Results", desc: "LTCR, STCR corrosion rates, remaining life, minimum thickness and next inspection date are computed." }]
+            }
+            formulas={[{ label: "LTCR = (t_orig − t_curr) / Years", color: "#60a5fa" }, { label: "RL = (t_curr − t_min) / CR", color: "#34d399" }, { label: "t_min = PD / (2(SE+PY))", color: "#a78bfa" }]}
+          />
+
+{showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowHelp(false)}>
           <div className="bg-dark-800 border border-white/10 rounded-xl p-6 max-w-2xl mx-4 max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">

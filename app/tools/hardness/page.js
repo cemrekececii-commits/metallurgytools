@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 import { convertHardness, convertMpaToPsi } from "@/lib/hardnessData";
 
 const SCALES = [
@@ -335,7 +336,22 @@ export default function HardnessConverter() {
           </div>
         </div>
 
-        {/* References */}
+        
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Sertlik Skalası Seç", desc: "Kaynak skalayı seç: HRC, HV, HB (Brinell), HRB veya çekme mukavemeti (MPa)." },
+              { icon: "②", color: "#f59e0b", title: "Değeri Gir", desc: "Bilinen sertlik veya mukavemet değerini sayısal olarak gir." },
+              { icon: "③", color: "#10b981", title: "Sonuçları Oku", desc: "Tüm skalalara (HRC, HV, HB, HRB, MPa, ksi) otomatik dönüşüm tablosu görüntülenir." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Hardness Scale", desc: "Choose source scale: HRC, HV, HB (Brinell), HRB or tensile strength (MPa)." },
+              { icon: "②", color: "#f59e0b", title: "Enter Value", desc: "Input the known hardness or strength value numerically." },
+              { icon: "③", color: "#10b981", title: "Read Results", desc: "Automatic conversion table to all scales (HRC, HV, HB, HRB, MPa, ksi) is displayed." }]
+            }
+            formulas={[{ label: "ASTM E140 Conversion Tables", color: "#60a5fa" }, { label: "ISO 18265 Cross-Reference", color: "#34d399" }]}
+          />
+
+          {/* References */}
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 mb-6">
           <h3 className="text-sm font-semibold text-dark-100 mb-2">{t.refTitle}</h3>
           <p className="text-dark-300 text-xs mb-3">{t.refDesc}</p>

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── SVG MİKROYAPI GÖRSELLERİ ────────────────────────────────────────────────
 
@@ -890,6 +891,23 @@ export default function InclusionAtlasPage() {
             ASTM E2142 (EDS Characterization of inclusions)
           </p>
         </div>
+
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "İnklüzyon Tipini Seç", desc: "MnS, Al₂O₃, TiN, kalsiyum alüminat, silikat, Nb(C,N) veya spinel kategorisinden birini seç." },
+              { icon: "②", color: "#f59e0b", title: "Morfoloji ve EDS Bilgisini İncele", desc: "Seçilen inklüzyon tipinin optik/SEM görüntüleri, tipik EDS spektrumu ve bileşimi incelenir." },
+              { icon: "③", color: "#8b5cf6", title: "Proses Kaynağını Oku", desc: "İnklüzyonun oluşum mekanizması ve hangi proses aşamasından kaynaklandığı açıklanır." },
+              { icon: "④", color: "#10b981", title: "Metalürjik Etkisini Değerlendir", desc: "Mekanik özelliklere ve yüzey kalitesine etkisi, kontrol stratejileri özetlenir." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Inclusion Type", desc: "Choose from MnS, Al₂O₃, TiN, calcium aluminate, silicate, Nb(C,N) or spinel category." },
+              { icon: "②", color: "#f59e0b", title: "Review Morphology and EDS Data", desc: "Optical/SEM images, typical EDS spectrum and composition of the selected inclusion are shown." },
+              { icon: "③", color: "#8b5cf6", title: "Read Process Source", desc: "Formation mechanism and originating process stage of the inclusion are explained." },
+              { icon: "④", color: "#10b981", title: "Assess Metallurgical Impact", desc: "Effect on mechanical properties and surface quality, control strategies are summarized." }]
+            }
+            formulas={[{ label: "ASTM E45 — JK Rating", color: "#60a5fa" }, { label: "ISO 4967 Classification", color: "#34d399" }]}
+          />
+
 
       </div>
     </div>

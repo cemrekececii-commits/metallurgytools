@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── DBTT CORRELATIONS ──────────────────────────────────
 // Pickering-Gladman (1963): DBTT = f(composition, grain size)
@@ -422,7 +423,24 @@ export default function DBTTEngine() {
               </div>
             </div>
 
-            {/* References */}
+            
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Çelik Kalitesi Seç veya Manuel Gir", desc: "Hazır kalitelerden seç (S355J2, X65, S700MC vb.) veya kimyasal bileşimi manuel olarak gir." },
+              { icon: "②", color: "#f59e0b", title: "Darbe Testi Parametrelerini Belirle", desc: "Charpy numune boyutu (tam boy / alt boy) ve test sıcaklığını seç." },
+              { icon: "③", color: "#8b5cf6", title: "Hesapla", desc: "Pickering-Gladman ve Mintz korelasyonlarına dayalı DBTT tahmini hesaplanır." },
+              { icon: "④", color: "#10b981", title: "Uygunluk Kontrolü", desc: "Standart bazlı minimum enerji gereksinimleri ile karşılaştırmalı PASS/FAIL değerlendirmesi yapılır." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Steel Grade or Enter Manually", desc: "Choose from presets (S355J2, X65, S700MC etc.) or enter chemical composition manually." },
+              { icon: "②", color: "#f59e0b", title: "Set Impact Test Parameters", desc: "Select Charpy specimen size (full/sub) and test temperature." },
+              { icon: "③", color: "#8b5cf6", title: "Calculate", desc: "DBTT prediction based on Pickering-Gladman and Mintz correlations is computed." },
+              { icon: "④", color: "#10b981", title: "Compliance Check", desc: "PASS/FAIL assessment against standard-based minimum energy requirements is displayed." }]
+            }
+            formulas={[{ label: "DBTT = f(C, Mn, Si, Grain Size)", color: "#60a5fa" }, { label: "KV = f(T, DBTT, USE)", color: "#34d399" }]}
+          />
+
+          {/* References */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
               <div className="text-[10px] text-dark-300 font-bold uppercase mb-1">{t.references}</div>
               <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">

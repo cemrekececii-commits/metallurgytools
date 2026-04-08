@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 
 // ─── ACCEPTANCE CRITERIA ────────────────────────────────────
 const ACCEPTANCE_CRITERIA = {
@@ -430,7 +431,24 @@ export default function InclusionClassification() {
               })}
             </div>
 
-            {/* References */}
+            
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Kimyasal Analizi Gir", desc: "Çeliğin C, Si, Mn, Al, Ca, S, O, N, Ti bileşimini ağırlık yüzdesi olarak gir." },
+              { icon: "②", color: "#f59e0b", title: "Proses Parametrelerini Belirle", desc: "Deoksidasyon tipi (Al-killed, Si-killed vb.) ve kalsiyum işlemi durumunu seç." },
+              { icon: "③", color: "#8b5cf6", title: "Analiz Et", desc: "Beklenen inklüzyon tipi, morfoloji, bileşim ve proses kaynağı tahmin edilir." },
+              { icon: "④", color: "#10b981", title: "Metalürjik Değerlendirme", desc: "ASTM E45 sınıflandırması ve inklüzyon kontrol önerileri sunulur." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Enter Chemical Analysis", desc: "Input steel composition: C, Si, Mn, Al, Ca, S, O, N, Ti in weight percent." },
+              { icon: "②", color: "#f59e0b", title: "Set Process Parameters", desc: "Select deoxidation type (Al-killed, Si-killed etc.) and calcium treatment status." },
+              { icon: "③", color: "#8b5cf6", title: "Analyze", desc: "Expected inclusion type, morphology, composition and process source are predicted." },
+              { icon: "④", color: "#10b981", title: "Metallurgical Assessment", desc: "ASTM E45 classification and inclusion control recommendations are provided." }]
+            }
+            formulas={[{ label: "ASTM E45 — Inclusion Rating", color: "#60a5fa" }, { label: "Ca/S Ratio → Inclusion Morphology", color: "#34d399" }, { label: "Al₂O₃ → CaO·Al₂O₃ Modification", color: "#a78bfa" }]}
+          />
+
+          {/* References */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3">
               <div className="text-[10px] text-dark-300 font-bold uppercase mb-1">{t.references}</div>
               <div className="text-[11px] text-dark-300 space-y-0.5 font-mono">

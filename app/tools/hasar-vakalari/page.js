@@ -5,6 +5,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { CASES, CATEGORIES } from "@/components/hasar/CaseData";
 import { useLang } from "@/lib/LanguageContext";
+import ToolBriefing from "@/components/ToolBriefing";
 import { useTheme } from "@/lib/ThemeContext";
 
 // ── translations ──────────────────────────────────────────────
@@ -289,6 +290,23 @@ export default function HasarVakalariPage() {
               </section>
             )}
           </>
+
+          {/* How-to Briefing */}
+          <ToolBriefing
+            title={lang === "tr" ? "Nasıl Kullanılır?" : "How to Use"}
+            steps={lang === "tr"
+              ? [{ icon: "①", color: "#3b82f6", title: "Hasar Vakası Seç", desc: "Listeden incelemek istediğin hasar analizi vakasını seç." },
+              { icon: "②", color: "#f59e0b", title: "Makro ve Mikro Bulguları İncele", desc: "Makroskopik görünüm, metalografik kesitler ve SEM görüntülerini incele." },
+              { icon: "③", color: "#8b5cf6", title: "Kök Neden Analizini Oku", desc: "Hasarın metalürjik kök nedeni, kırılma mekanizması ve proses ilişkisi açıklanır." },
+              { icon: "④", color: "#10b981", title: "Önlemleri Değerlendir", desc: "Tekrarlanmaması için önerilen proses ve kalite kontrol düzeltici faaliyetler listelenir." }]
+              : [{ icon: "①", color: "#3b82f6", title: "Select Failure Case", desc: "Choose the failure analysis case you want to review from the list." },
+              { icon: "②", color: "#f59e0b", title: "Review Macro and Micro Findings", desc: "Examine macroscopic appearance, metallographic sections and SEM images." },
+              { icon: "③", color: "#8b5cf6", title: "Read Root Cause Analysis", desc: "Metallurgical root cause, fracture mechanism and process relationship are explained." },
+              { icon: "④", color: "#10b981", title: "Evaluate Corrective Actions", desc: "Recommended process and quality control corrective actions to prevent recurrence are listed." }]
+            }
+            formulas={[]}
+          />
+
         )}
       </div>
     </div>
