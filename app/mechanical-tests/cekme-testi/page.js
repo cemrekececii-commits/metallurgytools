@@ -162,6 +162,15 @@ export default function TensileTestPage() {
           <div style={s.videoBox}>
             <video controls preload="metadata" style={{ width: "100%", display: "block", maxHeight: "520px", backgroundColor: "#000" }}>
               <source src="/cekme-testi.mp4" type="video/mp4" />
+              <div style={{ padding: "32px", textAlign: "center", color: "#9ca3af", fontSize: "14px", lineHeight: "1.7" }}>
+                <div style={{ fontSize: "32px", marginBottom: "12px" }}>🎬</div>
+                <p>Tarayıcınız videoyu oynatamıyor veya ağ bağlantınız video içeriğini engelliyor.</p>
+                <p style={{ marginTop: "8px" }}>
+                  <a href="/cekme-testi.mp4" download style={{ color: "#60a5fa", textDecoration: "underline" }}>
+                    Videoyu İndir →
+                  </a>
+                </p>
+              </div>
             </video>
           </div>
         </section>

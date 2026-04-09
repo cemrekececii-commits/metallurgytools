@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useLang } from "@/lib/LanguageContext";
 
 const TR = {
@@ -79,10 +80,11 @@ export default function Footer() {
 
       {/* Görsel Şerit / Photo Strip */}
       <div className="relative h-52 overflow-hidden">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&auto=format&fit=crop&q=80"
           alt={lang === "tr" ? "Entegre demir-çelik tesisi" : "Integrated steel plant"}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           style={{ opacity: 0.35 }}
         />
         {/* Overlay gradients */}

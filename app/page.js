@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useLang } from "@/lib/LanguageContext";
 
@@ -68,12 +69,14 @@ export default function HomePage() {
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20">
         {/* Hero background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&auto=format&fit=crop&q=80"
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             style={{ opacity: 0.08 }}
+            priority
           />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(3,7,18,0.7) 0%,rgba(3,7,18,0.3) 40%,rgba(3,7,18,0.9) 100%)" }} />
         </div>
@@ -94,7 +97,7 @@ export default function HomePage() {
               <>
                 Metalurji Mühendisinin{" "}
                 <span className="bg-gradient-to-r from-gold-400 via-gold-200 to-gold-500 bg-clip-text text-transparent">
-                  Dijital Alet Cantasi
+                  Dijital Alet Çantası
                 </span>
               </>
             ) : (
@@ -298,11 +301,12 @@ export default function HomePage() {
 
               {/* Tool image panel */}
               <div className="hidden md:block w-52 relative overflow-hidden shrink-0">
-                <img
+                <Image
                   src={TOOL_IMAGES[activeTool.id] || "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&auto=format&fit=crop&q=80"}
                   alt=""
                   aria-hidden="true"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                   style={{ opacity: 0.45 }}
                 />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(90deg,rgba(10,10,15,0.85) 0%,rgba(10,10,15,0.2) 60%,rgba(10,10,15,0.5) 100%)" }} />
