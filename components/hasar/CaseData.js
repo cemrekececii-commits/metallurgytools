@@ -7,7 +7,7 @@
 export const CATEGORIES = {
   wire: {
     id: "wire",
-    tr: "Uzun Mamul Kusurlari",
+    tr: "Uzun Mamul Kusurları",
     en: "Wire Rod Defects",
     color: "#2563eb",
     bg: "#1e3a6e",
@@ -15,7 +15,7 @@ export const CATEGORIES = {
   },
   flat: {
     id: "flat",
-    tr: "Yassi Mamul Kusurlari",
+    tr: "Yassı Mamul Kusurları",
     en: "Flat Product Defects",
     color: "#dc2626",
     bg: "#5c1a1a",

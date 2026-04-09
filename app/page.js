@@ -110,7 +110,7 @@ export default function HomePage() {
           {/* Subtitle */}
           <p className="text-base md:text-lg text-dark-200 max-w-3xl mx-auto mb-10 leading-relaxed">
             {lang === "tr"
-              ? "Hesaplama araclari, bilgi bankasi ve uzman danismanlik — hepsi tek platformda. Entegre demir-celik tesisinde 20 yili askin saha deneyimi ve 350.000+ mekanik test verisiyle gelistirilmistir."
+              ? "Hesaplama araçları, bilgi bankası ve uzman danışmanlık — hepsi tek platformda. Entegre demir-çelik tesisinde 20 yılı aşkın saha deneyimi ve 350.000+ mekanik test verisiyle geliştirilmiştir."
               : "Computation tools, knowledge base, and expert consultation — all in one platform. Built on 20+ years of integrated steel plant experience and 350,000+ mechanical test data points."}
           </p>
 
@@ -120,11 +120,11 @@ export default function HomePage() {
             <a href="#tools" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)" }}>
               <div className="text-2xl mb-2">🔧</div>
               <h3 className="text-sm font-bold text-gold-400 mb-1">
-                {lang === "tr" ? "Araclari Kullan" : "Use the Tools"}
+                {lang === "tr" ? "Araçları Kullan" : "Use the Tools"}
               </h3>
               <p className="text-xs text-dark-300 leading-relaxed">
                 {lang === "tr"
-                  ? "Tane boyutu, sertlik, CCT/TTT, karbon esdegeri, SEM-EDS ve daha fazlasi — uluslararasi standartlara uygun."
+                  ? "Tane boyutu, sertlik, CCT/TTT, karbon eşdeğeri, SEM-EDS ve daha fazlası — uluslararası standartlara uygun."
                   : "Grain size, hardness, CCT/TTT, carbon equivalent, SEM-EDS and more — standards-compliant."}
               </p>
             </a>
@@ -133,11 +133,11 @@ export default function HomePage() {
             <Link href="/knowledge" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
               <div className="text-2xl mb-2">📚</div>
               <h3 className="text-sm font-bold mb-1" style={{ color: "#93c5fd" }}>
-                {lang === "tr" ? "Bilgi Bankasi" : "Knowledge Base"}
+                {lang === "tr" ? "Bilgi Bankası" : "Knowledge Base"}
               </h3>
               <p className="text-xs text-dark-300 leading-relaxed">
                 {lang === "tr"
-                  ? "Fe-C faz diyagrami, celik mikroyapilari, mekanik test rehberi, korozyon mekanizmalari ve daha fazlasi."
+                  ? "Fe-C faz diyagramı, çelik mikroyapıları, mekanik test rehberi, korozyon mekanizmaları ve daha fazlası."
                   : "Fe-C phase diagram, steel microstructures, mechanical testing guide, corrosion mechanisms and more."}
               </p>
             </Link>
@@ -146,11 +146,11 @@ export default function HomePage() {
             <Link href="/consultation" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)" }}>
               <div className="text-2xl mb-2">👨‍🔬</div>
               <h3 className="text-sm font-bold mb-1" style={{ color: "#6ee7b7" }}>
-                {lang === "tr" ? "Uzman Danismanligi" : "Expert Consultation"}
+                {lang === "tr" ? "Uzman Danışmanlığı" : "Expert Consultation"}
               </h3>
               <p className="text-xs text-dark-300 leading-relaxed">
                 {lang === "tr"
-                  ? "Metalurjik sorunlariniza cozum arayin — hasar analizi, proses optimizasyonu, kalite problemleri."
+                  ? "Metalurjik sorunlarınıza çözüm arayın — hasar analizi, proses optimizasyonu, kalite problemleri."
                   : "Seek solutions to metallurgical problems — failure analysis, process optimization, quality issues."}
               </p>
             </Link>
@@ -167,13 +167,13 @@ export default function HomePage() {
           </div>
           <div className="flex gap-3 justify-center flex-wrap">
             <a href="#tools" className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 rounded-lg px-8 py-3 text-sm font-semibold no-underline hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold-400/25 transition-all">
-              {lang === "tr" ? "Araclari Kesfet →" : "Explore Tools →"}
+              {lang === "tr" ? "Araçları Keşfet →" : "Explore Tools →"}
             </a>
             <Link href="/mechanical-tests" className="rounded-lg px-8 py-3 text-sm font-medium hover:border-gold-400/50 transition-colors no-underline text-dark-50" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
               {lang === "tr" ? "Mekanik Test Rehberi" : "Mechanical Test Guide"}
             </Link>
             <Link href="/knowledge" className="rounded-lg px-8 py-3 text-sm font-medium hover:border-blue-400/50 transition-colors no-underline" style={{ border: "1px solid rgba(59,130,246,0.2)", color: "#93c5fd" }}>
-              {lang === "tr" ? "Bilgi Bankasi" : "Knowledge Base"}
+              {lang === "tr" ? "Bilgi Bankası" : "Knowledge Base"}
             </Link>
           </div>
         </div>
@@ -228,16 +228,16 @@ export default function HomePage() {
               <div className="flex-shrink-0 text-5xl">🩺</div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-xl font-bold mb-2 text-white">
-                  {lang === "tr" ? "Metalurjik Sorununuza Uzman Cozum" : "Expert Solutions for Your Metallurgical Problems"}
+                  {lang === "tr" ? "Metalurjik Sorununuza Uzman Çözüm" : "Expert Solutions for Your Metallurgical Problems"}
                 </h3>
                 <p className="text-sm text-dark-200 leading-relaxed max-w-xl">
                   {lang === "tr"
-                    ? "Hasar analizi, kirilma mekanigi, proses optimizasyonu, inkluzyon karakterizasyonu veya kalite problemi — deneyimli metalurji muhendislerimiz sizin icin burada."
+                    ? "Hasar analizi, kırılma mekaniği, proses optimizasyonu, inklüzyon karakterizasyonu veya kalite problemi — deneyimli metalurji mühendislerimiz sizin için burada."
                     : "Failure analysis, fracture mechanics, process optimization, inclusion characterization or quality problems — our experienced metallurgical engineers are here for you."}
                 </p>
               </div>
               <Link href="/consultation" className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl px-8 py-3.5 text-sm font-bold no-underline hover:-translate-y-0.5 transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 whitespace-nowrap">
-                {lang === "tr" ? "Danismanlik Talep Et →" : "Request Consultation →"}
+                {lang === "tr" ? "Danışmanlık Talep Et →" : "Request Consultation →"}
               </Link>
             </div>
           </div>
