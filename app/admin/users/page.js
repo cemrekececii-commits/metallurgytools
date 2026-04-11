@@ -4,14 +4,14 @@ import { ADMIN_KEY, TOOL_LABELS, STARTER_LIMIT } from "@/lib/planUtils";
 
 const S = {
   page:   { background: "#0a0a0a", minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" },
-  header: { background: "#111827", borderBottom: "1px solid #1e293b", padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" },
+  header: { background: "#0d1117", borderBottom: "1px solid #1e293b", padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" },
   table:  { width: "100%", borderCollapse: "collapse" },
   th:     { background: "#0f172a", color: "#64748b", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", padding: "10px 14px", textAlign: "left", borderBottom: "1px solid #1e293b" },
   td:     { padding: "12px 14px", borderBottom: "1px solid #0f172a", fontSize: 13, color: "#e2e8f0", verticalAlign: "top" },
   badge:  (plan) => ({ background: plan === "professional" ? "#052e16" : "#1e1b4b", color: plan === "professional" ? "#4ade80" : "#818cf8", borderRadius: 6, padding: "2px 10px", fontSize: 11, fontWeight: 700 }),
   btn:    (c) => ({ padding: "6px 14px", background: c || "#2563eb", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }),
   modal:  { position: "fixed", inset: 0, background: "#000000cc", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 },
-  modalBox: { background: "#111827", border: "1px solid #1e293b", borderRadius: 12, padding: "28px 32px", width: 420 },
+  modalBox: { background: "#0d1117", border: "1px solid #1e293b", borderRadius: 12, padding: "28px 32px", width: 420 },
   input:  { width: "100%", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 7, padding: "8px 12px", color: "#e2e8f0", fontSize: 13, outline: "none", boxSizing: "border-box" },
   select: { width: "100%", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 7, padding: "8px 12px", color: "#e2e8f0", fontSize: 13, outline: "none", boxSizing: "border-box" },
   label:  { color: "#64748b", fontSize: 12, fontWeight: 600, marginBottom: 5, display: "block" },
@@ -93,8 +93,6 @@ function EditModal({ user, onClose, onSave }) {
 }
 
 export default function AdminUsers() {
-  const [auth, setAuth]     = useState(false);
-  const [keyInput, setKey]  = useState("");
   const [users, setUsers]   = useState([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -109,30 +107,17 @@ export default function AdminUsers() {
     setLoading(false);
   };
 
-  const login = () => { if (keyInput === ADMIN_KEY) { setAuth(true); load(); } };
+  useEffect(() => { load(); }, []);
 
   const filtered = users
     .filter(u => filterPlan === "all" || u.plan === filterPlan)
-    .filter(u => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
+    .filter(u => !search || u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
 
   const stats = {
     total: users.length,
     pro:   users.filter(u => u.plan === "professional").length,
     starter: users.filter(u => u.plan === "starter").length,
   };
-
-  if (!auth) {
-    return (
-      <div style={{ ...S.page, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 12, padding: 40, width: 340, textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 16 }}>🔐</div>
-          <h2 style={{ color: "#f1f5f9", fontWeight: 700, marginBottom: 20 }}>Admin Girişi</h2>
-          <input type="password" placeholder="Erişim anahtarı" value={keyInput} onChange={e => setKey(e.target.value)} onKeyDown={e => e.key === "Enter" && login()} style={{ ...S.input, marginBottom: 12 }} />
-          <button onClick={login} style={{ ...S.btn(), width: "100%" }}>Giriş</button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={S.page}>
@@ -141,16 +126,27 @@ export default function AdminUsers() {
       <div style={S.header}>
         <h1 style={{ color: "#f1f5f9", fontWeight: 800, fontSize: 18, margin: 0 }}>👥 Kullanıcı Yönetimi</h1>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <span style={{ color: "#64748b", fontSize: 13 }}>Toplam: <strong style={{ color: "#e2e8f0" }}>{stats.total}</strong> &nbsp;|&nbsp; Pro: <strong style={{ color: "#4ade80" }}>{stats.pro}</strong> &nbsp;|&nbsp; Starter: <strong style={{ color: "#818cf8" }}>{stats.starter}</strong></span>
+          <span style={{ color: "#64748b", fontSize: 13 }}>
+            Toplam: <strong style={{ color: "#e2e8f0" }}>{stats.total}</strong>
+            &nbsp;|&nbsp;
+            Pro: <strong style={{ color: "#4ade80" }}>{stats.pro}</strong>
+            &nbsp;|&nbsp;
+            Starter: <strong style={{ color: "#818cf8" }}>{stats.starter}</strong>
+          </span>
           <button onClick={load} style={S.btn("#1e293b")}>Yenile</button>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ padding: "16px 28px", display: "flex", gap: 12, alignItems: "center", borderBottom: "1px solid #1e293b" }}>
-        <input placeholder="İsim veya e-posta ara..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...S.input, maxWidth: 280 }} />
+      <div style={{ padding: "14px 28px", display: "flex", gap: 12, alignItems: "center", borderBottom: "1px solid #1e293b" }}>
+        <input
+          placeholder="İsim veya e-posta ara..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ background: "#0d1117", border: "1px solid #1e293b", borderRadius: 7, padding: "7px 12px", color: "#e2e8f0", fontSize: 13, outline: "none", maxWidth: 280 }}
+        />
         {["all", "professional", "starter"].map(p => (
-          <button key={p} onClick={() => setFilter(p)} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #1e293b", background: filterPlan === p ? "#2563eb" : "#111827", color: filterPlan === p ? "#fff" : "#94a3b8", fontSize: 12, cursor: "pointer" }}>
+          <button key={p} onClick={() => setFilter(p)} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #1e293b", background: filterPlan === p ? "#2563eb" : "#0d1117", color: filterPlan === p ? "#fff" : "#94a3b8", fontSize: 12, cursor: "pointer" }}>
             {p === "all" ? "Tümü" : p === "professional" ? "Professional" : "Starter"}
           </button>
         ))}
@@ -171,7 +167,10 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {filtered.map(u => (
-                <tr key={u.userId} style={{ background: "#0a0a0a" }} onMouseEnter={e => e.currentTarget.style.background = "#0f172a"} onMouseLeave={e => e.currentTarget.style.background = "#0a0a0a"}>
+                <tr key={u.userId} style={{ background: "#0a0a0a" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#0f172a"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#0a0a0a"}
+                >
                   <td style={S.td}>
                     <div style={{ fontWeight: 600, color: "#e2e8f0" }}>{u.name || "—"}</div>
                     <div style={{ color: "#64748b", fontSize: 12 }}>{u.email}</div>
