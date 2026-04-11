@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const ADMIN_KEY = "metallurgy2026";
 const SESSION_KEY = "mt_admin_authed";
 
-export const AdminAuthContext = createContext({ authed: false });
+const AdminAuthContext = createContext({ authed: false });
 
 const NAV_ITEMS = [
   { href: "/admin",               icon: "📊", label: "Dashboard"       },
