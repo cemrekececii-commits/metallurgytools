@@ -84,18 +84,15 @@ export default function AScanDisplay({
       {Array.from({ length: 11 }).map((_, i) => (
         <line key={`v-${i}`} x1={i * 100} y1={0} x2={i * 100} y2={100} stroke="#1a331a" strokeWidth={i % 5 === 0 ? 2 : 1} />
       ))}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <line key={`h-${i}`} x1={0} y1={i * 25} x2={1000} y2={i * 25} stroke="#1a331a" strokeWidth={i % 2 === 0 ? 2 : 1} />
+      {Array.from({ length: 6 }).map((_, i) => (
+        <line key={`h-${i}`} x1={0} y1={i * 20} x2={1000} y2={i * 20} stroke="#1a331a" strokeWidth={i === 0 || i === 5 ? 2 : 1} />
       ))}
 
       {/* Gate */}
       <line x1={gateX} y1={gateY} x2={gateX + gateW} y2={gateY} stroke="#ef4444" strokeWidth={2} />
       <rect x={gateX} y={gateY} width={gateW} height={100 - gateY} fill="rgba(239,68,68,0.1)" />
 
-      {/* Signal fill */}
-      <path d={`${pathD} L ${maxX},100 L 0,100 Z`} fill="rgba(74,222,128,0.1)" />
-
-      {/* Signal line */}
+      {/* Signal */}
       <path
         d={pathD}
         fill="none"
@@ -104,6 +101,9 @@ export default function AScanDisplay({
         vectorEffect="non-scaling-stroke"
         style={{ filter: "drop-shadow(0 0 2px #4ade80)" }}
       />
+
+      {/* Fill under signal */}
+      <path d={`${pathD} L ${maxX},100 L 0,100 Z`} fill="rgba(74,222,128,0.1)" />
 
       {/* Highlighted Echo */}
       {hoveredFlawId &&
@@ -116,17 +116,17 @@ export default function AScanDisplay({
             return (
               <path
                 key={`hl-${i}`}
+                className="animate-echo-glow"
                 d={`M ${x - w},100 L ${x},${y} L ${x + w},100`}
                 fill="rgba(254,240,138,0.4)"
                 stroke="#fef08a"
                 strokeWidth={3}
                 vectorEffect="non-scaling-stroke"
-                style={{ filter: "drop-shadow(0 0 4px #fef08a)" }}
               />
             );
           })}
 
-      {/* Hit areas for hovering */}
+      {/* Invisible hit areas for hovering echoes */}
       {onHoverFlaw &&
         sortedEchoes
           .filter((e) => e.sourceId && typeof e.sourceId === "number")

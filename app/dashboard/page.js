@@ -76,10 +76,27 @@ export default function DashboardPage() {
           <div style={{ background: "linear-gradient(135deg,#1e3a6e,#1e293b)", border: "1px solid #2563eb44", borderRadius: 12, padding: "20px 24px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
             <div>
               <div style={{ color: "#60a5fa", fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Professional Plana Geç</div>
-              <div style={{ color: "#94a3b8", fontSize: 13 }}>Tüm araçlara sınırsız erişim · Aylık 1 ücretsiz danışmanlık · ₺415/ay</div>
+              <div style={{ color: "#94a3b8", fontSize: 13 }}>Tüm araçlara sınırsız erişim · Aylık 1 ücretsiz danışmanlık · ₺415/ay · Shopier güvenli ödeme</div>
             </div>
             <Link href="/pricing" style={{ background: "linear-gradient(135deg,#1d4ed8,#2563eb)", color: "#fff", borderRadius: 8, padding: "10px 22px", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               Yükselt →
+            </Link>
+          </div>
+        )}
+
+        {/* ── PRO SUBSCRIPTION INFO ── */}
+        {isPro && (
+          <div style={{ background: "#052e16", border: "1px solid #166534", borderRadius: 12, padding: "16px 24px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <div style={{ color: "#4ade80", fontWeight: 700, fontSize: 14, marginBottom: 3 }}>✓ Professional Plan Aktif</div>
+              <div style={{ color: "#6ee7b7", fontSize: 13 }}>
+                {planExpires
+                  ? `Bitiş tarihi: ${new Date(planExpires).toLocaleDateString("tr-TR")} · Yenilemek için fiyatlandırma sayfasını ziyaret edin.`
+                  : "Sınırsız erişim aktif."}
+              </div>
+            </div>
+            <Link href="/pricing" style={{ background: "#166534", color: "#4ade80", borderRadius: 8, padding: "8px 18px", fontWeight: 700, fontSize: 13, textDecoration: "none", border: "1px solid #166534" }}>
+              Yenile →
             </Link>
           </div>
         )}

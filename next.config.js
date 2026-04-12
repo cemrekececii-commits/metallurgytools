@@ -9,6 +9,12 @@ const nextConfig = {
       },
     ],
   },
+  // Allow larger request bodies for image uploads (base64 JSON ~ 20 MB raw)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
+  },
   // Required for Clerk UserProfile routing in App Router
   async rewrites() {
     return [

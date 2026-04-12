@@ -17,7 +17,7 @@ export default function FormulasView({ lang }) {
     },
     {
       title: isTr ? "Ses Yolu (Sound Path - S)" : "Sound Path (S)",
-      desc: isTr ? "Sesin probdan çıkıp yansıtıcıya gidip dönmesi için geçen süreye bağlı mesafe." : "The distance the sound travels from the probe to the reflector and back.",
+      desc: isTr ? "Sesin probdan çıkıp yansıtıcıya (kusura) gidip dönmesi için geçen süreye bağlı mesafe." : "The distance the sound travels from the probe to the reflector and back.",
       formula: "S = (v × t) / 2",
       vars: [
         { sym: "v", desc: isTr ? "Malzemedeki ses hızı (m/s)" : "Sound velocity in material (m/s)" },
@@ -25,8 +25,8 @@ export default function FormulasView({ lang }) {
       ],
     },
     {
-      title: isTr ? "Yüzey Mesafesi (PA - X)" : "Surface Distance / PA (X)",
-      desc: isTr ? "Kusurun probun çıkış noktasına olan yatay uzaklığı." : "The horizontal distance from the probe exit point to the flaw.",
+      title: isTr ? "Yüzey Mesafesi (Surface Distance / PA - X)" : "Surface Distance / PA (X)",
+      desc: isTr ? "Kusurun probun çıkış noktasına olan yatay uzaklığı (İzdüşüm)." : "The horizontal distance from the probe exit point to the flaw (Projection).",
       formula: "X = S × sin(θ)",
       vars: [
         { sym: "S", desc: isTr ? "Ses yolu (mm)" : "Sound path (mm)" },
@@ -34,7 +34,7 @@ export default function FormulasView({ lang }) {
       ],
     },
     {
-      title: isTr ? "Derinlik (RA - Y)" : "Depth / RA (Y)",
+      title: isTr ? "Derinlik (Depth / RA - Y)" : "Depth / RA (Y)",
       desc: isTr ? "Kusurun yüzeyden olan dikey derinliği." : "The vertical depth of the flaw from the surface.",
       formula: "Y = S × cos(θ)",
       vars: [
@@ -43,8 +43,8 @@ export default function FormulasView({ lang }) {
       ],
     },
     {
-      title: isTr ? "Dalga Boyu (λ)" : "Wavelength (λ)",
-      desc: isTr ? "Bir tam dalganın fiziksel uzunluğu. Hata tespit edilebilirliğini belirler (λ/2)." : "The physical length of one full wave. Determines flaw detectability (λ/2).",
+      title: isTr ? "Dalga Boyu (Wavelength - λ)" : "Wavelength (λ)",
+      desc: isTr ? "Bir tam dalganın fiziksel uzunluğu. Hata tespit edilebilirliğini belirler (Genellikle λ/2)." : "The physical length of one full wave. Determines flaw detectability (Usually λ/2).",
       formula: "λ = v / f",
       vars: [
         { sym: "v", desc: isTr ? "Ses hızı (m/s)" : "Sound velocity (m/s)" },
@@ -54,7 +54,7 @@ export default function FormulasView({ lang }) {
     {
       title: isTr ? "Yakın Alan (Near Field - N)" : "Near Field (N)",
       desc: isTr ? "Ses demetinin dalgalandığı ve genliklerin düzensiz olduğu bölge uzunluğu." : "The region where the sound beam fluctuates and amplitudes are irregular.",
-      formula: "N = D² / (4 × λ)",
+      formula: "N = D² / (4 × λ)   veya   N = (D² × f) / (4 × v)",
       vars: [
         { sym: "D", desc: isTr ? "Kristal çapı (mm)" : "Transducer diameter (mm)" },
         { sym: "λ", desc: isTr ? "Dalga boyu (mm)" : "Wavelength (mm)" },
@@ -62,7 +62,7 @@ export default function FormulasView({ lang }) {
     },
     {
       title: isTr ? "Demet Yayılması (Beam Spread - γ)" : "Beam Spread (γ)",
-      desc: isTr ? "Uzak alanda ses demetinin yayılma açısı." : "The angle of beam spread in the far field.",
+      desc: isTr ? "Uzak alanda (Far Field) ses demetinin yayılma açısı." : "The angle of beam spread in the far field.",
       formula: "sin(γ) = 1.22 × (λ / D)",
       vars: [
         { sym: "γ", desc: isTr ? "Yarım yayılma açısı" : "Half beam spread angle" },
@@ -71,7 +71,7 @@ export default function FormulasView({ lang }) {
       ],
     },
     {
-      title: isTr ? "Akustik Empedans (Z)" : "Acoustic Impedance (Z)",
+      title: isTr ? "Akustik Empedans (Acoustic Impedance - Z)" : "Acoustic Impedance (Z)",
       desc: isTr ? "Malzemenin ses dalgalarının geçişine gösterdiği direnç." : "The resistance of a material to the passage of sound waves.",
       formula: "Z = ρ × v",
       vars: [
@@ -80,9 +80,9 @@ export default function FormulasView({ lang }) {
       ],
     },
     {
-      title: isTr ? "Yansıma Katsayısı (R)" : "Reflection Coefficient (R)",
+      title: isTr ? "Yansıma Katsayısı (Reflection Coefficient - R)" : "Reflection Coefficient (R)",
       desc: isTr ? "İki farklı ortam sınırında sesin ne kadarının yansıyacağını belirtir." : "Indicates how much sound will reflect at the boundary of two different mediums.",
-      formula: "R = [ (Z₂ − Z₁) / (Z₂ + Z₁) ]²",
+      formula: "R = [ (Z₂ - Z₁) / (Z₂ + Z₁) ]²",
       vars: [
         { sym: "Z₁", desc: isTr ? "1. Ortamın akustik empedansı" : "Acoustic impedance of medium 1" },
         { sym: "Z₂", desc: isTr ? "2. Ortamın akustik empedansı" : "Acoustic impedance of medium 2" },
@@ -96,14 +96,17 @@ export default function FormulasView({ lang }) {
         <h2 className="text-2xl font-bold text-white mb-6 border-b border-neutral-700 pb-2">
           {isTr ? "Ultrasonik Muayene (UT) Temel Formülleri" : "Ultrasonic Testing (UT) Basic Formulas"}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {formulas.map((item, idx) => (
             <div key={idx} className="bg-neutral-800 border border-neutral-700 rounded-lg p-5 shadow-lg">
               <h3 className="text-lg font-semibold text-blue-400 mb-2">{item.title}</h3>
               <p className="text-sm text-neutral-400 mb-4">{item.desc}</p>
+
               <div className="bg-neutral-950 rounded p-4 mb-4 flex items-center justify-center border border-neutral-800">
                 <code className="text-green-400 text-lg font-mono tracking-wider">{item.formula}</code>
               </div>
+
               <div className="space-y-1">
                 {item.vars.map((v, vIdx) => (
                   <div key={vIdx} className="flex text-sm">

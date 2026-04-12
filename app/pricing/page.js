@@ -70,15 +70,13 @@ export default function PricingPage() {
 
   const features = isTr ? FEATURES_TR : FEATURES_EN;
 
-  const handleProCheckout = async () => {
+  const handleProCheckout = () => {
     if (!isSignedIn) { window.location.href = "/signup?redirect=/pricing"; return; }
     setLoading(true);
-    try {
-      const res  = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
-    setLoading(false);
+    const shopierUrl = "https://www.shopier.com/metallurgytools/45481563";
+    const email = user?.emailAddresses?.[0]?.emailAddress || "";
+    const url = email ? `${shopierUrl}?buyer_email=${encodeURIComponent(email)}` : shopierUrl;
+    window.location.href = url;
   };
 
   const userPlan = user?.publicMetadata?.plan || "starter";
@@ -138,7 +136,7 @@ export default function PricingPage() {
               </button>
           }
           <p style={{ color: "#64748b", fontSize: 11, textAlign: "center", marginTop: 10 }}>
-            {isTr ? "Kredi kartı ile güvenli ödeme · İstediğiniz zaman iptal" : "Secure card payment · Cancel anytime"}
+            {isTr ? "Shopier ile güvenli ödeme · SSL şifreli · 30 gün erişim" : "Secure payment via Shopier · SSL encrypted · 30-day access"}
           </p>
         </div>
       </div>
@@ -152,12 +150,14 @@ export default function PricingPage() {
           ["Starter planda ne kadar süre kullanabilirim?", `Her araç için ${STARTER_LIMIT} kullanım hakkı vardır. Süre kısıtlaması yoktur.`],
           ["Professional planı iptal edebilir miyim?", "Evet, istediğiniz zaman iptal edebilirsiniz. İptal sonrasında kalan süre boyunca erişiminiz devam eder."],
           ["Danışmanlık hizmeti nedir?", "Deneyimli metalurji mühendisleriyle birebir teknik danışmanlık görüşmesidir. Professional planda ayda 1 kez ücretsizdir."],
-          ["Ödeme güvenli mi?", "Tüm ödemeler Stripe altyapısı üzerinden SSL ile şifrelenmiş şekilde işlenir."],
+          ["Ödeme güvenli mi?", "Tüm ödemeler Shopier altyapısı üzerinden SSL ile şifrelenmiş şekilde güvenli şekilde işlenir."],
+          ["Ödeme sonrası planım ne zaman aktif olur?", "Shopier'dan ödeme onayı alındıktan sonra planınız birkaç dakika içinde otomatik olarak aktifleştirilir."],
         ] : [
           ["How long can I use the Starter plan?", `Each tool has ${STARTER_LIMIT} uses. There is no time limit.`],
           ["Can I cancel the Professional plan?", "Yes, at any time. Your access continues for the remaining period after cancellation."],
           ["What is the consultation service?", "One-on-one technical consultation with experienced metallurgical engineers. Free once per month on the Professional plan."],
-          ["Is payment secure?", "All payments are processed through Stripe infrastructure with SSL encryption."],
+          ["Is payment secure?", "All payments are processed securely through the Shopier platform with SSL encryption."],
+          ["When will my plan activate?", "Your plan activates automatically within a few minutes after payment confirmation from Shopier."],
         ]).map(([q, a], i) => (
           <div key={i} style={{ background: isDark ? "#111827" : "#ffffff", border: isDark ? "1px solid #1e293b" : "1px solid #e2e8f0", borderRadius: 10, padding: "16px 20px", marginBottom: 12 }}>
             <div style={{ color: isDark ? "#e2e8f0" : "#0f172a", fontWeight: 600, fontSize: 14, marginBottom: 6 }}>{q}</div>

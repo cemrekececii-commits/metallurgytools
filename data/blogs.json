@@ -1,0 +1,65 @@
+[
+  {
+    "id": "1",
+    "slug": "s700mc-hsla-dispersoid-cokelme-kinetigi",
+    "coverImage": "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80",
+    "tags": ["S700MC", "HSLA", "Nb(C,N)", "Precipitation Hardening", "Thermomechanical Rolling"],
+    "status": "published",
+    "date": "2025-03-15T08:00:00.000Z",
+    "readingTime": 7,
+    "tr": {
+      "title": "S700MC HSLA Çeliğinde Dispersoid Çökelme Kinetiği ve Mikroyapı Kontrolü",
+      "summary": "S700MC yüksek mukavemetli düşük alaşımlı (HSLA) çeliklerde Nb(C,N) ve TiN dispersoid çökelme kinetiği, tane sınırı çökelme mekanizmaları ve termokapiler süreçte mikroyapı gelişimi üzerine kapsamlı bir analiz.",
+      "content": "# S700MC HSLA Çeliğinde Dispersoid Çökelme Kinetiği\n\n## Giriş\n\nS700MC, EN 10149-2 standardına göre minimum 700 MPa akma dayanımı sunması gereken bir termomekanik haddelenmiş (TM) HSLA çeliğidir. Mekanik özelliklerin temel kaynağı, ince dağılmış Nb(C,N), TiN ve V(C,N) çökelti fazlarından gelen precipitation hardening ile buna eşlik eden tane incelme sertleşmesidir.\n\n## Çökelme Mekanizmaları\n\n### Nb(C,N) Çökelme Kinetiği\n\nNb(C,N) çökelmesi klasik Denklem (1) ile ifade edilir:\n\n```\nlog[Nb][C + 12/14·N] = 2.26 - 6700/T\n```\n\nAustenitte Nb'nin çözünürlük sıcaklığı (~1250°C), termomekanik haddede kontrollü çökelmeye olanak tanır. Kritik sıcaklıklar:\n\n| Parametre | Değer |\n|-----------|-------|\n| Tₛ (austenite solvus) | 1240–1260°C |\n| Yeniden kristalleşmeme sıcaklığı (T_nr) | 950–980°C |\n| Ar3 | 820–850°C |\n| Koolama başlangıcı | 780–820°C |\n\n### TiN Stabilitesi\n\nTiN, yüksek ergime sıcaklığı (~2950°C) nedeniyle sıvı fazda bile kararlıdır. Döküm sırasında oluşan TiN partikülleri:\n- Austenitte tane büyümesini engeller\n- Ortalama boyutu: 1–3 μm (köşeli morfoloji)\n- EDS: Ti Kα + N Kα çakışma analizi gerektirir\n\n## Mekanik Test Sonuçları\n\n| Test | Standart | Tipik Değer |\n|------|----------|-------------|\n| Rp0.2 | EN ISO 6892-1 | ≥700 MPa |\n| Rm | EN ISO 6892-1 | 750–950 MPa |\n| A₅ | EN ISO 6892-1 | ≥12% |\n| Charpy KV (-20°C) | EN ISO 148-1 | ≥40 J |\n\n## Sonuç\n\nS700MC'de dispersoid kontrolü, mekanik özelliklerin ana belirleyicisidir. Termokapiler haddede T_nr altında uygulanan deformasyon, Nb(C,N) çökelmesini hızlandırarak tane incelme ve precipitation hardening kombinasyonunu optimize eder."
+    },
+    "en": {
+      "title": "Dispersoid Precipitation Kinetics and Microstructure Control in S700MC HSLA Steel",
+      "summary": "A comprehensive analysis of Nb(C,N) and TiN dispersoid precipitation kinetics, grain boundary precipitation mechanisms, and microstructure evolution during thermomechanical processing of S700MC HSLA steel.",
+      "content": "# Dispersoid Precipitation Kinetics in S700MC HSLA Steel\n\n## Introduction\n\nS700MC is a thermomechanically rolled (TM) HSLA steel required to deliver a minimum yield strength of 700 MPa per EN 10149-2. The primary strengthening mechanisms are precipitation hardening from finely dispersed Nb(C,N), TiN and V(C,N) precipitate phases, combined with grain-refinement strengthening.\n\n## Precipitation Mechanisms\n\n### Nb(C,N) Precipitation Kinetics\n\nNb(C,N) precipitation is expressed by the classical solubility product (Eq. 1):\n\n```\nlog[Nb][C + 12/14·N] = 2.26 - 6700/T\n```\n\nThe solvus temperature of Nb in austenite (~1250°C) allows controlled precipitation during thermomechanical rolling. Critical temperatures:\n\n| Parameter | Value |\n|-----------|-------|\n| Tₛ (austenite solvus) | 1240–1260°C |\n| Non-recrystallisation temperature (T_nr) | 950–980°C |\n| Ar3 | 820–850°C |\n| Accelerated cooling start | 780–820°C |\n\n### TiN Stability\n\nTiN is stable even in the liquid phase due to its high melting temperature (~2950°C). TiN particles formed during solidification:\n- Inhibit austenite grain growth\n- Average size: 1–3 μm (angular morphology)\n- EDS: requires Ti Kα + N Kα overlap analysis\n\n## Mechanical Test Results\n\n| Test | Standard | Typical Value |\n|------|----------|---------------|\n| Rp0.2 | EN ISO 6892-1 | ≥700 MPa |\n| Rm | EN ISO 6892-1 | 750–950 MPa |\n| A₅ | EN ISO 6892-1 | ≥12% |\n| Charpy KV (-20°C) | EN ISO 148-1 | ≥40 J |\n\n## Conclusion\n\nDispersoid control is the primary determinant of mechanical properties in S700MC. Deformation applied below T_nr during thermomechanical rolling accelerates Nb(C,N) precipitation, optimising the combination of grain refinement and precipitation hardening."
+    },
+    "zh": { "title": "", "summary": "", "content": "" },
+    "ja": { "title": "", "summary": "", "content": "" }
+  },
+  {
+    "id": "2",
+    "slug": "api-5l-x65-dwtt-kirılma-davranisi",
+    "coverImage": "https://images.unsplash.com/photo-1565043589-a03e91538c4b?w=800&auto=format&fit=crop&q=80",
+    "tags": ["API 5L", "X65", "DWTT", "DBTT", "Pipeline Steel", "Fracture"],
+    "status": "published",
+    "date": "2025-04-02T09:00:00.000Z",
+    "readingTime": 8,
+    "tr": {
+      "title": "API 5L X65 Hat Borularında DWTT Kırılma Davranışı: Düktil-Gevrek Geçiş Analizi",
+      "summary": "API 5L X65 kalite hat borularında Drop Weight Tear Test (DWTT) metodolojisi, % SA (shear area) ölçümü ve düktil-gevrek geçiş sıcaklığı (DBTT) tayini üzerine kapsamlı bir inceleme.",
+      "content": "# API 5L X65 Hat Borularında DWTT Analizi\n\n## DWTT Metodu ve Standart Gereksinimleri\n\nDrop Weight Tear Test (DWTT), API 5L standardına göre hat boru çeliklerinin düktil kırılma yayılma direncini değerlendirmek için kullanılır. X65 için temel gereksinim:\n\n- **%85 SA (Shear Area)** minimum, -10°C veya belirtilen test sıcaklığında\n- Numune geometrisi: 76.2 × 305 mm, tam et kalınlığı\n- Çentik tipi: Basınçla bastırılmış (pressed notch)\n\n## Mikroyapısal Faktörler\n\n### Bainit-Ferrit Oranı\n\nX65 çeliğinde optimum DWTT performansı için:\n\n```\nMikroyapı hedefi: %70–80 asikülür ferrit + %20–30 bainit\nTane boyutu: ASTM 10–12 (5–10 μm)\nBand segregasyonu: ≤ Seviye 1 (ASTM E1268)\n```\n\n### Segregasyon ve Merkezî Çatlak Etkisi\n\nSürekli dökümde sıvı çekirdek beslenmesi yetersiz kaldığında merkezî segregasyon oluşur. C, Mn, P, S zenginleşmesi:\n\n| Element | Nominal | Merkez (segrege) |\n|---------|---------|------------------|\n| C (%) | 0.08 | 0.15–0.18 |\n| Mn (%) | 1.55 | 2.10–2.30 |\n| P (%) | 0.012 | 0.025–0.040 |\n\nMerkezî segregasyon, DWTT numunelerinde quasi-cleavage yayılım yoluna dönüşerek SA değerini kritik biçimde düşürür.\n\n## DBTT Yorumlama\n\nDBTT tayini için minimum 5 DWTT numunesi test edilmeli ve sigmoid eğrisi fit edilmelidir:\n\n```\nSA(T) = SA_üst / [1 + exp((T_DBTT - T) / b)]\n```\n\nX65 için DBTT tipik olarak -30 ile -50°C arasındadır. -10°C'de %85 SA kriteri rahatlıkla karşılanmalıdır."
+    },
+    "en": {
+      "title": "DWTT Fracture Behaviour in API 5L X65 Pipeline Steel: Ductile-Brittle Transition Analysis",
+      "summary": "A comprehensive review of Drop Weight Tear Test (DWTT) methodology, shear area (SA%) measurement, and ductile-brittle transition temperature (DBTT) determination in API 5L X65 grade pipeline steels.",
+      "content": "# DWTT Analysis of API 5L X65 Pipeline Steel\n\n## DWTT Method and Standard Requirements\n\nThe Drop Weight Tear Test (DWTT) is used to evaluate ductile fracture propagation resistance in pipeline steels per API 5L. Key requirements for X65:\n\n- **Minimum 85% SA (Shear Area)** at -10°C or the specified test temperature\n- Specimen geometry: 76.2 × 305 mm, full wall thickness\n- Notch type: pressed notch\n\n## Microstructural Factors\n\n### Bainite-Ferrite Ratio\n\nFor optimal DWTT performance in X65 steel:\n\n```\nTarget microstructure: 70–80% acicular ferrite + 20–30% bainite\nGrain size: ASTM 10–12 (5–10 μm)\nBanding segregation: ≤ Level 1 (ASTM E1268)\n```\n\n### Centreline Segregation and Crack Initiation\n\nCentreline segregation forms when liquid-core feeding is insufficient during continuous casting. C, Mn, P, S enrichment:\n\n| Element | Nominal | Centre (segregated) |\n|---------|---------|---------------------|\n| C (%) | 0.08 | 0.15–0.18 |\n| Mn (%) | 1.55 | 2.10–2.30 |\n| P (%) | 0.012 | 0.025–0.040 |\n\nCentreline segregation converts to quasi-cleavage propagation paths in DWTT specimens, critically reducing SA values.\n\n## DBTT Interpretation\n\nA minimum of 5 DWTT specimens must be tested and a sigmoid curve fitted:\n\n```\nSA(T) = SA_upper / [1 + exp((T_DBTT - T) / b)]\n```\n\nDBTT for X65 typically lies between -30 and -50°C. The 85% SA criterion at -10°C should be comfortably met."
+    },
+    "zh": { "title": "", "summary": "", "content": "" },
+    "ja": { "title": "", "summary": "", "content": "" }
+  },
+  {
+    "id": "3",
+    "slug": "surekli-dokumde-mns-inkluzyonu-morfoloji-kontrolu",
+    "coverImage": "https://images.unsplash.com/photo-1532094349884-543290f27de4?w=800&auto=format&fit=crop&q=80",
+    "tags": ["MnS", "Inclusions", "SEM-EDS", "Calcium Treatment", "Secondary Metallurgy", "Continuous Casting"],
+    "status": "published",
+    "date": "2025-04-10T10:00:00.000Z",
+    "readingTime": 9,
+    "tr": {
+      "title": "Sürekli Dökümde MnS İnklüzyonu Morfoloji Kontrolü: Ca Enjeksiyonu ve Yeniden Sülfürizasyon Mekanizması",
+      "summary": "BOF-LF-CC üretim rotasında MnS inklüzyon morfolojisini etkileyen Ca enjeksiyonu parametreleri, Ca/S oranı optimizasyonu ve oksit-sülfür kompozit inklüzyonlarının SEM-EDS karakterizasyonu.",
+      "content": "# MnS İnklüzyon Morfoloji Kontrolü\n\n## Teorik Arka Plan\n\nMnS inklüzyonlarının morfolojisi, çeliğin mekanik anizotropisi üzerinde doğrudan etkilidir. Tip I (küresel), Tip II (dendritik) ve Tip III (köşeli) inklüzyonlar farklı termal gradyan ve solidifikasyon hızlarında oluşur.\n\n## Ca Modifikasyonu\n\n### Ca/S Oranı Optimizasyonu\n\nEtkin Ca modifikasyonu için:\n\n```\nCa/S (ağırlık oranı) = 0.3 – 0.6 hedef\nCa/Al (ağırlık oranı) = 0.08 – 0.12\n[O] < 15 ppm (Ca enjeksiyonu öncesi)\n```\n\n### Oluşan Fazlar\n\n| Ca/S Oranı | Oluşan İnklüzyon Tipi |\n|------------|----------------------|\n| < 0.2 | MnS (Tip II, dendritik) |\n| 0.2–0.4 | (Ca,Mn)S karma |\n| 0.4–0.7 | CaS + Al₂O₃ kompozit |\n| > 0.7 | Serbest CaS, nozzle tıkanması riski |\n\n## SEM-EDS Karakterizasyon\n\nMnS tanımlaması için ASTM E2142 protokolü uygulanmalıdır:\n\n1. **BSE görüntüsü**: MnS ortalama atomik ağırlık nedeniyle Al₂O₃'ten daha parlak görünür\n2. **EDS map**: Mn Kα + S Kα eş-lokalizasyonu\n3. **Oksit çekirdeği tespiti**: Al Kα veya Ca Kα varlığı\n\n> **Not**: Vakum altında S buharlaşması nedeniyle EDS S sinyali düşük ölçülme eğilimindedir. Sputter-coated numune kullanımı tercih edilmelidir.\n\n## Sonuç\n\nOptimal Ca/S = 0.4–0.6 hedeflendiğinde Tip II MnS eliminasyonu sağlanır. TRIP ve DP çeliklerinde bu modifikasyon, enine darbe tokluğunu %30–50 artırabilir."
+    },
+    "en": {
+      "title": "MnS Inclusion Morphology Control in Continuous Casting: Ca Injection and Resulfurisation Mechanism",
+      "summary": "Ca injection parameters affecting MnS inclusion morphology, Ca/S ratio optimisation, and SEM-EDS characterisation of oxide-sulphide composite inclusions along the BOF-LF-CC production route.",
+      "content": "# MnS Inclusion Morphology Control\n\n## Theoretical Background\n\nThe morphology of MnS inclusions directly influences mechanical anisotropy in steel. Type I (globular), Type II (dendritic) and Type III (angular) inclusions form under different thermal gradient and solidification rate conditions.\n\n## Calcium Modification\n\n### Ca/S Ratio Optimisation\n\nFor effective Ca modification:\n\n```\nCa/S (weight ratio) = 0.3 – 0.6 target\nCa/Al (weight ratio) = 0.08 – 0.12\n[O] < 15 ppm (before Ca injection)\n```\n\n### Phases Formed\n\n| Ca/S Ratio | Inclusion Type Formed |\n|------------|----------------------|\n| < 0.2 | MnS (Type II, dendritic) |\n| 0.2–0.4 | (Ca,Mn)S mixed |\n| 0.4–0.7 | CaS + Al₂O₃ composite |\n| > 0.7 | Free CaS, nozzle clogging risk |\n\n## SEM-EDS Characterisation\n\nThe ASTM E2142 protocol should be applied for MnS identification:\n\n1. **BSE image**: MnS appears brighter than Al₂O₃ due to higher mean atomic weight\n2. **EDS map**: co-localisation of Mn Kα + S Kα\n3. **Oxide core detection**: presence of Al Kα or Ca Kα\n\n> **Note**: S signal in EDS tends to be underestimated due to sulphur evaporation under vacuum. Use of sputter-coated specimens is preferred.\n\n## Conclusion\n\nTargeting Ca/S = 0.4–0.6 achieves elimination of Type II MnS. In TRIP and DP steels, this modification can increase transverse impact toughness by 30–50%."
+    },
+    "zh": { "title": "", "summary": "", "content": "" },
+    "ja": { "title": "", "summary": "", "content": "" }
+  }
+]

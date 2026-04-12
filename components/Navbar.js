@@ -19,6 +19,8 @@ export default function Navbar() {
   const [langOpen, setLangOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileCat, setMobileCat] = useState(null); // expanded category on mobile
   const { isSignedIn } = useUser();
   const { lang, switchLang, t } = useLang();
   const { theme, toggleTheme } = useTheme();
@@ -53,6 +55,16 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   const currentLang = LANG_OPTIONS.find((l) => l.code === lang) || LANG_OPTIONS[0];
 
   const moreLinks = [
@@ -61,29 +73,69 @@ export default function Navbar() {
     { href: "/knowledge",            label: lang === "tr" ? "Bilgi Bankası" : lang === "zh" ? "知识库" : lang === "ja" ? "ナレッジ" : "Knowledge" },
     { href: "/methodology",          label: lang === "tr" ? "Metodoloji" : lang === "zh" ? "方法论" : lang === "ja" ? "方法論" : "Methodology" },
     { href: "/about",                label: lang === "tr" ? "Hakkında" : lang === "zh" ? "关于" : lang === "ja" ? "概要" : "About" },
+    { href: "/blog",                 label: lang === "tr" ? "Blog" : "Blog" },
   ];
+
+  // Tool categories for mobile menu
+  const mobileCategories = [
+    {
+      key: "metallo",
+      label: lang === "tr" ? "Metalografi & Mikroyapı" : lang === "zh" ? "金相学 & 微观结构" : lang === "ja" ? "金属組織学" : "Metallography & Microstructure",
+      items: [
+        { href: "/tools/grain-size",      icon: "🔬", name: lang === "tr" ? "Tane Boyutu" : "Grain Size",         sub: "ASTM E112" },
+        { href: "/tools/phase-diagram",   icon: "📊", name: lang === "tr" ? "Fe-C Simülatör" : "Fe-C Simulator",  sub: "Fe-C, Lever Rule" },
+        { href: "/tools/cct-ttt",         icon: "🌡️", name: "CCT/TTT",                                             sub: "Ms, Ae3, Bs" },
+        { href: "/tools/inclusion",       icon: "🔎", name: lang === "tr" ? "İnklüzyon ID" : "Inclusion ID",       sub: "ASTM E45" },
+        { href: "/tools/sem-eds",         icon: "🔬", name: "SEM-EDS",                                             sub: lang === "tr" ? "Spektrum Analizi" : "Spectrum Analysis" },
+        { href: "/tools/inclusion-atlas", icon: "📖", name: lang === "tr" ? "İnklüzyon Atlası" : "Inclusion Atlas", sub: "MnS · Al₂O₃ · TiN" },
+      ],
+    },
+    {
+      key: "mech",
+      label: lang === "tr" ? "Mekanik Test" : lang === "zh" ? "力学测试" : lang === "ja" ? "機械的試験" : "Mechanical Testing",
+      items: [
+        { href: "/tools/hardness",         icon: "🔧", name: lang === "tr" ? "Sertlik Çevirici" : "Hardness Conv.",     sub: "HRC, HV, HB" },
+        { href: "/tools/dbtt",             icon: "❄️", name: lang === "tr" ? "DBTT Motoru" : "DBTT Engine",             sub: "Charpy, DWTT" },
+        { href: "/tools/tensile-specimen", icon: "↕",  name: lang === "tr" ? "Çekme Numunesi L₀" : "Tensile Spec. L₀", sub: "EN ISO 6892-1, ASTM E8" },
+        { href: "/tools/dwtt",             icon: "⬇",  name: lang === "tr" ? "DWTT Simülatörü" : "DWTT Simulator",     sub: "API 5L · X42–X80" },
+      ],
+    },
+    {
+      key: "weld",
+      label: lang === "tr" ? "Kaynak & Korozyon" : lang === "zh" ? "焊接 & 腐蚀" : lang === "ja" ? "溶接 & 腐食" : "Welding & Corrosion",
+      items: [
+        { href: "/tools/carbon-equivalent", icon: "🔥", name: "CE Calc",                                                              sub: "IIW, CET, Pcm" },
+        { href: "/tools/preheat",           icon: "🔥", name: lang === "tr" ? "Ön Isıtma" : "Preheat",                               sub: "EN 1011-2, AWS D1.1" },
+        { href: "/tools/corrosion",         icon: "⚗️", name: lang === "tr" ? "Korozyon Hesap" : "Corrosion Calc",                   sub: "API 570 / ASME" },
+        { href: "/tools/ultrasonic",        icon: "〜",  name: lang === "tr" ? "UT Simülatör" : "UT Simulator",                       sub: "Pulse-Echo · NDT" },
+        { href: "/tools/unit-converter",    icon: "🔍", name: lang === "tr" ? "Birim Çevirici" : "Unit Converter",                    sub: "MPa, ksi, J, ft·lb" },
+      ],
+    },
+  ];
+
+  const closeMobile = () => { setMobileOpen(false); setMobileCat(null); };
 
   return (
     <>
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 px-6 h-16 flex items-center justify-between transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 h-16 flex items-center justify-between transition-all duration-300 ${
           scrolled
             ? "bg-dark-800/95 backdrop-blur-xl border-b border-gold-400/10"
             : "bg-dark-800/80 backdrop-blur-md border-b border-white/5"
         }`}
       >
         {/* ── LEFT: Logo ── */}
-        <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0" onClick={closeMobile}>
           <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-500 rounded-md flex items-center justify-center text-lg font-bold text-dark-800 font-mono">
             M
           </div>
           <span className="font-semibold text-lg tracking-tight text-dark-50">MetallurgyTools</span>
         </Link>
 
-        {/* ── RIGHT: nav items ── */}
-        <div className="flex items-center gap-3 text-sm ml-4 min-w-0">
+        {/* ── DESKTOP: nav items (hidden on mobile) ── */}
+        <div className="hidden md:flex items-center gap-3 text-sm ml-4 min-w-0">
 
           {/* Tools Dropdown */}
           <div className="relative shrink-0" ref={dropdownRef}>
@@ -248,9 +300,6 @@ export default function Navbar() {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            title={theme === "dark"
-              ? (lang === "tr" ? "Aydınlık Mod" : lang === "zh" ? "亮色模式" : lang === "ja" ? "ライトモード" : "Light Mode")
-              : (lang === "tr" ? "Karanlık Mod" : lang === "zh" ? "暗色模式" : lang === "ja" ? "ダークモード" : "Dark Mode")}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.05] border border-white/10 text-dark-100 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer bg-transparent font-sans text-base shrink-0"
           >
             {theme === "dark" ? "☀" : "🌙"}
@@ -302,7 +351,149 @@ export default function Navbar() {
             </SignInButton>
           )}
         </div>
+
+        {/* ── MOBILE: right side controls ── */}
+        <div className="flex md:hidden items-center gap-2">
+          {/* Search icon */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/10 text-dark-300 hover:text-gold-400 transition-all cursor-pointer font-sans text-base"
+          >
+            🔍
+          </button>
+          {/* Hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/10 text-dark-100 hover:text-gold-400 hover:border-gold-400/40 transition-all cursor-pointer font-sans"
+            aria-label="Menu"
+          >
+            {mobileOpen ? (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            )}
+          </button>
+        </div>
       </nav>
+
+      {/* ── MOBILE MENU OVERLAY ── */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 flex flex-col md:hidden" style={{ top: "64px" }}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeMobile} />
+          {/* Panel */}
+          <div className="relative bg-dark-800 border-b border-white/10 overflow-y-auto flex-1" style={{ maxHeight: "calc(100vh - 64px)" }}>
+            <div className="p-4 space-y-1">
+
+              {/* Tool categories (accordion) */}
+              <div className="mb-3">
+                <p className="text-[10px] text-gold-400 font-mono font-bold uppercase tracking-widest px-2 mb-2">
+                  {t.freeTools || "Free Tools"}
+                </p>
+                {mobileCategories.map((cat) => (
+                  <div key={cat.key} className="mb-1">
+                    <button
+                      onClick={() => setMobileCat(mobileCat === cat.key ? null : cat.key)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-dark-100 text-sm font-medium cursor-pointer font-sans border-none transition-colors"
+                    >
+                      <span>{cat.label}</span>
+                      <span className="text-[10px] text-dark-400">{mobileCat === cat.key ? "▲" : "▼"}</span>
+                    </button>
+                    {mobileCat === cat.key && (
+                      <div className="mt-1 ml-2 space-y-0.5 border-l border-white/[0.08] pl-3">
+                        {cat.items.map(({ href, icon, name, sub }) => (
+                          <Link key={href} href={href} onClick={closeMobile}
+                            className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 no-underline text-dark-50 transition-colors">
+                            <span className="text-base leading-none w-5 text-center">{icon}</span>
+                            <div>
+                              <div className="text-sm font-medium leading-tight">{name}</div>
+                              <div className="text-[11px] text-dark-300">{sub}</div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="h-px bg-white/[0.06] my-3" />
+
+              {/* Other links */}
+              <p className="text-[10px] text-gold-400 font-mono font-bold uppercase tracking-widest px-2 mb-2">
+                {lang === "tr" ? "Sayfalar" : "Pages"}
+              </p>
+              {[
+                { href: "/consultation", label: lang === "tr" ? "Danışmanlık" : "Consultation" },
+                { href: "/blog",         label: "Blog" },
+                { href: "/mechanical-tests", label: lang === "tr" ? "Mekanik Testler" : "Mech. Tests" },
+                { href: "/knowledge",    label: lang === "tr" ? "Bilgi Bankası" : "Knowledge" },
+                { href: "/methodology",  label: lang === "tr" ? "Metodoloji" : "Methodology" },
+                { href: "/about",        label: lang === "tr" ? "Hakkında" : "About" },
+              ].map(({ href, label }) => (
+                <Link key={href} href={href} onClick={closeMobile}
+                  className="block px-3 py-2.5 rounded-lg text-sm text-dark-200 hover:text-dark-50 hover:bg-white/5 no-underline transition-colors">
+                  {label}
+                </Link>
+              ))}
+
+              {/* Divider */}
+              <div className="h-px bg-white/[0.06] my-3" />
+
+              {/* Theme + Language row */}
+              <div className="flex items-center gap-2 px-2 pb-2">
+                <button
+                  onClick={toggleTheme}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-dark-100 text-sm cursor-pointer font-sans hover:border-gold-400/40 hover:text-gold-400 transition-all"
+                >
+                  {theme === "dark" ? "☀" : "🌙"}
+                  <span className="text-xs">{theme === "dark" ? (lang === "tr" ? "Aydınlık" : "Light") : (lang === "tr" ? "Karanlık" : "Dark")}</span>
+                </button>
+                <div className="flex gap-1">
+                  {LANG_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.code}
+                      onClick={() => switchLang(opt.code)}
+                      className={`px-2.5 py-2 rounded-lg text-xs font-medium cursor-pointer font-sans border transition-all ${
+                        lang === opt.code
+                          ? "bg-gold-400/10 border-gold-400/40 text-gold-400"
+                          : "bg-white/[0.04] border-white/10 text-dark-300 hover:text-dark-50"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sign in / Dashboard */}
+              <div className="px-2 pt-1 pb-4">
+                {isSignedIn ? (
+                  <Link href="/dashboard" onClick={closeMobile}
+                    className="block w-full text-center bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-lg px-4 py-2.5 text-sm font-semibold">
+                    {t.dashboard}
+                  </Link>
+                ) : (
+                  <SignInButton mode="modal">
+                    <button
+                      onClick={closeMobile}
+                      className="w-full border border-white/15 text-dark-100 rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans"
+                    >
+                      {lang === "tr" ? "Giriş Yap" : "Sign In"}
+                    </button>
+                  </SignInButton>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

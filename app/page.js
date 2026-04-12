@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useLang } from "@/lib/LanguageContext";
+import BlogSidebar from "@/components/BlogSidebar";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("grain-size");
@@ -196,6 +197,19 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── SIDEBAR LAYOUT STARTS ── */}
+      <div className="flex gap-0 max-w-7xl mx-auto px-4 sm:px-6">
+
+        {/* Left: sticky blog sidebar */}
+        <div className="hidden lg:block w-72 xl:w-80 shrink-0">
+          <div className="sticky top-20 py-8 pr-6 border-r border-white/[0.06]">
+            <BlogSidebar />
+          </div>
+        </div>
+
+        {/* Right: main content */}
+        <div className="flex-1 min-w-0">
 
       {/* WHY THIS PLATFORM */}
       <section className="py-20 px-6 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent">
@@ -430,6 +444,16 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+        </div>{/* end right main content */}
+      </div>{/* end sidebar layout */}
+
+      {/* Mobile blog section (shown only on small screens) */}
+      <div className="lg:hidden px-4 pb-10">
+        <div className="bg-dark-800/40 border border-white/[0.07] rounded-xl p-5">
+          <BlogSidebar />
+        </div>
+      </div>
 
     </div>
   );

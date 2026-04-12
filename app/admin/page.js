@@ -72,6 +72,7 @@ export default function AdminDashboard() {
             ["/admin/consultations", "⚗️ Danışmanlık", pendingCons > 0 ? `${pendingCons} bekliyor` : null, "#f97316"],
             ["/admin/feedback",      "💬 Görüş & İstekler", unreadFeed > 0 ? `${unreadFeed} yeni` : null, "#60a5fa"],
             ["/admin/users",         "👥 Kullanıcılar", null, null],
+            ["/admin/blog",          "📝 Blog Yönetimi", null, "#d2a935"],
           ].map(([href, lbl, badge, badgeClr]) => (
             <Link key={href} href={href} style={S.navBtn}>
               {lbl}
