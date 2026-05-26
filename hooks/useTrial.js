@@ -3,43 +3,35 @@
 /**
  * useTrial()
  *
- * Tool sayfalarında kullanılır:
- *  - İlk render'da /api/trial/init POST çağırarak trial'ı başlatır
- *  - Güncel durumu (daysLeft, active, expired) döndürür
- *  - Trial dolmuşsa /subscribe'a yönlendirir
+ * Giriş yapmış kullanıcının trial / plan durumunu döndürür.
+ * Trial dolmuşsa isteğe bağlı olarak /subscribe'a yönlendirir.
  *
  * Kullanım:
- *   const { trialActive, daysLeft, loading } = useTrial();
+ *   const { mode, active, daysLeft, loading } = useTrial();
  */
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function useTrial({ redirectOnExpiry = true } = {}) {
+export function useTrial({ redirectOnExpiry = false } = {}) {
   const router = useRouter();
-  const [state, setState] = useState({
-    loading:     true,
-    trialActive: false,
-    daysLeft:    0,
-    expired:     false,
-    never:       false,
-  });
+  const [state, setState] = useState({ loading: true, authenticated: false, active: false, daysLeft: 0, mode: null });
 
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch("/api/trial/init", { method: "POST" });
+        const res  = await fetch("/api/trial/init");
         const data = await res.json();
 
         setState({
-          loading:     false,
-          trialActive: data.active  ?? false,
-          daysLeft:    data.daysLeft ?? 0,
-          expired:     data.expired ?? false,
-          never:       data.never   ?? false,
+          loading:       false,
+          authenticated: data.authenticated ?? false,
+          active:        data.active        ?? false,
+          daysLeft:      data.daysLeft      ?? 0,
+          mode:          data.mode          ?? null,
         });
 
-        if (redirectOnExpiry && data.expired) {
+        if (redirectOnExpiry && data.authenticated && !data.active) {
           router.push("/subscribe");
         }
       } catch {

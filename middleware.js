@@ -1,32 +1,20 @@
 /**
  * middleware.js
  *
- * Erişim katmanları (öncelik sırasıyla):
- *  ① Her zaman açık rotalar  → public + SEO + statik
- *  ② Tool API rotaları       → trial VEYA professional plan zorunlu
- *  ③ Admin rotaları          → route handler kendi auth'unu yapar
- *  ④ Geri kalan             → Clerk isteğe bağlı, geçir
+ * Katmanlar:
+ *  ① Her zaman açık   → public sayfalar, SEO rotaları, statik dosyalar
+ *  ② Tool API'leri    → Clerk auth zorunlu (plan kontrolü route handler'da)
+ *  ③ Tool sayfaları   → Auth yoksa /signup'a yönlendir (SEO botları geçer)
+ *  ④ Admin rotaları   → Route handler halleder
+ *  ⑤ Diğerleri        → Geçir
  *
  * SEO NOTU:
- *   /tools/* ve /mechanical-tests/* SAYFA rotaları burada kilitlenmez.
- *   Sadece /api/tools/* ve /api/sem-eds hesaplama uç noktaları kısıtlanır.
- *   Googlebot metadata + JSON-LD'ye her zaman erişebilir.
+ *  Googlebot için /tools/* ve /mechanical-tests/* sayfaları açık kalır.
+ *  Sadece /api/tools/* ve /api/sem-eds hesaplama endpoint'leri kısıtlıdır.
  */
 
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
-import {
-  TRIAL_DAYS,
-  TRIAL_COOKIE,
-  COOKIE_MAX_AGE,
-  encodeTrialCookie,
-  decodeTrialCookie,
-  getFingerprint,
-  kvGetTrial,
-  kvSetTrial,
-  trialStatus,
-} from "@/lib/trialUtils";
 
 // ─── Route matchers ───────────────────────────────────────────────────────────
 
@@ -36,22 +24,23 @@ const isToolApiRoute = createRouteMatcher([
   "/api/sem-eds/(.*)",
 ]);
 
+const isToolPageRoute = createRouteMatcher([
+  "/tools(.*)",
+  "/mechanical-tests(.*)",
+]);
+
 const isAlwaysPublic = createRouteMatcher([
   "/",
   "/api/shopier/(.*)",
   "/api/trial/(.*)",
+  "/api/blog/(.*)",
+  "/api/consultation/(.*)",
+  "/api/feedback/(.*)",
   "/subscribe(.*)",
   "/login(.*)",
   "/signup(.*)",
   "/blog(.*)",
   "/knowledge(.*)",
-  "/api/blog/(.*)",
-  "/api/consultation/(.*)",
-  "/api/feedback/(.*)",
-  "/tools(.*)",
-  "/mechanical-tests(.*)",
-  "/_next/(.*)",
-  "/favicon.ico",
   "/sitemap.xml",
   "/robots.txt",
 ]);
@@ -59,64 +48,42 @@ const isAlwaysPublic = createRouteMatcher([
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 export default clerkMiddleware(async (auth, request) => {
-  // ① Her zaman geçen rotalar
+  const { pathname } = request.nextUrl;
+
+  // ① Her zaman açık
   if (isAlwaysPublic(request)) return NextResponse.next();
 
-  // ② Tool API rotaları
+  // ② Tool API rotaları — Clerk auth yoksa 401
   if (isToolApiRoute(request)) {
-
-    // 2a. Clerk auth + professional plan
-    const { userId, sessionClaims } = await auth();
-
-    if (userId) {
-      const meta      = sessionClaims?.public_metadata ?? sessionClaims?.metadata ?? {};
-      const plan      = meta?.plan;
-      const expiresAt = meta?.planExpiresAt;
-
-      if (plan === "professional") {
-        const notExpired = !expiresAt || new Date(expiresAt) > new Date();
-        if (notExpired) return NextResponse.next();
-      }
-    }
-
-    // 2b. KV + cookie trial
-    const fingerprint = await getFingerprint(request);
-    let startTs       = await kvGetTrial(fingerprint);
-
-    // KV'de yok → cookie'den kurtar
-    if (!startTs) {
-      const cookieVal  = request.cookies.get(TRIAL_COOKIE)?.value;
-      const fromCookie = cookieVal ? decodeTrialCookie(cookieVal) : null;
-      if (fromCookie) {
-        await kvSetTrial(fingerprint, fromCookie);
-        startTs = fromCookie;
-      }
-    }
-
-    if (startTs) {
-      const status = trialStatus(startTs);
-
-      if (status.active) {
-        const headers = new Headers(request.headers);
-        headers.set("x-trial-active",    "1");
-        headers.set("x-trial-days-left", String(status.daysLeft));
-        return NextResponse.next({ request: { headers } });
-      }
-
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
-        { error: "7 günlük ücretsiz deneme süreniz doldu.", redirect: "/subscribe", code: "trial_expired" },
-        { status: 402 }
+        { error: "Giriş yapmanız gerekiyor.", redirect: "/signup", mode: "unauthenticated" },
+        { status: 401 }
       );
     }
-
-    // Trial hiç başlatılmamış
-    return NextResponse.json(
-      { error: "Deneme süreniz başlatılmamış.", redirect: "/subscribe", code: "trial_not_started" },
-      { status: 402 }
-    );
+    // Plan/trial kontrolü accessControl.js'de yapılır
+    return NextResponse.next();
   }
 
-  // ③④ Admin ve diğer rotalar
+  // ③ Tool sayfa rotaları — auth yoksa /signup'a yönlendir
+  //    Googlebot ve arama motorları User-Agent ile tespit edilip geçirilir
+  if (isToolPageRoute(request)) {
+    const ua = request.headers.get("user-agent") || "";
+    const isBot = /googlebot|bingbot|yandexbot|slurp|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot/i.test(ua);
+
+    if (!isBot) {
+      const { userId } = await auth();
+      if (!userId) {
+        const signupUrl = new URL("/signup", request.url);
+        signupUrl.searchParams.set("redirect_url", pathname);
+        return NextResponse.redirect(signupUrl);
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // ④⑤ Admin ve diğerleri
   return NextResponse.next();
 });
 
