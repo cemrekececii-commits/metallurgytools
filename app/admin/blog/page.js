@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
-const ADMIN_KEY = "metallurgy2026";
+// ADMIN_KEY artık client tarafında tutulmaz. Kimlik doğrulama HttpOnly cookie ile sağlanır.
 
 const LANGS = [
   { code: "tr", label: "🇹🇷 TR", name: "Türkçe" },
@@ -98,7 +98,7 @@ export default function AdminBlogPage() {
 
   const fetchPosts = useCallback(() => {
     setLoading(true);
-    fetch(`/api/blog?adminKey=${ADMIN_KEY}&_t=${Date.now()}`, { cache: "no-store" })
+    fetch(`/api/blog?_t=${Date.now()}`, { cache: "no-store" })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setPosts(data); })
       .catch(() => {})
@@ -135,7 +135,7 @@ export default function AdminBlogPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              adminKey: ADMIN_KEY,
+              
               name: file.name,
               type: file.type,
               data: e.target.result, // data:image/...;base64,...
@@ -255,7 +255,7 @@ export default function AdminBlogPage() {
 
   const handleDelete = async (id) => {
     if (!confirm("Bu makaleyi silmek istediğinizden emin misiniz?")) return;
-    const r = await fetch(`/api/blog/${id}?adminKey=${ADMIN_KEY}`, { method: "DELETE" });
+    const r = await fetch(`/api/blog/${id}`, { method: "DELETE" });
     if (r.ok) { setMsg_("Silindi."); fetchPosts(); }
   };
 
@@ -276,7 +276,7 @@ export default function AdminBlogPage() {
       en: form.en,
       zh: form.zh,
       ja: form.ja,
-      adminKey: ADMIN_KEY,
+      
     };
 
     try {

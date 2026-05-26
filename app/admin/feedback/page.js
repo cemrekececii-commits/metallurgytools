@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const ADMIN_KEY = "metallurgy2026";
+// ADMIN_KEY artık client tarafında tutulmaz. Kimlik doğrulama HttpOnly cookie ile sağlanır.
 
 const TYPE_MAP = {
   "🔧 Yeni Araç Talebi":      { icon: "🔧", bg: "#1e3a6e", clr: "#60a5fa", label: "Yeni Araç" },
@@ -57,7 +57,7 @@ export default function AdminFeedback() {
 
   const load = () => {
     setLoading(true);
-    fetch(`/api/feedback?key=${ADMIN_KEY}`)
+    fetch(`/api/feedback`)
       .then(r => r.json())
       .then(d => { setList(d.feedback || []); setLoading(false); });
   };
@@ -65,7 +65,7 @@ export default function AdminFeedback() {
   useEffect(() => { load(); }, []);
 
   const markRead = async (id) => {
-    await fetch(`/api/feedback?key=${ADMIN_KEY}`, {
+    await fetch(`/api/feedback`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, read: true }),
@@ -74,7 +74,7 @@ export default function AdminFeedback() {
   };
 
   const markAllRead = async () => {
-    await fetch(`/api/feedback?key=${ADMIN_KEY}`, {
+    await fetch(`/api/feedback`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ markAllRead: true }),
@@ -83,7 +83,7 @@ export default function AdminFeedback() {
   };
 
   const deleteItem = async (id) => {
-    await fetch(`/api/feedback?key=${ADMIN_KEY}`, {
+    await fetch(`/api/feedback`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),

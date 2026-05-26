@@ -1,0 +1,16 @@
+{
+  "name": "MetallurgyTools – Professional Steel Metallurgy Calculators",
+  "short_name": "MetallurgyTools",
+  "description": "Professional metallurgical engineering tools: grain size, hardness, corrosion, preheat, CCT/TTT, DWTT, SEM-EDS, inclusion atlas, failure analysis.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#0f172a",
+  "lang": "tr-TR",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

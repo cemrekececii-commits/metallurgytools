@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const ADMIN_KEY = "metallurgy2026";
+// ADMIN_KEY artık client tarafında tutulmaz. Kimlik doğrulama HttpOnly cookie ile sağlanır.
 
 const CAT_LABELS = {
   hasar_analizi:     "Hasar Analizi",
@@ -55,14 +55,14 @@ function DetailPanel({ id, onBack }) {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/consultation?key=${ADMIN_KEY}&id=${id}`)
+    fetch(`/api/consultation?id=${id}`)
       .then(r => r.json())
       .then(d => { setItem(d.item); setReply(d.item?.reply || ""); });
   }, [id]);
 
   const sendReply = async () => {
     setSaving(true);
-    await fetch(`/api/consultation?key=${ADMIN_KEY}`, {
+    await fetch(`/api/consultation`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, reply }),
@@ -74,7 +74,7 @@ function DetailPanel({ id, onBack }) {
   };
 
   const setStatus = async (status) => {
-    await fetch(`/api/consultation?key=${ADMIN_KEY}`, {
+    await fetch(`/api/consultation`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status }),
@@ -189,7 +189,7 @@ export default function AdminConsultations() {
 
   const loadList = () => {
     setLoading(true);
-    fetch(`/api/consultation?key=${ADMIN_KEY}`)
+    fetch(`/api/consultation`)
       .then(r => r.json())
       .then(d => { setList(d.consultations || []); setLoading(false); });
   };

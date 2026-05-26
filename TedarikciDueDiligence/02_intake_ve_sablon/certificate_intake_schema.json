@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DueDiligenceIntake",
+  "description": "Müşteriden talep formunda toplanacak veri seti. Next.js Zod şeması ile eşleşir (lib/validators.ts).",
+  "type": "object",
+  "required": [
+    "heatNumber",
+    "standard",
+    "grade",
+    "productForm",
+    "thicknessMm",
+    "application",
+    "criticality",
+    "supplierName",
+    "ndaAccepted",
+    "certificateUploads"
+  ],
+  "properties": {
+    "heatNumber": {
+      "type": "string",
+      "description": "Heat / çelik üretim lot numarası",
+      "examples": ["H264891", "P2025-11-0442"],
+      "maxLength": 64
+    },
+    "standard": {
+      "type": "string",
+      "description": "Ürün standardı",
+      "examples": ["EN 10025-2", "EN 10149-2", "API 5L PSL2", "ASTM A36", "EN 10083-3"]
+    },
+    "grade": {
+      "type": "string",
+      "description": "Malzeme grade",
+      "examples": ["S355J2+N", "S700MC", "X65M", "DP600", "IF (DX54D)", "42CrMo4"]
+    },
+    "productForm": {
+      "type": "string",
+      "enum": [
+        "HOT_ROLLED_PLATE",
+        "HOT_ROLLED_COIL",
+        "COLD_ROLLED_SHEET",
+        "GALVANIZED_SHEET",
+        "WIRE_ROD",
+        "SEAMLESS_PIPE",
+        "WELDED_PIPE",
+        "STRUCTURAL_SECTION",
+        "OTHER"
+      ]
+    },
+    "thicknessMm": { "type": "number", "minimum": 0.1, "maximum": 1000 },
+    "widthMm": { "type": "number", "minimum": 1 },
+    "lengthMm": { "type": "number" },
+    "application": {
+      "type": "string",
+      "description": "Son kullanım alanı — risk değerlendirmesinde kritik bağlam",
+      "examples": [
+        "Otomotiv B-sütunu stamping",
+        "Basınçlı kap gövde (PED kategori IV)",
+        "Offshore yapısal (subsea)",
+        "Beyaz eşya kompresör gövdesi",
+        "İnce cidarlı kaynaklı kovan"
+      ]
+    },
+    "criticality": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "SAFETY_CRITICAL"],
+      "description": "Raporda gerekli inceleme derinliğini belirler. SAFETY_CRITICAL → DWTT / Charpy alt sıcaklık değerlendirmesi, NDT önerisi, kaynak prosedür uyumu yorumu zorunlu."
+    },
+    "supplierName": { "type": "string" },
+    "supplierCountry": { "type": "string" },
+    "customerSpecNotes": {
+      "type": "string",
+      "description": "Müşteri şartnamesinde grade ötesi ek gereklilikler (örn. 'Ti/N > 3.4, içeride tarif edildiği gibi Ca-treatment gerekli')"
+    },
+    "priorityExpedited": {
+      "type": "boolean",
+      "description": "24-48h premium teslim"
+    },
+    "ndaAccepted": { "type": "boolean", "const": true },
+    "certificateUploads": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": [
+          "fileKey",
+          "originalFilename",
+          "fileSize",
+          "mimeType",
+          "checksumSha256",
+          "certType"
+        ],
+        "properties": {
+          "fileKey": { "type": "string", "description": "Object storage key (presigned upload sonrası)" },
+          "originalFilename": { "type": "string" },
+          "fileSize": { "type": "integer", "maximum": 10485760 },
+          "mimeType": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/vnd.ms-excel"
+            ]
+          },
+          "checksumSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "certType": {
+            "type": "string",
+            "enum": [
+              "EN_10204_2_1",
+              "EN_10204_2_2",
+              "EN_10204_3_1",
+              "EN_10204_3_2",
+              "MILL_TEST_OTHER",
+              "CUSTOMER_SPEC",
+              "OTHER"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

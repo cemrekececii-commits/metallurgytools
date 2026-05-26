@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { readBlogs, writeBlogs } from "@/lib/blogStorage";
+import { isAdminAuthed } from "@/lib/adminAuth";
+import { cleanString, stripTags, isSlug, approxByteSize } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_KEY = process.env.BLOG_ADMIN_KEY || "metallurgy2026";
 const SUPPORTED_LANGS = ["tr", "en", "zh", "ja"];
 
 function estimateReadingTime(content) {
@@ -34,39 +36,53 @@ function localizePost(post, lang) {
   };
 }
 
-// GET /api/blog/[id]
+function requireAdmin() { return isAdminAuthed(cookies()); }
+
 export async function GET(req, { params }) {
   const { id } = await params;
   const { searchParams } = new URL(req.url);
-  const lang = searchParams.get("lang") || "tr";
-  const adminKey = searchParams.get("adminKey");
+  const lang = cleanString(searchParams.get("lang") || "tr", 4);
+  const wantAdmin = searchParams.get("admin") === "1";
 
   const blogs = await readBlogs();
   const post = blogs.find((b) => b.id === id || b.slug === id);
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (adminKey === ADMIN_KEY) return NextResponse.json(post);
-
-  return NextResponse.json(localizePost(post, lang));
+  if (wantAdmin && requireAdmin()) return NextResponse.json(post);
+  if (post.status !== "published" && !requireAdmin()) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  return NextResponse.json(localizePost(post, SUPPORTED_LANGS.includes(lang) ? lang : "tr"));
 }
 
-// PUT /api/blog/[id] — update
 export async function PUT(req, { params }) {
+  if (!requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const body = await req.json();
-  const { adminKey, ...data } = body;
 
-  if (adminKey !== ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let data;
+  try { data = await req.json(); } catch {
+    return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
+  }
+  if (approxByteSize(data) > 1024 * 1024) {
+    return NextResponse.json({ error: "İçerik çok büyük" }, { status: 413 });
   }
 
   const blogs = await readBlogs();
   const idx = blogs.findIndex((b) => b.id === id);
   if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (data.slug && blogs.some((b) => b.slug === data.slug && b.id !== id)) {
-    return NextResponse.json({ error: "Slug already in use" }, { status: 409 });
+  if (data.slug) {
+    if (!isSlug(data.slug)) return NextResponse.json({ error: "Geçersiz slug" }, { status: 400 });
+    if (blogs.some((b) => b.slug === data.slug && b.id !== id)) {
+      return NextResponse.json({ error: "Slug already in use" }, { status: 409 });
+    }
   }
+
+  const sanitizeLang = (cur, incoming) => incoming ? {
+    title: cleanString(incoming.title ?? cur?.title ?? "", 200),
+    summary: cleanString(incoming.summary ?? cur?.summary ?? "", 500),
+    content: stripTags(incoming.content ?? cur?.content ?? "", 200000),
+  } : cur;
 
   const trContent = data.tr?.content || blogs[idx].tr?.content || "";
   const enContent = data.en?.content || blogs[idx].en?.content || "";
@@ -75,15 +91,15 @@ export async function PUT(req, { params }) {
   blogs[idx] = {
     ...blogs[idx],
     slug: data.slug ?? blogs[idx].slug,
-    coverImage: data.coverImage ?? blogs[idx].coverImage,
-    tags: data.tags ?? blogs[idx].tags,
-    status: data.status ?? blogs[idx].status,
+    coverImage: data.coverImage !== undefined ? cleanString(data.coverImage, 500) : blogs[idx].coverImage,
+    tags: Array.isArray(data.tags) ? data.tags.slice(0, 20).map(t => cleanString(t, 40)) : blogs[idx].tags,
+    status: ["draft", "published"].includes(data.status) ? data.status : blogs[idx].status,
     date: data.date ?? blogs[idx].date,
     readingTime: estimateReadingTime(primaryContent),
-    tr: data.tr ? { ...blogs[idx].tr, ...data.tr } : blogs[idx].tr,
-    en: data.en ? { ...blogs[idx].en, ...data.en } : blogs[idx].en,
-    zh: data.zh ? { ...blogs[idx].zh, ...data.zh } : blogs[idx].zh,
-    ja: data.ja ? { ...blogs[idx].ja, ...data.ja } : blogs[idx].ja,
+    tr: sanitizeLang(blogs[idx].tr, data.tr),
+    en: sanitizeLang(blogs[idx].en, data.en),
+    zh: sanitizeLang(blogs[idx].zh, data.zh),
+    ja: sanitizeLang(blogs[idx].ja, data.ja),
     updatedAt: new Date().toISOString(),
   };
 
@@ -91,15 +107,9 @@ export async function PUT(req, { params }) {
   return NextResponse.json(blogs[idx]);
 }
 
-// DELETE /api/blog/[id]
 export async function DELETE(req, { params }) {
+  if (!requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { searchParams } = new URL(req.url);
-  const adminKey = searchParams.get("adminKey");
-
-  if (adminKey !== ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const blogs = await readBlogs();
   const idx = blogs.findIndex((b) => b.id === id);

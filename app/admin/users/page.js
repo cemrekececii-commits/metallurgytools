@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ADMIN_KEY, TOOL_LABELS, STARTER_LIMIT } from "@/lib/planUtils";
+import { TOOL_LABELS, STARTER_LIMIT } from "@/lib/planUtils";
 
 const S = {
   page:   { background: "#0a0a0a", minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" },
@@ -45,9 +45,9 @@ function EditModal({ user, onClose, onSave }) {
   const save = async () => {
     setSaving(true);
     const planExpiresAt = plan === "professional" && expires ? new Date(expires).toISOString() : null;
-    await fetch(`/api/admin/users?key=${ADMIN_KEY}`, {
+    await fetch(`/api/admin/users`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      headers: { "Content-Type": "application/json",  },
       body: JSON.stringify({ userId: user.userId, plan, planExpiresAt, resetUsage: resetU }),
     });
     setSaving(false);
@@ -101,7 +101,7 @@ export default function AdminUsers() {
 
   const load = async () => {
     setLoading(true);
-    const res  = await fetch(`/api/admin/users?key=${ADMIN_KEY}`, { headers: { "x-admin-key": ADMIN_KEY } });
+    const res  = await fetch(`/api/admin/users`, { headers: {  } });
     const data = await res.json();
     setUsers(data.users || []);
     setLoading(false);

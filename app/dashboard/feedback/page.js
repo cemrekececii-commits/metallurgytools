@@ -8,7 +8,7 @@ export default function FeedbackAdmin() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/feedback?key=metallurgy2026")
+    fetch("/api/feedback")
       .then(r => r.json())
       .then(data => {
         if (data.feedback) setFeedback(data.feedback);

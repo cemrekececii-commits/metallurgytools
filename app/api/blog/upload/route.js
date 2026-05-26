@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { uploadImage } from "@/lib/imageStorage";
+import { isAdminAuthed } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_KEY = process.env.BLOG_ADMIN_KEY || "metallurgy2026";
-const MAX_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
+const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB (bodySizeLimit ile uyumlu)
+
+function requireAdmin() { return isAdminAuthed(cookies()); }
 
 export async function POST(req) {
   try {
@@ -16,9 +19,9 @@ export async function POST(req) {
       try { body = await req.json(); }
       catch { return NextResponse.json({ error: "JSON ayrıştırma hatası." }, { status: 400 }); }
 
-      const { adminKey, name, type, data } = body;
+      const { name, type, data } = body;
 
-      if (adminKey !== ADMIN_KEY) {
+      if (!requireAdmin()) {
         return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
       }
       if (!data || !type) {
@@ -53,10 +56,9 @@ export async function POST(req) {
         );
       }
 
-      const adminKey = formData.get("adminKey");
       const file = formData.get("file");
 
-      if (adminKey !== ADMIN_KEY) {
+      if (!requireAdmin()) {
         return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
       }
       if (!file || typeof file === "string") {

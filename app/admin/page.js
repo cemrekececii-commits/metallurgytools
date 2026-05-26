@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const ADMIN_KEY = "metallurgy2026";
+// ADMIN_KEY artık client tarafında tutulmaz. Kimlik doğrulama HttpOnly cookie ile sağlanır.
 
 const S = {
   wrap:     { padding: "28px 32px", maxWidth: 1200, margin: "0 auto" },
@@ -41,9 +41,9 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/consultation?key=${ADMIN_KEY}`).then(r => r.json()).catch(() => ({})),
-      fetch(`/api/feedback?key=${ADMIN_KEY}`).then(r => r.json()).catch(() => ({})),
-      fetch(`/api/admin/users?key=${ADMIN_KEY}`, { headers: { "x-admin-key": ADMIN_KEY } }).then(r => r.json()).catch(() => ({})),
+      fetch(`/api/consultation`).then(r => r.json()).catch(() => ({})),
+      fetch(`/api/feedback`).then(r => r.json()).catch(() => ({})),
+      fetch(`/api/admin/users`, { headers: {  } }).then(r => r.json()).catch(() => ({})),
     ]).then(([c, f, u]) => {
       setCons(c.consultations || []);
       setFeed(f.feedback || []);

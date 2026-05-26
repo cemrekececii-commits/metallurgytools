@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { readBlogs, writeBlogs } from "@/lib/blogStorage";
+import { isAdminAuthed } from "@/lib/adminAuth";
+import { cleanString, isSlug, stripTags, approxByteSize } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_KEY = process.env.BLOG_ADMIN_KEY || "metallurgy2026";
 const SUPPORTED_LANGS = ["tr", "en", "zh", "ja"];
 
 function estimateReadingTime(content) {
@@ -28,9 +30,7 @@ function localizePost(post, lang) {
     status: post.status,
     date: post.date,
     readingTime: post.readingTime,
-    title,
-    summary,
-    content,
+    title, summary, content,
     lang: langActual,
     hasTranslation: SUPPORTED_LANGS.reduce((acc, l) => {
       acc[l] = !!(post[l]?.title);
@@ -39,30 +39,31 @@ function localizePost(post, lang) {
   };
 }
 
+function requireAdmin() {
+  return isAdminAuthed(cookies());
+}
+
 // GET /api/blog
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const adminKey = searchParams.get("adminKey");
-  const lang = searchParams.get("lang") || "tr";
-  const tag = searchParams.get("tag");
-  const search = searchParams.get("search");
+  const lang = cleanString(searchParams.get("lang") || "tr", 4);
+  const tag = cleanString(searchParams.get("tag") || "", 40);
+  const search = cleanString(searchParams.get("search") || "", 120);
+  const wantAdmin = searchParams.get("admin") === "1";
 
   let blogs = await readBlogs();
+  const authed = requireAdmin();
 
-  if (adminKey !== ADMIN_KEY) {
-    blogs = blogs.filter((b) => b.status === "published");
-  }
-
-  if (adminKey === ADMIN_KEY) {
+  if (wantAdmin && authed) {
     blogs.sort((a, b) => new Date(b.date) - new Date(a.date));
     return NextResponse.json(blogs);
   }
 
-  let result = blogs.map((p) => localizePost(p, lang));
+  // Public görünüm — yalnızca yayınlananlar
+  blogs = blogs.filter((b) => b.status === "published");
+  let result = blogs.map((p) => localizePost(p, SUPPORTED_LANGS.includes(lang) ? lang : "tr"));
 
-  if (tag) {
-    result = result.filter((p) => p.tags?.includes(tag));
-  }
+  if (tag) result = result.filter((p) => p.tags?.includes(tag));
 
   if (search) {
     const q = search.toLowerCase();
@@ -78,41 +79,51 @@ export async function GET(req) {
   return NextResponse.json(result);
 }
 
-// POST /api/blog — create new
+// POST /api/blog — create new (admin only)
 export async function POST(req) {
-  const body = await req.json();
-  const { adminKey, ...data } = body;
+  if (!requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (adminKey !== ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let body;
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
   }
 
-  if (!data.slug) {
-    return NextResponse.json({ error: "slug required" }, { status: 400 });
+  // Büyük içerik kabul edilebilir ama makul bir tavan koy
+  if (approxByteSize(body) > 1024 * 1024) {
+    return NextResponse.json({ error: "İçerik çok büyük" }, { status: 413 });
+  }
+
+  if (!isSlug(body.slug)) {
+    return NextResponse.json({ error: "Geçersiz slug" }, { status: 400 });
   }
 
   const blogs = await readBlogs();
-
-  if (blogs.some((b) => b.slug === data.slug)) {
+  if (blogs.some((b) => b.slug === body.slug)) {
     return NextResponse.json({ error: "Slug already exists" }, { status: 409 });
   }
 
-  const trContent = data.tr?.content || "";
-  const enContent = data.en?.content || "";
+  const trContent = body.tr?.content || "";
+  const enContent = body.en?.content || "";
   const primaryContent = trContent || enContent;
+
+  const sanitizeLang = (x) => x ? {
+    title: cleanString(x.title, 200),
+    summary: cleanString(x.summary, 500),
+    content: stripTags(x.content, 200000), // blog içeriği — tag'lar markdown render'da üretiliyor
+  } : { title: "", summary: "", content: "" };
 
   const newPost = {
     id: Date.now().toString(),
-    slug: data.slug,
-    coverImage: data.coverImage || "",
-    tags: data.tags || [],
-    status: data.status || "draft",
-    date: data.date || new Date().toISOString(),
+    slug: body.slug,
+    coverImage: cleanString(body.coverImage, 500),
+    tags: Array.isArray(body.tags) ? body.tags.slice(0, 20).map(t => cleanString(t, 40)) : [],
+    status: ["draft", "published"].includes(body.status) ? body.status : "draft",
+    date: body.date || new Date().toISOString(),
     readingTime: estimateReadingTime(primaryContent),
-    tr: data.tr || { title: "", summary: "", content: "" },
-    en: data.en || { title: "", summary: "", content: "" },
-    zh: data.zh || { title: "", summary: "", content: "" },
-    ja: data.ja || { title: "", summary: "", content: "" },
+    tr: sanitizeLang(body.tr),
+    en: sanitizeLang(body.en),
+    zh: sanitizeLang(body.zh),
+    ja: sanitizeLang(body.ja),
   };
 
   blogs.unshift(newPost);

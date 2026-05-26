@@ -3,9 +3,10 @@ import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const ADMIN_KEY = "metallurgy2026";
-const SESSION_KEY = "mt_admin_authed";
-
+// Güvenlik: Admin anahtarı artık client'ta tutulmaz ve sessionStorage
+// üzerinden manipüle edilemez. Kimlik doğrulama /api/admin/verify üzerinden
+// sunucu tarafında yapılır; oturum HttpOnly + SameSite=Strict imzalı cookie
+// ile saklanır. Client yalnızca "authed=true/false" bilgisini görür.
 const AdminAuthContext = createContext({ authed: false });
 
 const NAV_ITEMS = [
@@ -43,10 +44,34 @@ const S = {
 function LoginScreen({ onLogin }) {
   const [key, setKey] = useState("");
   const [err, setErr] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errMsg, setErrMsg] = useState("Hatalı anahtar");
 
-  const attempt = () => {
-    if (key === ADMIN_KEY) { onLogin(); }
-    else { setErr(true); setTimeout(() => setErr(false), 2000); }
+  const attempt = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ key }),
+      });
+      if (r.ok) {
+        onLogin();
+      } else {
+        const j = await r.json().catch(() => ({}));
+        setErrMsg(j.error || "Hatalı anahtar");
+        setErr(true);
+        setTimeout(() => setErr(false), 2500);
+      }
+    } catch {
+      setErrMsg("Bağlantı hatası");
+      setErr(true);
+      setTimeout(() => setErr(false), 2500);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -65,8 +90,8 @@ function LoginScreen({ onLogin }) {
           style={{ ...S.input, borderColor: err ? "#ef4444" : "#1e293b" }}
           autoFocus
         />
-        {err && <div style={{ color: "#ef4444", fontSize: 12, marginBottom: 10, marginTop: -6 }}>Hatalı anahtar</div>}
-        <button onClick={attempt} style={S.btn()}>Giriş Yap</button>
+        {err && <div style={{ color: "#ef4444", fontSize: 12, marginBottom: 10, marginTop: -6 }}>{errMsg}</div>}
+        <button onClick={attempt} disabled={busy} style={S.btn()}>{busy ? "Doğrulanıyor..." : "Giriş Yap"}</button>
         <p style={{ color: "#334155", fontSize: 11, marginTop: 20 }}>MetallurgyTools Admin · v2026</p>
       </div>
     </div>
@@ -121,19 +146,38 @@ export default function AdminLayout({ children }) {
   const [authed, setAuthed] = useState(false);
   const [checked, setChecked] = useState(false);
 
+  // Sunucudan oturum durumunu sor. Cookie HttpOnly olduğu için client
+  // doğrudan göremez; yalnızca "authed=true/false" döner.
   useEffect(() => {
-    const stored = sessionStorage.getItem(SESSION_KEY);
-    if (stored === "1") setAuthed(true);
-    setChecked(true);
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/admin/verify", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!cancelled) {
+          setAuthed(!!j.authed);
+          setChecked(true);
+        }
+      } catch {
+        if (!cancelled) setChecked(true);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  const handleLogin = () => {
-    sessionStorage.setItem(SESSION_KEY, "1");
-    setAuthed(true);
-  };
+  const handleLogin = () => setAuthed(true);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/verify", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+    } catch { /* ignore */ }
     setAuthed(false);
   };
 
@@ -141,7 +185,7 @@ export default function AdminLayout({ children }) {
   if (!authed) return <LoginScreen onLogin={handleLogin} />;
 
   return (
-    <AdminAuthContext.Provider value={{ authed, ADMIN_KEY }}>
+    <AdminAuthContext.Provider value={{ authed }}>
       <div style={S.page}>
         <Sidebar onLogout={handleLogout} />
         <main style={S.content}>

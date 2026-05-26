@@ -1,10 +1,17 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Routes that require authentication
+// ─────────────────────────────────────────────────────────────────────────────
+// SEO NOTU: /tools ve /mechanical-tests rotaları içerik sayfalarıdır.
+// Bunlar middleware seviyesinde kilitlenirse Googlebot ve diğer arama
+// motoru tarayıcıları sayfa içeriğini, metadata'yı ve JSON-LD'yi göremez —
+// site indekslenemez. Bu nedenle bu rotaları "public" tutuyoruz; gerçek
+// hesaplama/AI API uç noktaları zaten `app/api/tools/*/route.js` içinde
+// Clerk `auth()` ile sunucu tarafında korunmaktadır.
+// Yalnızca kullanıcıya özel paneller (dashboard, account, consultation)
+// ve admin tarafı korunmalıdır.
+// ─────────────────────────────────────────────────────────────────────────────
 const isProtectedRoute = createRouteMatcher([
-  "/tools(.*)",
-  "/mechanical-tests/(.*)",
   "/dashboard(.*)",
   "/account(.*)",
   "/consultation",

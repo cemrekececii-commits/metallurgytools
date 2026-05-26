@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { clerkClient } from "@clerk/nextjs/server";
 import { kv } from "@vercel/kv";
-import { ADMIN_KEY } from "@/lib/planUtils";
+import { isAdminAuthed } from "@/lib/adminAuth";
 
-function checkAdmin(req) {
-  const key = req.headers.get("x-admin-key") || new URL(req.url).searchParams.get("key");
-  return key === ADMIN_KEY;
+export const dynamic = "force-dynamic";
+
+function checkAdmin() {
+  return isAdminAuthed(cookies());
 }
 
 // GET — list all users with plan info
 export async function GET(req) {
-  if (!checkAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const client = await clerkClient();
   const { data: clerkUsers } = await client.users.getUserList({ limit: 200 });
@@ -39,7 +41,7 @@ export async function GET(req) {
 
 // PATCH — manually update a user's plan (admin action)
 export async function PATCH(req) {
-  if (!checkAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { userId, plan, planExpiresAt, resetUsage, subscriptionStatus, consultationFreeUsed } = await req.json();
   if (!userId || !plan) return NextResponse.json({ error: "userId and plan required" }, { status: 400 });
