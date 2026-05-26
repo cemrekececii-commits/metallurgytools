@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { rateLimit } from "@/lib/rateLimit";
 import { cleanString, approxByteSize } from "@/lib/validation";
+import { checkToolAccess, accessDeniedResponse } from "@/lib/accessControl";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // /api/sem-eds — Gemini görüntü/metin analiz uç noktası.
@@ -30,15 +30,15 @@ function getClientIp(req) {
 
 export async function POST(req) {
   try {
-    // 1) Auth — anonim çağrı yasak (AI API maliyet kontrolü).
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // 1) Erişim kontrolü: trial (7 gün) veya professional plan
+    const access = await checkToolAccess(req);
+    if (!access.allowed) return accessDeniedResponse(access.mode);
 
-    // 2) Rate limit — kullanıcı başına saatte 10, ek IP başına saatte 20 (DoS).
-    const ip = getClientIp(req);
-    const rlUser = await rateLimit(`sem-eds:user:${userId}`, { limit: 10, windowSec: 3600 });
+    // 2) Rate limit — kullanıcı/trial ID başına saatte 10, IP başına saatte 20 (DoS).
+    const ip      = getClientIp(req);
+    // Trial kullanıcılar için IP'yi, Clerk kullanıcılar için userId'yi kullan
+    const rlKey   = access.userId ? `sem-eds:user:${access.userId}` : `sem-eds:trial:${ip}`;
+    const rlUser  = await rateLimit(rlKey, { limit: 10, windowSec: 3600 });
     if (!rlUser.ok) {
       return NextResponse.json(
         { error: "Rate limit aşıldı, lütfen daha sonra tekrar deneyin." },

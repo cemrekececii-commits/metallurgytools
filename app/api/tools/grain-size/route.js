@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { callGeminiWithImage } from "@/lib/ai-studio";
-import { getUserPlan, hasToolAccess, hasCalculationsRemaining } from "@/lib/plans";
+import { checkToolAccess, accessDeniedResponse } from "@/lib/accessControl";
 
 const SYSTEM_PROMPT = `You are an expert metallurgical grain size analyzer. 
 You receive optical micrographs of steel samples and perform grain size measurement 
@@ -26,29 +25,9 @@ Respond ONLY in valid JSON with this structure:
 
 export async function POST(request) {
   try {
-    // Auth check
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Plan check
-    const user = await currentUser();
-    const { plan, calculationsUsed } = getUserPlan(user);
-
-    if (!hasToolAccess(plan, "grain-size")) {
-      return NextResponse.json(
-        { error: "Tool not available in your plan. Please upgrade." },
-        { status: 403 }
-      );
-    }
-
-    if (!hasCalculationsRemaining(plan, calculationsUsed)) {
-      return NextResponse.json(
-        { error: "Monthly calculation limit reached. Please upgrade." },
-        { status: 429 }
-      );
-    }
+    // Erişim kontrolü: trial (7 gün) veya professional plan
+    const access = await checkToolAccess(request);
+    if (!access.allowed) return accessDeniedResponse(access.mode);
 
     // Parse request
     const { image, mimeType, method } = await request.json();

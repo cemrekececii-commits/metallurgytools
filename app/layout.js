@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import Navbar from "@/components/Navbar";
+import TrialBanner from "@/components/TrialBanner";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
@@ -219,6 +220,7 @@ export default function RootLayout({ children }) {
         <body>
           <ThemeProvider>
             <LanguageProvider>
+              <TrialBanner />
               <Navbar />
               {children}
               <Footer />

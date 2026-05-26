@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { callGemini } from "@/lib/ai-studio";
-import { getUserPlan, hasToolAccess, hasCalculationsRemaining } from "@/lib/plans";
+import { checkToolAccess, accessDeniedResponse } from "@/lib/accessControl";
 
 const SYSTEM_PROMPT = `You are an expert physical metallurgist. Given a carbon content (wt%) and temperature (°C),
 determine the equilibrium phases present in the Fe-C (iron-cementite) system.
@@ -27,16 +26,8 @@ Respond ONLY in valid JSON:
 
 export async function POST(request) {
   try {
-    const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const user = await currentUser();
-    const { plan, calculationsUsed } = getUserPlan(user);
-
-    if (!hasToolAccess(plan, "phase-diagram"))
-      return NextResponse.json({ error: "Upgrade required" }, { status: 403 });
-    if (!hasCalculationsRemaining(plan, calculationsUsed))
-      return NextResponse.json({ error: "Limit reached" }, { status: 429 });
+    const access = await checkToolAccess(request);
+    if (!access.allowed) return accessDeniedResponse(access.mode);
 
     const { carbon, temperature } = await request.json();
 
