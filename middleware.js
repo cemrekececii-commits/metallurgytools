@@ -2,21 +2,27 @@
  * middleware.js
  *
  * Katmanlar:
- *  ① Her zaman açık   → public sayfalar, SEO rotaları, statik dosyalar
- *  ② Tool API'leri    → Clerk auth zorunlu (plan kontrolü route handler'da)
- *  ③ Tool sayfaları   → Auth yoksa /signup'a yönlendir (SEO botları geçer)
- *  ④ Admin rotaları   → Route handler halleder
- *  ⑤ Diğerleri        → Geçir
+ *  - Her zaman acik   -> public sayfalar, SEO rotalari, statik dosyalar
+ *  - Tool API'leri    -> Clerk auth zorunlu (plan kontrolu route handler'da)
+ *  - Tool sayfalari   -> Auth yoksa /signup'a yonlendir
+ *  - Admin rotalari   -> Route handler halleder
+ *  - Digerleri        -> Gecir
  *
- * SEO NOTU:
- *  Googlebot için /tools/* ve /mechanical-tests/* sayfaları açık kalır.
- *  Sadece /api/tools/* ve /api/sem-eds hesaplama endpoint'leri kısıtlıdır.
+ * SEO NOTU (guncellendi):
+ *  - /mechanical-tests/* egitim rehberleri artik TAM PUBLIC (statik icerik,
+ *    Google icin yuksek degerli; isAlwaysPublic'e tasindi).
+ *  - /tools/* interaktif hesaplayicilar girise kapalidir. ONEMLI: Artik
+ *    User-Agent ayrimi YOK. Daha once Googlebot'a icerik, kullaniciya /signup
+ *    sunuluyordu; bu CLOAKING'dir ve Google cezalandirabilir. Simdi kullanici
+ *    ve bot AYNI yaniti alir (auth yoksa ikisi de /signup'a yonlenir). /tools
+ *    indexlenmez ama farkli icerik sunulmadigi icin ceza riski ortadan kalkar.
+ *  - Sadece /api/tools/* ve /api/sem-eds hesaplama endpoint'leri kisitlidir.
  */
 
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// ─── Route matchers ───────────────────────────────────────────────────────────
+// --- Route matchers ---
 
 const isToolApiRoute = createRouteMatcher([
   "/api/tools/(.*)",
@@ -24,9 +30,10 @@ const isToolApiRoute = createRouteMatcher([
   "/api/sem-eds/(.*)",
 ]);
 
+// Sadece interaktif araclar girise kapali. Egitim rehberleri (mechanical-tests)
+// artik burada DEGIL -> isAlwaysPublic'te (tam public).
 const isToolPageRoute = createRouteMatcher([
   "/tools(.*)",
-  "/mechanical-tests(.*)",
 ]);
 
 const isAlwaysPublic = createRouteMatcher([
@@ -41,49 +48,46 @@ const isAlwaysPublic = createRouteMatcher([
   "/signup(.*)",
   "/blog(.*)",
   "/knowledge(.*)",
+  "/mechanical-tests(.*)",   // egitim rehberleri: TAM PUBLIC (SEO icerigi)
   "/sitemap.xml",
   "/robots.txt",
 ]);
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
+// --- Middleware ---
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
-  // ① Her zaman açık
+  // 1) Her zaman acik
   if (isAlwaysPublic(request)) return NextResponse.next();
 
-  // ② Tool API rotaları — Clerk auth yoksa 401
+  // 2) Tool API rotalari - Clerk auth yoksa 401
   if (isToolApiRoute(request)) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json(
-        { error: "Giriş yapmanız gerekiyor.", redirect: "/signup", mode: "unauthenticated" },
+        { error: "Giris yapmaniz gerekiyor.", redirect: "/signup", mode: "unauthenticated" },
         { status: 401 }
       );
     }
-    // Plan/trial kontrolü accessControl.js'de yapılır
+    // Plan/trial kontrolu accessControl.js'de yapilir
     return NextResponse.next();
   }
 
-  // ③ Tool sayfa rotaları — auth yoksa /signup'a yönlendir
-  //    Googlebot ve arama motorları User-Agent ile tespit edilip geçirilir
+  // 3) Tool sayfa rotalari - auth yoksa /signup'a yonlendir.
+  //    CLOAKING KALDIRILDI: kullanici ve bot ayrimi yapilmaz; herkes ayni
+  //    yaniti alir. Auth yoksa Googlebot dahil herkes /signup'a yonlenir.
   if (isToolPageRoute(request)) {
-    const ua = request.headers.get("user-agent") || "";
-    const isBot = /googlebot|bingbot|yandexbot|slurp|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot/i.test(ua);
-
-    if (!isBot) {
-      const { userId } = await auth();
-      if (!userId) {
-        const signupUrl = new URL("/signup", request.url);
-        signupUrl.searchParams.set("redirect_url", pathname);
-        return NextResponse.redirect(signupUrl);
-      }
+    const { userId } = await auth();
+    if (!userId) {
+      const signupUrl = new URL("/signup", request.url);
+      signupUrl.searchParams.set("redirect_url", pathname);
+      return NextResponse.redirect(signupUrl);
     }
     return NextResponse.next();
   }
 
-  // ④⑤ Admin ve diğerleri
+  // 4-5) Admin ve digerleri
   return NextResponse.next();
 });
 
