@@ -13,6 +13,9 @@
 // statik export'ta dynamic sitemap istenirse generateMetadata + KV
 // integration ekleyerek genişletilebilir.
 // ─────────────────────────────────────────────────────────────────────────────
+import { CASES } from "@/components/hasar/CaseData";
+import blogPosts from "@/data/blogs.json";
+
 export default function sitemap() {
   const baseUrl = "https://www.metallurgytools.com";
   const lastModified = new Date();
@@ -86,10 +89,50 @@ export default function sitemap() {
     lastModified,
   }));
 
+  // ── Yasal sayfalar (düşük öncelik, fakat indexlenmeli) ─────────────────────
+  const legalSlugs = [
+    "gizlilik-politikasi",
+    "kvkk-aydinlatma",
+    "cerez-politikasi",
+    "kullanim-kosullari",
+    "mesafeli-hizmet-sozlesmesi",
+    "iletisim",
+  ];
+  const legalPages = legalSlugs.map((slug) => ({
+    url: `${baseUrl}/${slug}`,
+    changeFrequency: "yearly",
+    priority: 0.30,
+    lastModified,
+  }));
+
+  // ── Hasar vakaları — tekil sayfalar (derin, benzersiz teknik içerik) ────────
+  // components/hasar/CaseData.js -> 25 üretim kusuru vakası. Daha önce yalnız
+  // /tools/hasar-vakalari liste sayfası sitemap'teydi; tekil URL'ler sadece
+  // link discovery ile bulunuyordu. Artık doğrudan sitemap'te → daha hızlı keşif.
+  const casePages = CASES.map((c) => ({
+    url: encodeURI(`${baseUrl}/tools/hasar-vakalari/${c.slug}`),
+    changeFrequency: "yearly",
+    priority: 0.70,
+    lastModified,
+  }));
+
+  // ── Blog yazıları (yalnız published) ────────────────────────────────────────
+  const blogPostPages = blogPosts
+    .filter((b) => b && b.slug && b.status === "published")
+    .map((b) => ({
+      url: encodeURI(`${baseUrl}/blog/${b.slug}`),
+      changeFrequency: "monthly",
+      priority: 0.75,
+      lastModified: b.date ? new Date(b.date) : lastModified,
+    }));
+
   return [
     ...staticPages.map((p) => ({ ...p, lastModified })),
     ...toolPages,
     ...mechanicalTestPages,
     ...knowledgePages,
+    ...casePages,
+    ...blogPostPages,
+    ...legalPages,
   ];
 }
