@@ -22,6 +22,13 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+// --- PUBLIC MODE (geri alinabilir) ---
+// NEXT_PUBLIC_OPEN_ACCESS=true iken TUM sayfa ve API rotalari login/abonelik
+// aranmadan gecer. AI endpoint'lerinde IP hiz limiti accessControl.js'de
+// uygulanir. Bayragi kaldirinca / "false" yapinca asagidaki gating aynen
+// geri gelir (yalnizca redeploy gerekir).
+const OPEN_ACCESS = process.env.NEXT_PUBLIC_OPEN_ACCESS === "true";
+
 // --- Route matchers ---
 
 const isToolApiRoute = createRouteMatcher([
@@ -57,6 +64,10 @@ const isAlwaysPublic = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
+
+  // 0) PUBLIC MODE - her sey acik. Hicbir sayfa/endpoint login istemez.
+  //    (AI endpoint'lerinde IP hiz limiti accessControl.js'de uygulanir.)
+  if (OPEN_ACCESS) return NextResponse.next();
 
   // 1) Her zaman acik
   if (isAlwaysPublic(request)) return NextResponse.next();

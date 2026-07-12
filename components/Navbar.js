@@ -6,6 +6,10 @@ import { useLang } from "@/lib/LanguageContext";
 import { useTheme } from "@/lib/ThemeContext";
 import SearchModal from "./SearchModal";
 
+// PUBLIC MODE (geri alinabilir): NEXT_PUBLIC_OPEN_ACCESS=true iken giris
+// (Sign In) butonu gizlenir. Bayrak kalkinca eski hali geri gelir.
+const OPEN_ACCESS = process.env.NEXT_PUBLIC_OPEN_ACCESS === "true";
+
 const LANG_OPTIONS = [
   { code: "tr", label: "TR" },
   { code: "en", label: "EN" },
@@ -332,23 +336,28 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Divider */}
-          <div className="w-px h-5 bg-white/10 shrink-0" />
-
-          {/* Dashboard / Sign In */}
+          {/* Dashboard / Sign In — OPEN_ACCESS + anonim iken giris gizli */}
           {isSignedIn ? (
-            <Link
-              href="/dashboard"
-              className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-md px-4 py-1.5 text-sm font-semibold hover:shadow-lg hover:shadow-gold-400/20 transition-all shrink-0 whitespace-nowrap"
-            >
-              {t.dashboard}
-            </Link>
-          ) : (
-            <SignInButton mode="modal">
-              <button className="border border-white/15 text-dark-100 rounded-md px-4 py-1.5 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans shrink-0 whitespace-nowrap">
-                {lang === "tr" ? "Giriş Yap" : lang === "zh" ? "登录" : lang === "ja" ? "ログイン" : "Sign In"}
-              </button>
-            </SignInButton>
+            <>
+              {/* Divider */}
+              <div className="w-px h-5 bg-white/10 shrink-0" />
+              <Link
+                href="/dashboard"
+                className="bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-md px-4 py-1.5 text-sm font-semibold hover:shadow-lg hover:shadow-gold-400/20 transition-all shrink-0 whitespace-nowrap"
+              >
+                {t.dashboard}
+              </Link>
+            </>
+          ) : OPEN_ACCESS ? null : (
+            <>
+              {/* Divider */}
+              <div className="w-px h-5 bg-white/10 shrink-0" />
+              <SignInButton mode="modal">
+                <button className="border border-white/15 text-dark-100 rounded-md px-4 py-1.5 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans shrink-0 whitespace-nowrap">
+                  {lang === "tr" ? "Giriş Yap" : lang === "zh" ? "登录" : lang === "ja" ? "ログイン" : "Sign In"}
+                </button>
+              </SignInButton>
+            </>
           )}
         </div>
 
@@ -471,24 +480,26 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Sign in / Dashboard */}
-              <div className="px-2 pt-1 pb-4">
-                {isSignedIn ? (
-                  <Link href="/dashboard" onClick={closeMobile}
-                    className="block w-full text-center bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-lg px-4 py-2.5 text-sm font-semibold">
-                    {t.dashboard}
-                  </Link>
-                ) : (
-                  <SignInButton mode="modal">
-                    <button
-                      onClick={closeMobile}
-                      className="w-full border border-white/15 text-dark-100 rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans"
-                    >
-                      {lang === "tr" ? "Giriş Yap" : "Sign In"}
-                    </button>
-                  </SignInButton>
-                )}
-              </div>
+              {/* Sign in / Dashboard — OPEN_ACCESS + anonim iken giris gizli */}
+              {!(OPEN_ACCESS && !isSignedIn) && (
+                <div className="px-2 pt-1 pb-4">
+                  {isSignedIn ? (
+                    <Link href="/dashboard" onClick={closeMobile}
+                      className="block w-full text-center bg-gradient-to-br from-gold-400 to-gold-500 text-dark-800 no-underline rounded-lg px-4 py-2.5 text-sm font-semibold">
+                      {t.dashboard}
+                    </Link>
+                  ) : (
+                    <SignInButton mode="modal">
+                      <button
+                        onClick={closeMobile}
+                        className="w-full border border-white/15 text-dark-100 rounded-lg px-4 py-2.5 text-sm font-medium cursor-pointer hover:border-gold-400/40 hover:text-gold-400 transition-all bg-transparent font-sans"
+                      >
+                        {lang === "tr" ? "Giriş Yap" : "Sign In"}
+                      </button>
+                    </SignInButton>
+                  )}
+                </div>
+              )}
 
             </div>
           </div>
