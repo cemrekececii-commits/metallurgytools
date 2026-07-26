@@ -34,7 +34,7 @@ const TR = {
   stats: [
     { label: 'Profesyonel Mühendislik Aracı', value: '11' },
     { label: 'Referans Alınan Uluslararası Standartlar', value: 'ASTM / ISO / API / EN' },
-    { label: 'Doğrulamada Kullanılan Test Veri Noktası', value: '50.000+' },
+    { label: 'Yıllık Doğrulama Test Verisi', value: '70.000+' },
     { label: 'Dil Desteği', value: 'TR / EN / ZH / JA' }
   ],
 
@@ -98,7 +98,7 @@ const EN = {
   stats: [
     { label: 'Professional Engineering Tools', value: '11' },
     { label: 'Referenced International Standards', value: 'ASTM / ISO / API / EN' },
-    { label: 'Test Data Points Used in Validation', value: '50,000+' },
+    { label: 'Test Results Used in Validation (per year)', value: '70,000+' },
     { label: 'Language Support', value: 'TR / EN / ZH / JA' }
   ],
 

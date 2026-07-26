@@ -1,0 +1,17 @@
+# RFC 9116 — security.txt
+# Bu dosya güvenlik araştırmacılarına zafiyet bildirim kanalını ilan eder.
+
+Contact: mailto:security@metallurgytools.com
+Expires: 2027-05-26T23:59:59Z
+Preferred-Languages: tr, en
+Canonical: https://www.metallurgytools.com/.well-known/security.txt
+Policy: https://www.metallurgytools.com/security-policy
+
+# Notlar:
+# - Tarayıcı tabanlı (XSS, CSRF, header bypass, IDOR) ve sunucu tarafı
+#   (auth bypass, SSRF, deserialization) bulgularını sorumlu bilgilendirme
+#   ilkesi çerçevesinde bildirin.
+# - "Penetration test scope": yalnızca www.metallurgytools.com.
+# - Out of scope: 3. parti sağlayıcılar (Clerk, Stripe, Vercel, Cloudflare,
+#   iyzico, Shopier) — bunları kendi disclosure programlarına bildirin.
+# - Lütfen production data'sını kopyalamayın; ekran görüntüsü yeterlidir.

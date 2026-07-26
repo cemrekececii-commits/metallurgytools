@@ -105,6 +105,20 @@ const nextConfig = {
   async rewrites() {
     return [
       { source: "/account", destination: "/account" },
+
+      // ── Markdown ayna URL'leri ────────────────────────────────────────────
+      // /tools/hardness.md → /api/md/tools/hardness
+      //
+      // :slug([^/.]+) deseni nokta içermeyen tek segmenti yakalar; ardındaki
+      // literal ".md" böylece slug'a dahil olmaz. JS çalıştırmayan ajanlar
+      // sayfanın teknik özetini düz Markdown olarak alabilir. HTML sayfaları
+      // ve araçların çalışması etkilenmez; kanonik sürüm HTML'dir ve .md
+      // yanıtları X-Robots-Tag: noindex ile servis edilir.
+      { source: "/tools/hasar-vakalari/:slug([^/.]+).md", destination: "/api/md/tools/hasar-vakalari/:slug" },
+      { source: "/tools/:slug([^/.]+).md", destination: "/api/md/tools/:slug" },
+      { source: "/knowledge/:slug([^/.]+).md", destination: "/api/md/knowledge/:slug" },
+      { source: "/mechanical-tests/:slug([^/.]+).md", destination: "/api/md/mechanical-tests/:slug" },
+      { source: "/blog/:slug([^/.]+).md", destination: "/api/md/blog/:slug" },
     ];
   },
 };

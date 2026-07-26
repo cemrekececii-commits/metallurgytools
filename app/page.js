@@ -33,7 +33,7 @@ export default function HomePage() {
     { icon: "🔬", title: "Metalografik Doğrulama", desc: "Her araç, optik ve elektron mikroskobu verileriyle doğrulanmış. Laboratuvar pratiğiyle uyumlu." },
     { icon: "🧪", title: "Hasar Analizi Odaklı", desc: "Müşteri şikayeti numunelerinden kök neden analizine, inklüzyon karakterizasyonundan kırılma mekaniğine." },
     { icon: "🌍", title: "Küresel Erişim", desc: "Türkçe ve İngilizce dil desteği. Dünyanın her yerindeki metalurji mühendisleri için tasarlanmış." },
-    { icon: "📊", title: "350.000+ Test Verisi", desc: "İçerik ve algoritmalar, 350.000'i aşkın gerçek üretim testi verisiyle kalibre edilmiştir." },
+    { icon: "📊", title: "Yılda 70.000+ Test Verisi", desc: "İçerik ve algoritmalar, yılda 70.000'i aşkın gerçek üretim testi verisiyle kalibre edilmektedir." },
   ];
   const featuresEN = [
     { icon: "🏭", title: "From the Industry", desc: "Designed with real field experience — from BOF steelmaking to continuous casting, rolling lines to quality control laboratories." },
@@ -41,7 +41,7 @@ export default function HomePage() {
     { icon: "🔬", title: "Metallographically Validated", desc: "Every tool validated against optical and electron microscopy data." },
     { icon: "🧪", title: "Failure Analysis Focused", desc: "From customer complaint root cause analysis to inclusion characterization and fracture mechanics." },
     { icon: "🌍", title: "Global Access", desc: "Turkish and English language support. Browser-based platform for metallurgical engineers worldwide." },
-    { icon: "📊", title: "350,000+ Test Data Points", desc: "Content and algorithms calibrated against over 350,000 real production test data points." },
+    { icon: "📊", title: "70,000+ Test Results per Year", desc: "Content and algorithms calibrated against more than 70,000 real production test results processed annually." },
   ];
 
   const features = lang === "tr" ? featuresTR : featuresEN;
@@ -89,7 +89,7 @@ export default function HomePage() {
           {/* Top badge */}
           <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-mono mb-8" style={{ background: "rgba(30,64,175,0.12)", border: "1px solid rgba(59,130,246,0.25)", color: "#93c5fd" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-            {lang === "tr" ? "20+ Yıl Saha Deneyimi · 350.000+ Test Verisi · Ücretsiz Başla" : "20+ Years Field Experience · 350,000+ Test Data · Start Free"}
+            {lang === "tr" ? "20+ Yıl Saha Deneyimi · Yılda 70.000+ Test Verisi · Ücretsiz Başla" : "20+ Years Field Experience · 70,000+ Tests / Year · Start Free"}
           </div>
 
           {/* Main headline */}
@@ -114,8 +114,8 @@ export default function HomePage() {
           {/* Subtitle */}
           <p className="text-base md:text-lg text-dark-200 max-w-3xl mx-auto mb-10 leading-relaxed">
             {lang === "tr"
-              ? "Hesaplama araçları, bilgi bankası ve uzman danışmanlık — hepsi tek platformda. Entegre demir-çelik tesisinde 20 yılı aşkın saha deneyimi ve 350.000+ mekanik test verisiyle geliştirilmiştir."
-              : "Computation tools, knowledge base, and expert consultation — all in one platform. Built on 20+ years of integrated steel plant experience and 350,000+ mechanical test data points."}
+              ? "Hesaplama araçları, bilgi bankası ve uzman danışmanlık — hepsi tek platformda. Entegre demir-çelik tesisinde 20 yılı aşkın saha deneyimi ve yılda 70.000+ mekanik test verisiyle geliştirilmiştir."
+              : "Computation tools, knowledge base, and expert consultation — all in one platform. Built on 20+ years of integrated steel plant experience and 70,000+ mechanical test results processed per year."}
           </p>
 
           {/* Three pillars */}
@@ -344,13 +344,13 @@ export default function HomePage() {
               {lang === "tr" ? (
                 <>
                   <p>MetallurgyTools, entegre demir-çelik tesislerinde görev yapan uzman metalurji mühendisleri tarafından geliştirilmektedir. Çelik üretiminin her aşamasında — BOF çelik yapımından sürekli dökme, sıcak haddeleme hatlarından mekanik test laboratuvarlarına kadar — edinilen gerçek saha deneyimine dayanmaktadır.</p>
-                  <p>Platformdaki her araç, uluslararası standartlarla (ASTM, ISO, API, ASME) uyumlu olarak tasarlanmış ve 350.000'i aşkın gerçek üretim test verisiyle doğrulanmıştır.</p>
+                  <p>Platformdaki her araç, uluslararası standartlarla (ASTM, ISO, API, ASME) uyumlu olarak tasarlanmış ve yılda 70.000'i aşkın gerçek üretim test verisiyle doğrulanmaktadır.</p>
                   <p>Hedefimiz, dünya genelindeki metalurji mühendislerine günlük iş akışlarında kullanabilecekleri pratik, güvenilir ve standartlara uygun dijital araçlar sunmaktır.</p>
                 </>
               ) : (
                 <>
                   <p>MetallurgyTools is developed by expert metallurgical engineers working in integrated iron and steel plants, grounded in real-world experience across every stage of steel production.</p>
-                  <p>Every tool is designed in compliance with international standards (ASTM, ISO, API, ASME) and validated against more than 350,000 real production data points.</p>
+                  <p>Every tool is designed in compliance with international standards (ASTM, ISO, API, ASME) and validated against more than 70,000 real production test results processed each year.</p>
                   <p>Our goal is to provide metallurgical engineers worldwide with practical, reliable, and standards-compliant digital tools for their daily workflows.</p>
                 </>
               )}

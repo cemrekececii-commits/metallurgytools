@@ -22,7 +22,7 @@ export default function CredibilityBar() {
       }}>
         {[
           { value: "18+", label: "Yıl Endüstriyel Deneyim", sub: "Entegre çelik tesisi" },
-          { value: "50.000+", label: "Analiz Edilmiş Test Verisi", sub: "Çekme · Charpy · Sertlik · DWTT" },
+          { value: "70.000+", label: "Yılda Analiz Edilen Test Verisi", sub: "Çekme · Charpy · Sertlik · DWTT" },
           { value: "12+", label: "Akademik Yayın", sub: "Konferans bildirisi" },
           { value: "ASTM · EN ISO · API", label: "Standart Uyumluluğu", sub: "Tüm içerik doğrulanmış" },
         ].map((item) => (

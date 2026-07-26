@@ -12,7 +12,7 @@ const TOOL_ICONS = {
 const translations = {
   tr: {
     title: 'Bilimsel Temel ve Metodoloji',
-    subtitle: 'Entegre çelik fabrikalarından 50.000+ üretim test kaydına karşı doğrulanmış ampirik formüller',
+    subtitle: 'Entegre çelik fabrikalarından yılda 70.000+ üretim test kaydına karşı doğrulanan ampirik formüller',
     hero_desc: 'Her MetallurgyTools hesaplayıcısının arkasında titiz bilimsel araştırma ve endüstri standartları vardır. Aşağıda her araçta kullanılan matematiksel ve fiziksel temeli bulacaksınız.',
     tools: {
       grain: {
@@ -69,12 +69,12 @@ const translations = {
       },
     },
     validation_title: 'Doğrulama ve Güvenilirlik',
-    validation_text: 'Tüm algoritmalar, entegre çelik fabrikalarından 50.000+ üretim test kaydına karşı doğrulanmıştır. Belirsizlikler ve sınırlamalar net bir şekilde belirtilmiştir. Sonuçlar mühendislik tahminleridir ve gerçek testlerle doğrulanmalıdır.',
+    validation_text: 'Tüm algoritmalar, entegre çelik fabrikalarından yılda 70.000+ üretim test kaydına karşı doğrulanmaktadır. Belirsizlikler ve sınırlamalar net bir şekilde belirtilmiştir. Sonuçlar mühendislik tahminleridir ve gerçek testlerle doğrulanmalıdır.',
     references_title: 'Tam Referans Listesi',
   },
   en: {
     title: 'Scientific Foundation & Methodology',
-    subtitle: 'Empirical formulas validated against 50,000+ production test records from integrated steel plants',
+    subtitle: 'Empirical formulas validated against 70,000+ production test records per year from integrated steel plants',
     hero_desc: 'Behind every MetallurgyTools calculator lies rigorous scientific research and industry standards. Below you will find the mathematical and physical foundations used in each tool.',
     tools: {
       grain: {
@@ -131,7 +131,7 @@ const translations = {
       },
     },
     validation_title: 'Validation & Reliability',
-    validation_text: 'All algorithms validated against 50,000+ production test records from integrated steel plants. Uncertainty and limitations are clearly stated. Results are engineering estimates and should be verified with actual tests.',
+    validation_text: 'All algorithms validated against 70,000+ production test records per year from integrated steel plants. Uncertainty and limitations are clearly stated. Results are engineering estimates and should be verified with actual tests.',
     references_title: 'Complete References',
   },
 };

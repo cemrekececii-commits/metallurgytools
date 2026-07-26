@@ -43,8 +43,19 @@ const isToolPageRoute = createRouteMatcher([
   "/tools(.*)",
 ]);
 
+// Markdown ayna URL'leri (/tools/x.md, /blog/x.md ...) ve LLM korpus
+// dosyalari. Bunlar salt-okunur metin ozetleridir; hesaplama yapmazlar ve
+// kullanim hakki tuketmezler. isToolPageRoute'tan ONCE degerlendirilmelidir,
+// aksi halde /tools/*.md istekleri /signup'a yonlenir (tespit: yerelde 307).
+const isMarkdownMirror = createRouteMatcher([
+  "/(.*)\\.md",
+  "/api/md/(.*)",
+]);
+
 const isAlwaysPublic = createRouteMatcher([
   "/",
+  "/llms.txt",
+  "/llms-full.txt",
   "/api/shopier/(.*)",
   "/api/trial/(.*)",
   "/api/blog/(.*)",
@@ -69,7 +80,8 @@ export default clerkMiddleware(async (auth, request) => {
   //    (AI endpoint'lerinde IP hiz limiti accessControl.js'de uygulanir.)
   if (OPEN_ACCESS) return NextResponse.next();
 
-  // 1) Her zaman acik
+  // 1) Her zaman acik (Markdown aynalari dahil — tool gating'den ONCE)
+  if (isMarkdownMirror(request)) return NextResponse.next();
   if (isAlwaysPublic(request)) return NextResponse.next();
 
   // 2) Tool API rotalari - Clerk auth yoksa 401

@@ -7,7 +7,7 @@ const TR = {
   whyLabel: "Neden MetallurgyTools?",
   whyTitle: "Deneyim, Saha Verisi\nve İstatistiksel Analiz",
   whyDesc:
-    "Entegre demir-çelik tesisinde 18 yılı aşkın saha çalışması, 50.000'i aşkın mekanik test sonucu ve sistematik veri incelemelerine dayanan istatistik temelli deney tasarımı yaklaşımıyla geliştirilmiştir.",
+    "Entegre demir-çelik tesisinde 20 yılı aşkın saha çalışması, yılda 70.000'i aşkın mekanik test sonucu ve sistematik veri incelemelerine dayanan istatistik temelli deney tasarımı yaklaşımıyla geliştirilmiştir.",
 
   methLabel: "Metodoloji",
   methItems: [
@@ -32,13 +32,23 @@ const TR = {
     { href: "/tools",            label: "Araçlar"         },
     { href: "/pricing",          label: "Fiyatlandırma"   },
   ],
+
+  legalLabel: "Yasal Bilgiler",
+  legalLinks: [
+    { href: "/gizlilik-politikasi",        label: "Gizlilik Politikası"      },
+    { href: "/kvkk-aydinlatma",            label: "KVKK Aydınlatma"          },
+    { href: "/cerez-politikasi",           label: "Çerez Politikası"         },
+    { href: "/kullanim-kosullari",         label: "Kullanım Koşulları"       },
+    { href: "/mesafeli-hizmet-sozlesmesi", label: "Mesafeli Hizmet Sözleşmesi" },
+    { href: "/iletisim",                   label: "İletişim"                 },
+  ],
 };
 
 const EN = {
   whyLabel: "Why MetallurgyTools?",
   whyTitle: "Experience, Field Data\nand Statistical Analysis",
   whyDesc:
-    "Built on 18+ years of field work in an integrated steel plant, 50,000+ mechanical test results, and a statistically-based experimental design approach rooted in systematic data analysis.",
+    "Built on 20+ years of field work in an integrated steel plant, 70,000+ mechanical test results per year, and a statistically-based experimental design approach rooted in systematic data analysis.",
 
   methLabel: "Methodology",
   methItems: [
@@ -62,6 +72,16 @@ const EN = {
     { href: "/knowledge",        label: "Knowledge Base"   },
     { href: "/tools",            label: "Tools"            },
     { href: "/pricing",          label: "Pricing"          },
+  ],
+
+  legalLabel: "Legal",
+  legalLinks: [
+    { href: "/gizlilik-politikasi",        label: "Privacy Policy"           },
+    { href: "/kvkk-aydinlatma",            label: "KVKK Notice"              },
+    { href: "/cerez-politikasi",           label: "Cookie Policy"            },
+    { href: "/kullanim-kosullari",         label: "Terms of Use"             },
+    { href: "/mesafeli-hizmet-sozlesmesi", label: "Distance Sales Contract"  },
+    { href: "/iletisim",                   label: "Contact"                  },
   ],
 };
 
@@ -164,6 +184,24 @@ export default function Footer() {
               {t.disclaimer}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Yasal Bağlantılar / Legal Links Band */}
+      <div className="border-t border-white/[0.06] bg-dark-900/60 px-6 py-5">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-x-5 gap-y-2">
+          <span className="text-gold-400 font-mono text-[11px] tracking-[0.1em] uppercase">
+            {t.legalLabel}
+          </span>
+          {t.legalLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-dark-400 text-xs no-underline hover:text-gold-400 transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       </div>
 

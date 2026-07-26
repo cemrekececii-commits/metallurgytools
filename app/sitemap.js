@@ -25,6 +25,10 @@ export default function sitemap() {
     { url: `${baseUrl}/about`,                       changeFrequency: "monthly", priority: 0.60 },
     { url: `${baseUrl}/pricing`,                     changeFrequency: "monthly", priority: 0.60 },
     { url: `${baseUrl}/methodology`,                 changeFrequency: "monthly", priority: 0.55 },
+    // Danışmanlık hizmet sayfası — robots'ta disallow'dan çıkarıldı, artık
+    // hizmet kapsamının taranabilir tek dayanağı ve ProfessionalService
+    // şemasının kanonik hedefi.
+    { url: `${baseUrl}/consultation`,                changeFrequency: "monthly", priority: 0.75 },
     { url: `${baseUrl}/knowledge`,                   changeFrequency: "weekly",  priority: 0.85 },
     { url: `${baseUrl}/mechanical-tests`,            changeFrequency: "weekly",  priority: 0.85 },
     { url: `${baseUrl}/blog`,                        changeFrequency: "daily",   priority: 0.80 },

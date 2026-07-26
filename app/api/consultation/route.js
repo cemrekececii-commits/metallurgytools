@@ -5,10 +5,11 @@ import {
   cleanString, stripTags, isEmail, approxByteSize, validateAttachments
 } from "@/lib/validation";
 import { rateLimit } from "@/lib/rateLimit";
+import { putEntry, getEntry, patchEntry, listEntries } from "@/lib/kvStore";
 
 export const dynamic = "force-dynamic";
 
-if (!global.consultationStore) { global.consultationStore = []; }
+const NS = "consultation";
 
 function clientIp(req) {
   return (
@@ -38,26 +39,32 @@ export async function POST(req) {
       return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
     }
 
-    // Toplam istek boyutu koruması (dosyalar hariç metin ~ 64 KB yeterli;
-    // dosyalar aşağıda validateAttachments ile ayrıca sınırlanır)
     if (approxByteSize({ ...body, files: undefined }) > 64 * 1024) {
       return NextResponse.json({ error: "Metin alanları çok büyük" }, { status: 413 });
     }
 
-    const name          = cleanString(body.name, 120);
-    const email         = cleanString(body.email, 254);
-    const company       = cleanString(body.company, 160);
-    const subject       = cleanString(body.subject, 200);
-    const category      = cleanString(body.category, 40);
-    const steelGrade    = cleanString(body.steelGrade, 80);
-    const standard      = cleanString(body.standard, 80);
+    const name             = cleanString(body.name, 120);
+    const email            = cleanString(body.email, 254);
+    const company          = cleanString(body.company, 160);
+    const subject          = cleanString(body.subject, 200);
+    const category         = cleanString(body.category, 40);
+    const steelGrade       = cleanString(body.steelGrade, 80);
+    const standard         = cleanString(body.standard, 80);
     const chemicalAnalysis = stripTags(body.chemicalAnalysis, 4000);
-    const situation     = stripTags(body.situation, 8000);
-    const processParams = stripTags(body.processParams, 4000);
-    const additionalInfo= stripTags(body.additionalInfo, 4000);
+    const situation        = stripTags(body.situation, 8000);
+    const processParams    = stripTags(body.processParams, 4000);
+    const additionalInfo   = stripTags(body.additionalInfo, 4000);
 
     if (!name || !isEmail(email) || !subject || !situation) {
       return NextResponse.json({ error: "Zorunlu alanlar eksik veya geçersiz" }, { status: 400 });
+    }
+
+    // KVKK aydınlatma metnine açık rıza beyanı
+    if (body.kvkkConsent !== true) {
+      return NextResponse.json(
+        { error: "Aydınlatma metnine açık rıza zorunludur." },
+        { status: 400 }
+      );
     }
 
     const att = validateAttachments(body.files, { maxCount: 5, maxTotalBytes: 6 * 1024 * 1024 });
@@ -66,6 +73,7 @@ export async function POST(req) {
     const entry = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       status: "pending",
       name, email, company, subject, category,
       steelGrade, standard,
@@ -73,12 +81,12 @@ export async function POST(req) {
       files: att.files,
       reply: null,
       repliedAt: null,
+      kvkkConsentAt: new Date().toISOString(),
     };
 
-    global.consultationStore.unshift(entry);
-    return NextResponse.json({ success: true, id: entry.id });
+    const saved = await putEntry(NS, entry);
+    return NextResponse.json({ success: true, id: saved.id });
   } catch (err) {
-    // Hata detaylarını istemciye sızdırma
     console.error("consultation POST:", err?.message);
     return NextResponse.json({ error: "Gönderim başarısız" }, { status: 500 });
   }
@@ -89,10 +97,11 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (id) {
-    const item = (global.consultationStore || []).find(x => x.id === id);
+    const item = await getEntry(NS, id);
     return NextResponse.json({ item: item || null });
   }
-  const list = (global.consultationStore || []).map(x => ({
+  const all = await listEntries(NS, { limit: 500 });
+  const list = all.map((x) => ({
     id: x.id, date: x.date, status: x.status,
     name: x.name, email: x.email, subject: x.subject, category: x.category,
     filesCount: x.files?.length || 0,
@@ -104,14 +113,15 @@ export async function PATCH(req) {
   if (!requireAdmin()) return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
   try {
     const { id, status, reply } = await req.json();
-    const item = (global.consultationStore || []).find(x => x.id === id);
-    if (!item) return NextResponse.json({ error: "Bulunamadı" }, { status: 404 });
-    if (status) item.status = cleanString(status, 40);
+    const patch = {};
+    if (status) patch.status = cleanString(status, 40);
     if (reply !== undefined) {
-      item.reply = stripTags(reply, 8000);
-      item.repliedAt = new Date().toISOString();
-      item.status = "replied";
+      patch.reply = stripTags(reply, 8000);
+      patch.repliedAt = new Date().toISOString();
+      patch.status = "replied";
     }
+    const updated = await patchEntry(NS, id, patch);
+    if (!updated) return NextResponse.json({ error: "Bulunamadı" }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Güncelleme başarısız" }, { status: 500 });

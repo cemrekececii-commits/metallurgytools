@@ -32,7 +32,13 @@ const SENSITIVE_DISALLOW = [
   "/account/",
   "/login",
   "/signup",
-  "/consultation",
+  // NOT: /consultation KASITLI OLARAK KALDIRILDI.
+  //   Danışmanlık hizmetlerini tanıtan tek genel sayfa burasıdır ve kimlik
+  //   doğrulaması gerektirmez. Disallow altında kaldığında hem Google hem de
+  //   LLM tarayıcıları hizmet kapsamını göremiyordu; ayrıca JSON-LD
+  //   ProfessionalService şemasının url alanı taranamayan bir hedefi
+  //   gösteriyordu. Form gönderimi POST /api/consultation üzerinden yapılır
+  //   ve /api/ zaten disallow listesindedir (rate-limit ayrıca lib/rateLimit.js).
 ];
 
 // AI / LLM tarayıcıları — explicit allow (admin hariç).
@@ -84,7 +90,7 @@ export default function robots() {
       // ① Genel arama motorları + tüm diğer botlar
       {
         userAgent: "*",
-        allow: ["/", "/tools/", "/mechanical-tests/", "/knowledge/", "/blog/"],
+        allow: ["/", "/tools/", "/mechanical-tests/", "/knowledge/", "/blog/", "/consultation"],
         disallow: SENSITIVE_DISALLOW,
       },
       // ② AI tarayıcıları — explicit allow (içerik LLM bilgi tabanlarına geçsin)
@@ -98,6 +104,10 @@ export default function robots() {
           "/blog/",
           "/about",
           "/methodology",
+          "/consultation",
+          // LLM korpus dosyaları ve Markdown ayna URL'leri
+          "/llms.txt",
+          "/llms-full.txt",
         ],
         disallow: SENSITIVE_DISALLOW,
       },

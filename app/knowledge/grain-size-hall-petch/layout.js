@@ -1,3 +1,6 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, techArticleLd } from "@/lib/seo";
+
 export const metadata = {
   title: "Tane Boyutu ve Hall-Petch İlişkisi — ASTM E112",
   description:
@@ -18,5 +21,25 @@ export const metadata = {
 };
 
 export default function Layout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          techArticleLd({
+            headline: "Tane Boyutu ve Hall-Petch İlişkisi — ASTM E112",
+            path: "/knowledge/grain-size-hall-petch",
+            description:
+              "ASTM E112 tane boyutu ölçümü, Hall-Petch denklemi ve tane inceltme mekanizmaları.",
+            keywords: ["tane boyutu", "grain size", "Hall-Petch", "ASTM E112"],
+          }),
+          breadcrumbLd([
+            { name: "Ana Sayfa", path: "" },
+            { name: "Bilgi Tabanı", path: "/knowledge" },
+            { name: "Tane Boyutu ve Hall-Petch", path: "/knowledge/grain-size-hall-petch" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

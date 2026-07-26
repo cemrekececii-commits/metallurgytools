@@ -1,14 +1,14 @@
 import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
+import { siteGraphLd, CLAIMS } from "@/lib/seo";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import Navbar from "@/components/Navbar";
 import TrialBanner from "@/components/TrialBanner";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
+import AnalyticsScripts from "@/components/AnalyticsScripts";
 import "./globals.css";
-
-const GA_ID = "G-P1R7MB65WK";
-const CLARITY_ID = "w8jv2xdiqq";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // metadataBase: tüm relative og:image / canonical URL'leri için tek doğruluk
@@ -51,7 +51,8 @@ export const metadata = {
   publisher: "MetallurgyTools",
   openGraph: {
     title: "MetallurgyTools – Professional Steel Metallurgy Calculators",
-    description: "Free professional-grade metallurgical engineering tools. Fe-C phase diagram, grain size analyzer, corrosion calculator, hardness converter, CCT/TTT, DWTT, inclusion atlas, failure analysis cases. Built on 350,000+ real production data points.",
+    // Nicel iddia lib/seo.js → CLAIMS'ten gelir (tek doğruluk kaynağı).
+    description: `Free professional-grade metallurgical engineering tools. Fe-C phase diagram, grain size analyzer, corrosion calculator, hardness converter, CCT/TTT, DWTT, inclusion atlas, failure analysis cases. Built by metallurgists processing ${CLAIMS.testsPerYearLabel.en} across ${CLAIMS.experienceLabel.en}.`,
     url: SITE_URL,
     siteName: "MetallurgyTools",
     type: "website",
@@ -124,106 +125,57 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="tr">
         <head>
-          {/* Google Analytics 4 */}
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga4-init" strategy="afterInteractive">
+          {/* Google Consent Mode v2 — default DENIED (KVKK/ePrivacy uyumlu).
+              Kullanıcı consent verene kadar GA/Clarity gibi analitik araçlar
+              cookie/storage'a yazamaz. Banner kabul edilince update edilir. */}
+          <Script id="consent-default" strategy="beforeInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_ID}', {
-                page_path: window.location.pathname,
+              window.gtag = gtag;
+              gtag('consent', 'default', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied',
+                wait_for_update: 500
               });
             `}
           </Script>
 
-          {/* Microsoft Clarity */}
-          <Script id="clarity-init" strategy="afterInteractive">
-            {`
-              (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window,document,"clarity","script","${CLARITY_ID}");
-            `}
-          </Script>
+          {/* Analitik script'leri (GA4 + Clarity) yalnızca consent verildiyse
+              yüklenir. Bu component client tarafında çalışır. */}
 
-          {/* JSON-LD: Organization + WebSite + SoftwareApplication
-              Google'ın siteyi anlayıp zengin sonuçlarda göstermesini kolaylaştırır. */}
-          <Script id="ld-organization" type="application/ld+json" strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                "@id": "https://www.metallurgytools.com/#organization",
-                "name": "MetallurgyTools",
-                "url": "https://www.metallurgytools.com",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": "https://www.metallurgytools.com/og-default.png",
-                  "width": 1200,
-                  "height": 630
-                },
-                "sameAs": [],
-                "description": "Professional steel metallurgy calculators and failure analysis tools built by integrated steel plant metallurgists.",
-                "knowsAbout": [
-                  "Steel Metallurgy", "Failure Analysis", "ASTM E112 Grain Size",
-                  "ASTM E140 Hardness Conversion", "API 570 Corrosion",
-                  "EN 1011-2 Weld Preheat", "CCT/TTT Diagrams", "DWTT Testing",
-                  "SEM-EDS Analysis", "Inclusion Classification ASTM E45",
-                  "Wire Rod Production", "Hot Rolling", "Continuous Casting"
-                ]
-              })
-            }}
+          {/* JSON-LD birleşik graf: Organization + WebSite + ProfessionalService
+              + SoftwareApplication. Tek @graph içinde yayınlanır; @id
+              referansları aynı belgede çözülür. Kaynak: lib/seo.js
+              (tek doğruluk noktası — sameAs, knowsAbout, hizmet kataloğu).
+
+              next/script yerine düz <script>: JSON-LD çalıştırılmaz, yalnız
+              okunur. beforeInteractive stratejisi bu içerik için gereksizdi
+              ve script'i client bundle'a bağlıyordu. */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(siteGraphLd()) }}
           />
-          <Script id="ld-website" type="application/ld+json" strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                "@id": "https://www.metallurgytools.com/#website",
-                "name": "MetallurgyTools",
-                "url": "https://www.metallurgytools.com",
-                "inLanguage": ["tr-TR","en-US"],
-                "publisher": { "@id": "https://www.metallurgytools.com/#organization" },
-                "potentialAction": {
-                  "@type": "SearchAction",
-                  "target": "https://www.metallurgytools.com/blog?search={search_term_string}",
-                  "query-input": "required name=search_term_string"
-                }
-              })
-            }}
-          />
-          <Script id="ld-softwareapp" type="application/ld+json" strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                "name": "MetallurgyTools",
-                "operatingSystem": "Web",
-                "applicationCategory": "EngineeringApplication",
-                "applicationSubCategory": "Metallurgical Engineering",
-                "description": "Professional metallurgical engineering calculator suite: ASTM E112 grain size, ASTM E140 hardness, API 570 corrosion, EN 1011-2 preheat, CCT/TTT, DWTT, SEM-EDS, inclusion atlas, failure analysis cases.",
-                "offers": {
-                  "@type": "Offer",
-                  "price": "0",
-                  "priceCurrency": "USD"
-                },
-                "url": "https://www.metallurgytools.com"
-              })
-            }}
-          />
+
+          {/* llms.txt keşfi — LLM ajanlarının site özet dosyasını bulması için.
+              [Doğrulanmadı] llms.txt henüz resmî bir W3C/IETF standardı değildir;
+              yaygınlaşan bir topluluk konvansiyonudur. */}
+          <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+          <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
         </head>
         <body>
+          {/* Consent-gated analitik script enjekte eder (client-only) */}
+          <AnalyticsScripts />
           <ThemeProvider>
             <LanguageProvider>
               <TrialBanner />
               <Navbar />
               {children}
               <Footer />
+              {/* KVKK / ePrivacy çerez consent banner */}
+              <CookieConsent />
             </LanguageProvider>
           </ThemeProvider>
         </body>

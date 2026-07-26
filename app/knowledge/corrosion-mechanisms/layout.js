@@ -1,3 +1,6 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, techArticleLd } from "@/lib/seo";
+
 export const metadata = {
   title: "Korozyon Mekanizmaları ve Korozyon Hızı Hesabı — API 570, NACE",
   description:
@@ -17,5 +20,25 @@ export const metadata = {
 };
 
 export default function Layout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          techArticleLd({
+            headline: "Korozyon Mekanizmaları ve Korozyon Hızı Hesabı — API 570, NACE",
+            path: "/knowledge/corrosion-mechanisms",
+            description:
+              "Elektrokimyasal korozyon temelleri, korozyon türleri, API 570 korozyon hızı hesabı ve koruma stratejileri.",
+            keywords: ["korozyon", "corrosion", "API 570", "NACE", "Barlow"],
+          }),
+          breadcrumbLd([
+            { name: "Ana Sayfa", path: "" },
+            { name: "Bilgi Tabanı", path: "/knowledge" },
+            { name: "Korozyon Mekanizmaları", path: "/knowledge/corrosion-mechanisms" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

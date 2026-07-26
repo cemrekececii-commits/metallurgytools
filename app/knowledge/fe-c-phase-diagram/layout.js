@@ -1,3 +1,6 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, techArticleLd } from "@/lib/seo";
+
 export const metadata = {
   title: "Fe-C Faz Diyagramı: Ötektoid Reaksiyon, Faz Bölgeleri, Kaldıraç Kuralı",
   description:
@@ -17,5 +20,25 @@ export const metadata = {
 };
 
 export default function Layout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          techArticleLd({
+            headline: "Fe-C Faz Diyagramı: Ötektoid Reaksiyon, Faz Bölgeleri, Kaldıraç Kuralı",
+            path: "/knowledge/fe-c-phase-diagram",
+            description:
+              "Fe-Fe₃C denge diyagramı: ötektoid nokta, ferrit/östenit/sementit bölgeleri, A1/A3/Acm sıcaklıkları ve kaldıraç kuralı.",
+            keywords: ["Fe-C faz diyagramı", "iron carbon diagram", "ötektoid", "kaldıraç kuralı"],
+          }),
+          breadcrumbLd([
+            { name: "Ana Sayfa", path: "" },
+            { name: "Bilgi Tabanı", path: "/knowledge" },
+            { name: "Fe-C Faz Diyagramı", path: "/knowledge/fe-c-phase-diagram" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

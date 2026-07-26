@@ -1,3 +1,6 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, techArticleLd } from "@/lib/seo";
+
 export const metadata = {
   title: "Mekanik Test Yöntemleri: Çekme, Darbe (Charpy) ve DWTT",
   description:
@@ -17,5 +20,25 @@ export const metadata = {
 };
 
 export default function Layout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          techArticleLd({
+            headline: "Mekanik Test Yöntemleri: Çekme, Darbe (Charpy) ve DWTT",
+            path: "/knowledge/mechanical-testing",
+            description:
+              "ASTM E8/ISO 6892-1 çekme, Charpy darbe ve ASTM E436 DWTT testlerinin metalurjik temelleri.",
+            keywords: ["mekanik test", "çekme testi", "Charpy", "DWTT", "ASTM E8"],
+          }),
+          breadcrumbLd([
+            { name: "Ana Sayfa", path: "" },
+            { name: "Bilgi Tabanı", path: "/knowledge" },
+            { name: "Mekanik Test Yöntemleri", path: "/knowledge/mechanical-testing" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

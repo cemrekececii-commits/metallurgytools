@@ -1,3 +1,6 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbLd, techArticleLd } from "@/lib/seo";
+
 export const metadata = {
   title: "Çelik Mikroyapıları: Ferrit, Perlit, Beynit, Martenzit — Oluşum ve Özellikler",
   description:
@@ -18,5 +21,25 @@ export const metadata = {
 };
 
 export default function Layout({ children }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={[
+          techArticleLd({
+            headline: "Çelik Mikroyapıları: Ferrit, Perlit, Beynit, Martenzit — Oluşum ve Özellikler",
+            path: "/knowledge/steel-microstructures",
+            description:
+              "Ferrit, perlit, beynit ve martenzit: oluşum mekanizmaları, morfolojiler, CCT/TTT konumları ve mekanik özelliklere etkiler.",
+            keywords: ["çelik mikroyapısı", "steel microstructure", "ferrit", "perlit", "beynit", "martenzit"],
+          }),
+          breadcrumbLd([
+            { name: "Ana Sayfa", path: "" },
+            { name: "Bilgi Tabanı", path: "/knowledge" },
+            { name: "Çelik Mikroyapıları", path: "/knowledge/steel-microstructures" },
+          ]),
+        ]}
+      />
+      {children}
+    </>
+  );
 }

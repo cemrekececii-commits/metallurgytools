@@ -3,10 +3,11 @@ import { cookies } from "next/headers";
 import { isAdminAuthed } from "@/lib/adminAuth";
 import { cleanString, stripTags, isEmail, approxByteSize } from "@/lib/validation";
 import { rateLimit } from "@/lib/rateLimit";
+import { putEntry, getEntry, patchEntry, listEntries, deleteEntry } from "@/lib/kvStore";
 
 export const dynamic = "force-dynamic";
 
-if (!global.feedbackStore) { global.feedbackStore = []; }
+const NS = "feedback";
 
 function clientIp(req) {
   return (
@@ -37,25 +38,34 @@ export async function POST(req) {
       return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
     }
 
-    // Toplam gövde boyutu koruması (küçük form — 32 KB yeterli)
     if (approxByteSize(body) > 32 * 1024) {
       return NextResponse.json({ error: "İstek çok büyük" }, { status: 413 });
     }
 
-    const name = cleanString(body.name, 120);
-    const email = cleanString(body.email, 254);
-    const type = cleanString(body.type, 40);
+    const name    = cleanString(body.name, 120);
+    const email   = cleanString(body.email, 254);
+    const type    = cleanString(body.type, 40);
     const message = stripTags(body.message, 4000);
 
     if (!name || !isEmail(email) || !message) {
       return NextResponse.json({ error: "Zorunlu alanlar eksik veya geçersiz" }, { status: 400 });
     }
 
-    global.feedbackStore.unshift({
+    // KVKK aydınlatma metnine açık rıza beyanı
+    if (body.kvkkConsent !== true) {
+      return NextResponse.json(
+        { error: "Aydınlatma metnine açık rıza zorunludur." },
+        { status: 400 }
+      );
+    }
+
+    await putEntry(NS, {
       id: Date.now().toString(),
       name, email, type, message,
       date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       read: false,
+      kvkkConsentAt: new Date().toISOString(),
     });
     return NextResponse.json({ success: true });
   } catch {
@@ -65,7 +75,8 @@ export async function POST(req) {
 
 export async function GET() {
   if (!requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ feedback: global.feedbackStore || [] });
+  const items = await listEntries(NS, { limit: 500 });
+  return NextResponse.json({ feedback: items });
 }
 
 export async function PATCH(req) {
@@ -74,14 +85,14 @@ export async function PATCH(req) {
     const body = await req.json();
 
     if (body.markAllRead) {
-      (global.feedbackStore || []).forEach(x => { x.read = true; });
+      const items = await listEntries(NS, { limit: 1000 });
+      await Promise.all(items.filter((x) => !x.read).map((x) => patchEntry(NS, x.id, { read: true })));
       return NextResponse.json({ success: true });
     }
 
     if (body.id) {
-      const item = (global.feedbackStore || []).find(x => x.id === body.id);
-      if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-      if (body.read !== undefined) item.read = !!body.read;
+      const updated = await patchEntry(NS, body.id, { read: body.read === undefined ? true : !!body.read });
+      if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return NextResponse.json({ success: true });
     }
 
@@ -96,7 +107,9 @@ export async function DELETE(req) {
   try {
     const { id } = await req.json();
     if (!id || typeof id !== "string") return NextResponse.json({ error: "id required" }, { status: 400 });
-    global.feedbackStore = (global.feedbackStore || []).filter(x => x.id !== id);
+    const existing = await getEntry(NS, id);
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    await deleteEntry(NS, id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
