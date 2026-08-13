@@ -29,6 +29,9 @@ export default function sitemap() {
     // hizmet kapsamının taranabilir tek dayanağı ve ProfessionalService
     // şemasının kanonik hedefi.
     { url: `${baseUrl}/consultation`,                changeFrequency: "monthly", priority: 0.75 },
+    // İş birliği başvuru sayfası — kimlik doğrulaması gerektirmez, robots'ta
+    // explicit allow listesindedir.
+    { url: `${baseUrl}/collaborate`,                 changeFrequency: "monthly", priority: 0.70 },
     { url: `${baseUrl}/knowledge`,                   changeFrequency: "weekly",  priority: 0.85 },
     { url: `${baseUrl}/mechanical-tests`,            changeFrequency: "weekly",  priority: 0.85 },
     { url: `${baseUrl}/blog`,                        changeFrequency: "daily",   priority: 0.80 },

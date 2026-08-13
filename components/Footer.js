@@ -31,6 +31,7 @@ const TR = {
     { href: "/knowledge",        label: "Bilgi Bankası"   },
     { href: "/tools",            label: "Araçlar"         },
     { href: "/pricing",          label: "Fiyatlandırma"   },
+    { href: "/collaborate",      label: "İş Birliği"      },
   ],
 
   legalLabel: "Yasal Bilgiler",
@@ -72,6 +73,7 @@ const EN = {
     { href: "/knowledge",        label: "Knowledge Base"   },
     { href: "/tools",            label: "Tools"            },
     { href: "/pricing",          label: "Pricing"          },
+    { href: "/collaborate",      label: "Collaborate"      },
   ],
 
   legalLabel: "Legal",

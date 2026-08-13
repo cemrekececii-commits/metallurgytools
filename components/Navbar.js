@@ -78,6 +78,7 @@ export default function Navbar() {
     { href: "/methodology",          label: lang === "tr" ? "Metodoloji" : lang === "zh" ? "方法论" : lang === "ja" ? "方法論" : "Methodology" },
     { href: "/about",                label: lang === "tr" ? "Hakkında" : lang === "zh" ? "关于" : lang === "ja" ? "概要" : "About" },
     { href: "/blog",                 label: lang === "tr" ? "Blog" : "Blog" },
+    { href: "/collaborate",          label: lang === "tr" ? "İş Birliği" : lang === "zh" ? "合作" : lang === "ja" ? "協業" : "Collaborate" },
   ];
 
   // Tool categories for mobile menu
@@ -439,6 +440,7 @@ export default function Navbar() {
               </p>
               {[
                 { href: "/consultation", label: lang === "tr" ? "Danışmanlık" : "Consultation" },
+                { href: "/collaborate",  label: lang === "tr" ? "İş Birliği" : "Collaborate" },
                 { href: "/blog",         label: "Blog" },
                 { href: "/mechanical-tests", label: lang === "tr" ? "Mekanik Testler" : "Mech. Tests" },
                 { href: "/knowledge",    label: lang === "tr" ? "Bilgi Bankası" : "Knowledge" },

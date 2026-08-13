@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const [cons, setCons] = useState([]);
   const [feed, setFeed] = useState([]);
   const [users, setUsers] = useState([]);
+  const [collabs, setCollabs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,10 +45,12 @@ export default function AdminDashboard() {
       fetch(`/api/consultation`).then(r => r.json()).catch(() => ({})),
       fetch(`/api/feedback`).then(r => r.json()).catch(() => ({})),
       fetch(`/api/admin/users`, { headers: {  } }).then(r => r.json()).catch(() => ({})),
-    ]).then(([c, f, u]) => {
+      fetch(`/api/collaboration`).then(r => r.json()).catch(() => ({})),
+    ]).then(([c, f, u, k]) => {
       setCons(c.consultations || []);
       setFeed(f.feedback || []);
       setUsers(u.users || []);
+      setCollabs(k.collaborations || []);
       setLoading(false);
     });
   }, []);
@@ -55,9 +58,11 @@ export default function AdminDashboard() {
   const pendingCons  = cons.filter(x => x.status === "pending").length;
   const unreadFeed   = feed.filter(x => !x.read).length;
   const proPlan      = users.filter(u => u.plan === "professional").length;
+  const newCollabs   = collabs.filter(x => x.status === "new").length;
 
   const recentCons = cons.slice(0, 6);
   const recentFeed = feed.slice(0, 6);
+  const recentCollabs = collabs.slice(0, 6);
 
   return (
     <div style={S.wrap}>
@@ -71,6 +76,7 @@ export default function AdminDashboard() {
           {[
             ["/admin/consultations", "⚗️ Danışmanlık", pendingCons > 0 ? `${pendingCons} bekliyor` : null, "#f97316"],
             ["/admin/feedback",      "💬 Görüş & İstekler", unreadFeed > 0 ? `${unreadFeed} yeni` : null, "#60a5fa"],
+            ["/admin/collaborations", "🤝 İş Birliği", newCollabs > 0 ? `${newCollabs} yeni` : null, "#a5b4fc"],
             ["/admin/users",         "👥 Kullanıcılar", null, null],
             ["/admin/blog",          "📝 Blog Yönetimi", null, "#d2a935"],
           ].map(([href, lbl, badge, badgeClr]) => (
@@ -103,6 +109,11 @@ export default function AdminDashboard() {
               <div style={{ ...S.cardVal, color: unreadFeed > 0 ? "#60a5fa" : "#f1f5f9" }}>{unreadFeed}</div>
               <div style={S.cardSub}>{feed.length} toplam kayıt</div>
             </div>
+            <div style={S.card(newCollabs > 0 ? "#312e81" : "#1e293b")}>
+              <div style={S.cardLbl}>Yeni İş Birliği Başvurusu</div>
+              <div style={{ ...S.cardVal, color: newCollabs > 0 ? "#a5b4fc" : "#f1f5f9" }}>{newCollabs}</div>
+              <div style={S.cardSub}>{collabs.length} toplam başvuru</div>
+            </div>
             <div style={S.card("#052e16")}>
               <div style={S.cardLbl}>Professional Üye</div>
               <div style={{ ...S.cardVal, color: "#4ade80" }}>{proPlan}</div>
@@ -126,6 +137,34 @@ export default function AdminDashboard() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: "#e2e8f0", fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.subject}</div>
                     <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{item.name} · {fmt(item.date)}</div>
+                  </div>
+                  {item.filesCount > 0 && <span style={{ color: "#64748b", fontSize: 11 }}>📎 {item.filesCount}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Collaborations */}
+          <div style={S.sect}>
+            <div style={S.sectHd}>
+              <span>🤝 Son İş Birliği Başvuruları</span>
+              <Link href="/admin/collaborations" style={S.link}>Tümünü gör →</Link>
+            </div>
+            <div style={{ background: "#0d1117", border: "1px solid #1e293b", borderRadius: 10, overflow: "hidden" }}>
+              {recentCollabs.length === 0 && <div style={{ padding: "28px", color: "#334155", textAlign: "center", fontSize: 13 }}>Henüz iş birliği başvurusu yok</div>}
+              {recentCollabs.map((item, i) => (
+                <div key={item.id} style={S.row(i % 2 === 1)}>
+                  <span style={S.badge(item.status === "new" ? "pending" : item.status === "accepted" ? "replied" : "closed")}>
+                    {item.status === "new" ? "Yeni"
+                      : item.status === "reviewing" ? "İnceleniyor"
+                      : item.status === "contacted" ? "İletişimde"
+                      : item.status === "accepted" ? "Kabul" : "Arşiv"}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: "#e2e8f0", fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.projectTitle}</div>
+                    <div style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>
+                      {item.name}{item.org ? ` · ${item.org}` : ""} · {fmt(item.date)}
+                    </div>
                   </div>
                   {item.filesCount > 0 && <span style={{ color: "#64748b", fontSize: 11 }}>📎 {item.filesCount}</span>}
                 </div>

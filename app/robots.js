@@ -90,7 +90,7 @@ export default function robots() {
       // ① Genel arama motorları + tüm diğer botlar
       {
         userAgent: "*",
-        allow: ["/", "/tools/", "/mechanical-tests/", "/knowledge/", "/blog/", "/consultation"],
+        allow: ["/", "/tools/", "/mechanical-tests/", "/knowledge/", "/blog/", "/consultation", "/collaborate"],
         disallow: SENSITIVE_DISALLOW,
       },
       // ② AI tarayıcıları — explicit allow (içerik LLM bilgi tabanlarına geçsin)
@@ -105,6 +105,7 @@ export default function robots() {
           "/about",
           "/methodology",
           "/consultation",
+          "/collaborate",
           // LLM korpus dosyaları ve Markdown ayna URL'leri
           "/llms.txt",
           "/llms-full.txt",

@@ -261,6 +261,48 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* COLLABORATION CALL — metalurji × yazılım / YZ / otomasyon */}
+      <section className="py-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(212,175,55,0.07) 100%)", border: "1px solid rgba(129,140,248,0.22)" }}>
+            <div className="absolute left-0 bottom-0 w-80 h-80 bg-[radial-gradient(circle,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none" />
+            <div className="relative z-10 p-8 md:p-10">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="flex-shrink-0 text-5xl">🤝</div>
+                <div className="flex-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-indigo-300 mb-2">
+                    {lang === "tr" ? "Açık Çağrı" : "Open Call"}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-white">
+                    {lang === "tr"
+                      ? "Metalurji × Yapay Zeka × Yazılım × Otomasyon"
+                      : "Metallurgy × AI × Software × Automation"}
+                  </h3>
+                  <p className="text-sm text-dark-200 leading-relaxed max-w-2xl mb-4">
+                    {lang === "tr"
+                      ? "Mikroyapı ve fraktografi görüntülerinin otomatik analizi, mekanik test verisinin istatistiksel değerlendirilmesi, proses–özellik tahmin modelleri, laboratuvar süreç otomasyonu ve alan-özgü LLM uygulamaları üzerine birlikte çalışacak mühendis, araştırmacı, geliştirici ve kurumlardan başvuru bekliyoruz."
+                      : "We are looking for engineers, researchers, developers and organisations to work together on automated microstructure and fractography image analysis, statistical evaluation of mechanical test data, process–property prediction models, laboratory process automation and domain-specific LLM applications."}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {(lang === "tr"
+                      ? ["Görüntü İşleme", "Makine Öğrenmesi", "LLM / RAG", "PLC / SCADA", "Veri Analizi", "Açık Kaynak"]
+                      : ["Computer Vision", "Machine Learning", "LLM / RAG", "PLC / SCADA", "Data Analysis", "Open Source"]
+                    ).map((tag) => (
+                      <span key={tag} className="text-[11px] font-mono text-indigo-200/80 border border-indigo-300/20 bg-indigo-400/5 rounded-full px-3 py-1">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <Link href="/collaborate" className="inline-block bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-xl px-8 py-3.5 text-sm font-bold no-underline hover:-translate-y-0.5 transition-all shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 whitespace-nowrap">
+                    {lang === "tr" ? "İş Birliği Başvurusu Yap →" : "Apply to Collaborate →"}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TOOLS */}
       <section id="tools" className="py-24 px-6 max-w-5xl mx-auto">
         <div className="text-center mb-16">
