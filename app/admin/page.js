@@ -182,7 +182,7 @@ export default function AdminDashboard() {
               {recentFeed.length === 0 && <div style={{ padding: "28px", color: "#334155", textAlign: "center", fontSize: 13 }}>Henüz geri bildirim yok</div>}
               {recentFeed.map((fb, i) => (
                 <div key={fb.id} style={S.row(i % 2 === 1)}>
-                  {!fb.read && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#d4af37", flexShrink: 0, marginTop: 5 }} />}
+                  {!fb.read && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "rgb(var(--gold-400))", flexShrink: 0, marginTop: 5 }} />}
                   <span style={S.typeTag}>{fb.type || "Görüş"}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: "#e2e8f0", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fb.message}</div>

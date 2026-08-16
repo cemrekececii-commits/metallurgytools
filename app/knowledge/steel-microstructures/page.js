@@ -15,8 +15,8 @@ function MicrostructureSVG() {
       <text x="75" y="180" textAnchor="middle" fill="#6B7280" fontSize="9">~80-200 HV</text>
       {/* Pearlite */}
       <rect x="160" y="20" width="130" height="130" rx="8" fill="#1F2937" stroke="#374151" />
-      {[30,40,50,60,70,80,90,100,110].map((y,i) => (<line key={i} x1="175" y1={y} x2="275" y2={y} stroke={i%2===0?"#D4AF37":"#60A5FA"} strokeWidth="1.5" />))}
-      <text x="225" y="165" textAnchor="middle" fill="#D4AF37" fontSize="11" fontWeight="600">Perlit (α+Fe₃C)</text>
+      {[30,40,50,60,70,80,90,100,110].map((y,i) => (<line key={i} x1="175" y1={y} x2="275" y2={y} stroke={i%2===0?"rgb(var(--gold-400))":"#60A5FA"} strokeWidth="1.5" />))}
+      <text x="225" y="165" textAnchor="middle" fontSize="11" fontWeight="600" className="fill-gold-400">Perlit (α+Fe₃C)</text>
       <text x="225" y="180" textAnchor="middle" fill="#6B7280" fontSize="9">~200-300 HV</text>
       {/* Bainite */}
       <rect x="310" y="20" width="130" height="130" rx="8" fill="#1F2937" stroke="#374151" />

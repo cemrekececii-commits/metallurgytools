@@ -121,7 +121,7 @@ export default function HomePage() {
           {/* Three pillars */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-10">
             {/* Pillar 1: Tools */}
-            <a href="#tools" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)" }}>
+            <a href="#tools" className="group rounded-xl p-5 text-left no-underline transition-all hover:-translate-y-1" style={{ background: "rgb(var(--gold-400) / 0.06)", border: "1px solid rgb(var(--gold-400) / 0.15)" }}>
               <div className="text-2xl mb-2">🔧</div>
               <h3 className="text-sm font-bold text-gold-400 mb-1">
                 {lang === "tr" ? "Araçları Kullan" : "Use the Tools"}
@@ -185,10 +185,10 @@ export default function HomePage() {
         {/* Stats */}
         <div className="relative z-10 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
           {[
-            { val: "20+", label: lang === "tr" ? "Yil Endustriyel Deneyim" : "Years Industry Experience", color: "#D4AF37" },
-            { val: "350K+", label: lang === "tr" ? "Analiz Edilmis Test Verisi" : "Analyzed Test Data Points", color: "#D4AF37" },
+            { val: "20+", label: lang === "tr" ? "Yil Endustriyel Deneyim" : "Years Industry Experience", color: "rgb(var(--gold-400))" },
+            { val: "350K+", label: lang === "tr" ? "Analiz Edilmis Test Verisi" : "Analyzed Test Data Points", color: "rgb(var(--gold-400))" },
             { val: "13+", label: lang === "tr" ? "Profesyonel Arac" : "Professional Tools", color: "#60a5fa" },
-            { val: "12+", label: lang === "tr" ? "Akademik Yayin" : "Academic Publications", color: "#D4AF37" },
+            { val: "12+", label: lang === "tr" ? "Akademik Yayin" : "Academic Publications", color: "rgb(var(--gold-400))" },
           ].map((s, i) => (
             <div key={i} className="text-center">
               <div className="text-2xl md:text-3xl font-bold font-mono" style={{ color: s.color }}>{s.val}</div>
@@ -264,7 +264,7 @@ export default function HomePage() {
       {/* COLLABORATION CALL — metalurji × yazılım / YZ / otomasyon */}
       <section className="py-12 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(212,175,55,0.07) 100%)", border: "1px solid rgba(129,140,248,0.22)" }}>
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgb(var(--gold-400) / 0.07) 100%)", border: "1px solid rgba(129,140,248,0.22)" }}>
             <div className="absolute left-0 bottom-0 w-80 h-80 bg-[radial-gradient(circle,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none" />
             <div className="relative z-10 p-8 md:p-10">
               <div className="flex flex-col md:flex-row items-start gap-6">

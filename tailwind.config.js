@@ -7,17 +7,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Vurgu skalası. İsim tarihsel ("gold") — değerler artık aktif palete
+        // göre turuncu / bakır / altın olabilir (bkz. app/globals.css).
+        // Kodda yalnızca 200-300-400-500 stopları kullanılıyor; uç stoplar
+        // dangling kalmasın diye en yakın tanımlı değişkene bağlandı.
         gold: {
-          50: "#FFF8E7",
-          100: "#FFEFC2",
-          200: "#FFE08A",
-          300: "#F0D060",
-          400: "#D4AF37",
-          500: "#B8860B",
-          600: "#8B6914",
-          700: "#6B5210",
-          800: "#4A3A0D",
-          900: "#2A210A",
+          50:  "rgb(var(--gold-200) / <alpha-value>)",
+          100: "rgb(var(--gold-200) / <alpha-value>)",
+          200: "rgb(var(--gold-200) / <alpha-value>)",
+          300: "rgb(var(--gold-300) / <alpha-value>)",
+          400: "rgb(var(--gold-400) / <alpha-value>)",
+          500: "rgb(var(--gold-500) / <alpha-value>)",
+          600: "rgb(var(--gold-500) / <alpha-value>)",
+          700: "rgb(var(--gold-500) / <alpha-value>)",
+          800: "rgb(var(--gold-500) / <alpha-value>)",
+          900: "rgb(var(--gold-500) / <alpha-value>)",
         },
         dark: {
           50:  "rgb(var(--dark-50)  / <alpha-value>)",

@@ -107,7 +107,7 @@ export default function CookieConsent() {
         padding: "16px",
         background: "rgba(15, 23, 42, 0.97)",
         backdropFilter: "blur(6px)",
-        borderTop: "1px solid rgba(212, 175, 55, 0.25)",
+        borderTop: "1px solid rgb(var(--gold-400) / 0.25)",
         color: "#e2e8f0",
         fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
         fontSize: 14,
@@ -115,12 +115,12 @@ export default function CookieConsent() {
     >
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", flexDirection: "column", gap: 12 }}>
         <div>
-          <strong style={{ color: "#d4af37" }}>Çerez Kullanımı (KVKK / ePrivacy)</strong>
+          <strong style={{ color: "rgb(var(--gold-400))" }}>Çerez Kullanımı (KVKK / ePrivacy)</strong>
           <p style={{ margin: "6px 0 0", lineHeight: 1.5 }}>
             Sitemizin çalışması için zorunlu çerezleri kullanıyoruz. İsteğe bağlı
             olarak analitik (Google Analytics, Microsoft Clarity) ve pazarlama
             çerezlerini kullanmamıza izin verebilirsiniz. Tercihinizi istediğiniz
-            zaman <a href="/cerez-politikasi" style={{ color: "#d4af37" }}>Çerez Politikası</a> ve <a href="/gizlilik-politikasi" style={{ color: "#d4af37" }}>Gizlilik Politikası</a> sayfalarımızdan değiştirebilirsiniz.
+            zaman <a href="/cerez-politikasi" style={{ color: "rgb(var(--gold-400))" }}>Çerez Politikası</a> ve <a href="/gizlilik-politikasi" style={{ color: "rgb(var(--gold-400))" }}>Gizlilik Politikası</a> sayfalarımızdan değiştirebilirsiniz.
           </p>
         </div>
 
@@ -152,12 +152,12 @@ export default function CookieConsent() {
           </button>
           {showPrefs && (
             <button onClick={() => accept(false)}
-              style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid #d4af37", background: "transparent", color: "#d4af37", cursor: "pointer" }}>
+              style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid rgb(var(--gold-400))", background: "transparent", color: "rgb(var(--gold-400))", cursor: "pointer" }}>
               Seçimi kaydet
             </button>
           )}
           <button onClick={() => accept(true)}
-            style={{ padding: "8px 14px", borderRadius: 6, border: "none", background: "#d4af37", color: "#0f172a", fontWeight: 600, cursor: "pointer" }}>
+            style={{ padding: "8px 14px", borderRadius: 6, border: "none", background: "rgb(var(--gold-400))", color: "#0f172a", fontWeight: 600, cursor: "pointer" }}>
             Tümünü kabul et
           </button>
         </div>

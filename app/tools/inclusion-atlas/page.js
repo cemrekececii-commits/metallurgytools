@@ -48,9 +48,9 @@ function MnSSVG() {
       <ellipse cx="195" cy="128" rx="44" ry="5.5" fill="#898989" opacity="0.90" />
       <ellipse cx="40"  cy="135" rx="25" ry="4"   fill="#8e8e8e" opacity="0.85" />
       {/* Rolling direction */}
-      <line x1="8" y1="168" x2="260" y2="168" stroke="#d4af37" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.7" />
-      <polygon points="258,165 268,168 258,171" fill="#d4af37" opacity="0.7" />
-      <text x="6" y="166" fill="#d4af37" fontSize="7.5" fontFamily="monospace" opacity="0.7">RD →</text>
+      <line x1="8" y1="168" x2="260" y2="168" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.7"  className="stroke-gold-400"/>
+      <polygon points="258,165 268,168 258,171" opacity="0.7"  className="fill-gold-400"/>
+      <text x="6" y="166" fontSize="7.5" fontFamily="monospace" opacity="0.7" className="fill-gold-400">RD →</text>
       <ScaleBar />
     </svg>
   );
@@ -99,9 +99,9 @@ function SilicateSVG() {
       <line x1="120" y1="67" x2="130" y2="77" stroke="#aaa" strokeWidth="0.4" opacity="0.3" />
       <line x1="160" y1="68" x2="168" y2="76" stroke="#aaa" strokeWidth="0.4" opacity="0.3" />
       {/* Rolling direction */}
-      <line x1="8" y1="168" x2="260" y2="168" stroke="#d4af37" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.7" />
-      <polygon points="258,165 268,168 258,171" fill="#d4af37" opacity="0.7" />
-      <text x="6" y="166" fill="#d4af37" fontSize="7.5" fontFamily="monospace" opacity="0.7">RD →</text>
+      <line x1="8" y1="168" x2="260" y2="168" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.7"  className="stroke-gold-400"/>
+      <polygon points="258,165 268,168 258,171" opacity="0.7"  className="fill-gold-400"/>
+      <text x="6" y="166" fontSize="7.5" fontFamily="monospace" opacity="0.7" className="fill-gold-400">RD →</text>
       <ScaleBar label="100 μm" />
     </svg>
   );

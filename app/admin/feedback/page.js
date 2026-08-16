@@ -37,11 +37,11 @@ const S = {
     const t = TYPE_MAP[type] || TYPE_MAP["💬 Genel Görüş"];
     return { background: t.bg, color: t.clr, borderRadius: 6, padding: "2px 9px", fontSize: 11, fontWeight: 700 };
   },
-  dot:     { width: 8, height: 8, borderRadius: "50%", background: "#d4af37", flexShrink: 0, marginTop: 3, animation: "pulse 2s infinite" },
+  dot:     { width: 8, height: 8, borderRadius: "50%", background: "rgb(var(--gold-400))", flexShrink: 0, marginTop: 3, animation: "pulse 2s infinite" },
   meta:    { color: "#475569", fontSize: 11, marginTop: 4 },
   msg:     { color: "#cbd5e1", fontSize: 13, lineHeight: 1.7, marginTop: 8, whiteSpace: "pre-wrap" },
   btn:     (c) => ({ padding: "5px 12px", background: c || "#1e293b", border: "1px solid #2d3748", borderRadius: 6, color: "#e2e8f0", fontSize: 11, fontWeight: 600, cursor: "pointer" }),
-  badge:   (n) => ({ background: n > 0 ? "rgba(212,175,55,0.15)" : "#1e293b", color: n > 0 ? "#d4af37" : "#64748b", borderRadius: 6, padding: "2px 9px", fontSize: 12, fontWeight: 700 }),
+  badge:   (n) => ({ background: n > 0 ? "rgb(var(--gold-400) / 0.15)" : "#1e293b", color: n > 0 ? "rgb(var(--gold-400))" : "#64748b", borderRadius: 6, padding: "2px 9px", fontSize: 12, fontWeight: 700 }),
 };
 
 function fmt(iso) {

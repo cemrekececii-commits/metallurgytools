@@ -31,7 +31,7 @@ function FeCDiagram() {
       {/* A3 line */}
       <polyline points="80,155 180,225" fill="none" stroke="#60A5FA" strokeWidth="2" />
       {/* A1 line (eutectoid) */}
-      <line x1="80" y1="225" x2="395" y2="225" stroke="#D4AF37" strokeWidth="2" strokeDasharray="6,3" />
+      <line x1="80" y1="225" x2="395" y2="225" strokeWidth="2" strokeDasharray="6,3"  className="stroke-gold-400"/>
       {/* Acm line */}
       <polyline points="180,225 395,190" fill="none" stroke="#A78BFA" strokeWidth="2" />
       {/* Eutectic line */}
@@ -47,14 +47,14 @@ function FeCDiagram() {
       <text x="200" y="210" fill="#A78BFA" fontSize="11" fontFamily="sans-serif">γ + Fe₃C</text>
       <text x="450" y="300" fill="#6B7280" fontSize="11" fontFamily="sans-serif">Ledeburite</text>
       {/* Key points */}
-      <circle cx="180" cy="225" r="5" fill="#D4AF37" />
-      <text x="180" y="250" textAnchor="middle" fill="#D4AF37" fontSize="9" fontFamily="monospace">Eutectoid</text>
-      <text x="180" y="262" textAnchor="middle" fill="#D4AF37" fontSize="8" fontFamily="monospace">0.77%C, 727°C</text>
+      <circle cx="180" cy="225" r="5"  className="fill-gold-400"/>
+      <text x="180" y="250" textAnchor="middle" fontSize="9" fontFamily="monospace" className="fill-gold-400">Eutectoid</text>
+      <text x="180" y="262" textAnchor="middle" fontSize="8" fontFamily="monospace" className="fill-gold-400">0.77%C, 727°C</text>
       <circle cx="395" cy="190" r="5" fill="#F97316" />
       <text x="395" y="175" textAnchor="middle" fill="#F97316" fontSize="9" fontFamily="monospace">Eutectic</text>
       <text x="395" y="165" textAnchor="middle" fill="#F97316" fontSize="8" fontFamily="monospace">4.3%C, 1147°C</text>
       {/* A1 label */}
-      <text x="45" y="228" fill="#D4AF37" fontSize="9" fontFamily="monospace" fontWeight="600">A₁</text>
+      <text x="45" y="228" fontSize="9" fontFamily="monospace" fontWeight="600" className="fill-gold-400">A₁</text>
       <text x="45" y="158" fill="#60A5FA" fontSize="9" fontFamily="monospace" fontWeight="600">A₃</text>
     </svg>
   );

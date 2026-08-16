@@ -6,8 +6,8 @@ export default function CredibilityBar() {
   return (
     <div style={{
       backgroundColor: "#0a0f1a",
-      borderTop: "1px solid rgba(212,175,55,0.15)",
-      borderBottom: "1px solid rgba(212,175,55,0.15)",
+      borderTop: "1px solid rgb(var(--gold-400) / 0.15)",
+      borderBottom: "1px solid rgb(var(--gold-400) / 0.15)",
       padding: "12px 24px",
       overflowX: "auto",
     }}>
@@ -27,7 +27,7 @@ export default function CredibilityBar() {
           { value: "ASTM · EN ISO · API", label: "Standart Uyumluluğu", sub: "Tüm içerik doğrulanmış" },
         ].map((item) => (
           <div key={item.value} style={{ textAlign: "center", minWidth: "140px" }}>
-            <p style={{ fontFamily: "monospace", color: "#d4af37", fontSize: "18px", fontWeight: "700", margin: 0 }}>
+            <p style={{ fontFamily: "monospace", color: "rgb(var(--gold-400))", fontSize: "18px", fontWeight: "700", margin: 0 }}>
               {item.value}
             </p>
             <p style={{ color: "#e5e7eb", fontSize: "12px", fontWeight: "600", margin: "2px 0 1px" }}>

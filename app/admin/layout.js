@@ -21,7 +21,7 @@ const S = {
   sidebar: { width: 220, background: "#0d1117", borderRight: "1px solid #1e293b", display: "flex", flexDirection: "column", minHeight: "100vh", flexShrink: 0 },
   logo:    { padding: "20px 18px 16px", borderBottom: "1px solid #1e293b" },
   logoInner: { display: "flex", alignItems: "center", gap: 10 },
-  logoMark: { width: 34, height: 34, background: "linear-gradient(135deg,#d4af37,#f5d55e)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#0a0a0a", fontFamily: "monospace" },
+  logoMark: { width: 34, height: 34, background: "linear-gradient(135deg,rgb(var(--gold-400)),#f5d55e)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#0a0a0a", fontFamily: "monospace" },
   logoText: { fontSize: 14, fontWeight: 700, color: "#f1f5f9", letterSpacing: "-0.01em" },
   adminBadge: { fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", color: "#ef4444", background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 4, padding: "1px 6px", marginTop: 2 },
   nav:     { padding: "14px 10px", flex: 1 },

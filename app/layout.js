@@ -123,8 +123,26 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="tr">
+      <html lang="tr" data-palette="navy">
         <head>
+          {/* Tema/palet ilk boyaması — React hidrasyonundan ÖNCE çalışır.
+              Aksi halde kullanıcının seçtiği palet useEffect'e kadar
+              uygulanmaz ve varsayılan renkler bir kare boyunca görünür (FOUC). */}
+          <Script id="theme-init" strategy="beforeInteractive">
+            {`
+              (function(){
+                try {
+                  var p = localStorage.getItem('mt-palette');
+                  if (p !== 'navy' && p !== 'copper' && p !== 'classic') p = 'navy';
+                  document.documentElement.setAttribute('data-palette', p);
+                  if (localStorage.getItem('mt-theme') === 'light') {
+                    document.documentElement.classList.add('light');
+                  }
+                } catch (e) {}
+              })();
+            `}
+          </Script>
+
           {/* Google Consent Mode v2 — default DENIED (KVKK/ePrivacy uyumlu).
               Kullanıcı consent verene kadar GA/Clarity gibi analitik araçlar
               cookie/storage'a yazamaz. Banner kabul edilince update edilir. */}

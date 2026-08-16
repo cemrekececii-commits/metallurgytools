@@ -11,7 +11,7 @@ function TensileCurveSVG() {
       <text x="260" y="310" textAnchor="middle" fill="#9CA3AF" fontSize="11">Strain (ε)</text>
       <text x="20" y="160" textAnchor="middle" fill="#9CA3AF" fontSize="11" transform="rotate(-90,20,160)">Stress (σ)</text>
       {/* Curve */}
-      <path d="M60,280 L60,275 L120,140 L130,135 Q160,120 200,110 Q240,100 280,90 Q320,82 350,78 Q370,80 390,90 Q410,110 420,140 L425,160" fill="none" stroke="#D4AF37" strokeWidth="2.5" />
+      <path d="M60,280 L60,275 L120,140 L130,135 Q160,120 200,110 Q240,100 280,90 Q320,82 350,78 Q370,80 390,90 Q410,110 420,140 L425,160" fill="none" strokeWidth="2.5"  className="stroke-gold-400"/>
       {/* Fracture X */}
       <circle cx="425" cy="160" r="4" fill="#EF4444" />
       <text x="440" y="155" fill="#EF4444" fontSize="10" fontWeight="600">Fracture</text>

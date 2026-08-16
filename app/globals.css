@@ -4,8 +4,61 @@
 
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap");
 
-/* ── Dark theme (default) — RGB triplets for Tailwind alpha support ── */
-:root {
+/* ─────────────────────────────────────────────────────────────────────────────
+   RENK PALETLERİ
+   İki bağımsız eksen vardır:
+     1. Palet   → html[data-palette="navy|copper|classic"]  (varsayılan: navy)
+     2. Aydınlık→ html.light                                 (varsayılan: koyu)
+
+   Tüm renkler iki değişken skalasından türer:
+     --dark-50 … --dark-900  → zemin/yüzey/metin (50 = birincil metin,
+                                900 = en yüksek yüzey; açık temada luminans terslenir)
+     --gold-200 … --gold-500 → vurgu rengi. İsim tarihsel; skala artık palete
+                                göre turuncu/bakır/altın olabilir.
+   Tailwind `dark-*` ve `gold-*` yardımcı sınıfları bu değişkenleri okur
+   (bkz. tailwind.config.js), böylece palet değişimi tek noktadan yayılır.
+   RGB üçlüsü formatı Tailwind'in <alpha-value> desteği için zorunludur.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Varsayılan: navy — koyu lacivert zemin, turuncu vurgu ── */
+:root,
+html[data-palette="navy"] {
+  --dark-50:  230 236 244;   /* birincil metin                        */
+  --dark-100: 159 178 201;   /* ikincil metin                         */
+  --dark-200: 141 160 184;
+  --dark-300: 125 144 166;   /* soluk metin                           */
+  --dark-400:  74  95 122;   /* kenarlık / placeholder                */
+  --dark-500:  30  52  80;
+  --dark-600:  22  42  67;
+  --dark-700:  18  37  60;   /* kart zemini                           */
+  --dark-800:  12  26  46;   /* sayfa zemini                          */
+  --dark-900:   8  18  34;   /* en derin yüzey                        */
+  --gold-200: 246 196 150;
+  --gold-300: 240 168 104;
+  --gold-400: 224 122  40;   /* vurgu — turuncu                       */
+  --gold-500: 184  92  24;
+}
+
+/* ── copper — antrasit zemin, bakır vurgu ── */
+html[data-palette="copper"] {
+  --dark-50:  233 233 234;
+  --dark-100: 168 172 178;
+  --dark-200: 150 154 161;
+  --dark-300: 134 139 146;
+  --dark-400:  74  78  84;
+  --dark-500:  42  46  52;
+  --dark-600:  33  36  41;
+  --dark-700:  30  33  38;
+  --dark-800:  23  25  28;
+  --dark-900:  16  18  20;
+  --gold-200: 226 175 141;
+  --gold-300: 216 146 100;
+  --gold-400: 196 112  58;   /* vurgu — bakır                         */
+  --gold-500: 158  86  40;
+}
+
+/* ── classic — özgün siyah zemin, altın vurgu ── */
+html[data-palette="classic"] {
   --dark-50:  232 230 225;
   --dark-100: 160 160 160;
   --dark-200: 136 136 136;
@@ -16,22 +69,64 @@
   --dark-700:  15  15  24;
   --dark-800:  10  10  15;
   --dark-900:   5   5   8;
-  --gold-400: #d4af37;
-  --gold-500: #b8860b;
+  --gold-200: 255 224 138;
+  --gold-300: 240 208  96;
+  --gold-400: 212 175  55;   /* vurgu — altın                         */
+  --gold-500: 184 134  11;
 }
 
-/* ── Light theme — same palette semantics, inverted luminance ── */
-html.light {
-  --dark-50:   20  20  31;   /* primary text  → near-black           */
-  --dark-100:  34  34  64;   /* secondary text                        */
+/* ── Açık tema — aynı palet semantiği, ters luminans ──
+   Vurgu skalası açık zeminde kontrast için bir tık koyultulur. */
+html.light,
+html.light[data-palette="navy"] {
+  --dark-50:   18  41  74;   /* birincil metin  → lacivert            */
+  --dark-100:  42  71 108;
+  --dark-200:  60  90 128;
+  --dark-300: 107 122 143;   /* soluk metin                           */
+  --dark-400: 158 170 186;   /* kenarlık / placeholder                */
+  --dark-500: 207 212 220;
+  --dark-600: 226 229 234;   /* kenarlıklar                           */
+  --dark-700: 255 255 255;   /* kart zemini                           */
+  --dark-800: 243 244 246;   /* sayfa zemini                          */
+  --dark-900: 255 255 255;
+  --gold-200: 232 160 106;
+  --gold-300: 219 130  56;
+  --gold-400: 194  94  22;
+  --gold-500: 158  74  16;
+}
+
+html.light[data-palette="copper"] {
+  --dark-50:   32  35  39;
+  --dark-100:  62  66  71;
+  --dark-200:  84  89  95;
+  --dark-300: 112 117 124;
+  --dark-400: 164 168 174;
+  --dark-500: 210 213 217;
+  --dark-600: 228 230 233;
+  --dark-700: 255 255 255;
+  --dark-800: 244 244 245;
+  --dark-900: 255 255 255;
+  --gold-200: 214 152 110;
+  --gold-300: 190 118  66;
+  --gold-400: 166  92  42;
+  --gold-500: 136  72  30;
+}
+
+html.light[data-palette="classic"] {
+  --dark-50:   20  20  31;
+  --dark-100:  34  34  64;
   --dark-200:  51  51  85;
   --dark-300:  85  85 112;
-  --dark-400: 136 136 160;   /* muted / placeholder                   */
-  --dark-500: 200 200 216;   /* subtle surface                        */
-  --dark-600: 228 228 236;   /* borders                               */
-  --dark-700: 240 240 246;   /* card background                       */
-  --dark-800: 248 248 252;   /* main page background                  */
-  --dark-900: 255 255 255;   /* highest surface (deepest bg → white)  */
+  --dark-400: 136 136 160;
+  --dark-500: 200 200 216;
+  --dark-600: 228 228 236;
+  --dark-700: 240 240 246;
+  --dark-800: 248 248 252;
+  --dark-900: 255 255 255;
+  --gold-200: 214 172  74;
+  --gold-300: 188 146  40;
+  --gold-400: 150 114  16;
+  --gold-500: 122  92  10;
 }
 
 html {

@@ -12,16 +12,16 @@ function RockwellDiagram() {
           <stop offset="100%" style={{ stopColor: "#374151" }} />
         </linearGradient>
         <linearGradient id="indenter" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#D4AF37" }} />
-          <stop offset="100%" style={{ stopColor: "#B8860B" }} />
+          <stop offset="0%" style={{ stopColor: "rgb(var(--gold-400))" }} />
+          <stop offset="100%" style={{ stopColor: "rgb(var(--gold-500))" }} />
         </linearGradient>
       </defs>
       {/* Specimen */}
       <rect x="50" y="160" width="400" height="120" rx="4" fill="url(#steel)" stroke="#4B5563" strokeWidth="1" />
       <text x="250" y="235" textAnchor="middle" fill="#9CA3AF" fontSize="12" fontFamily="monospace">SPECIMEN</text>
       {/* Indenter - diamond cone */}
-      <polygon points="250,60 235,155 265,155" fill="url(#indenter)" stroke="#B8860B" strokeWidth="1.5" />
-      <text x="250" y="50" textAnchor="middle" fill="#D4AF37" fontSize="11" fontFamily="sans-serif" fontWeight="600">Diamond Cone (120°)</text>
+      <polygon points="250,60 235,155 265,155" fill="url(#indenter)" strokeWidth="1.5"  className="stroke-gold-500"/>
+      <text x="250" y="50" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fontWeight="600" className="fill-gold-400">Diamond Cone (120°)</text>
       {/* Indent mark */}
       <path d="M240,160 L250,185 L260,160" fill="none" stroke="#EF4444" strokeWidth="1.5" strokeDasharray="3,2" />
       {/* Depth arrows */}
@@ -32,7 +32,7 @@ function RockwellDiagram() {
       <text x="250" y="12" textAnchor="middle" fill="#F59E0B" fontSize="11" fontFamily="sans-serif" fontWeight="600">F (load)</text>
       {/* Labels */}
       <rect x="30" y="5" width="140" height="22" rx="4" fill="#1F2937" />
-      <text x="100" y="20" textAnchor="middle" fill="#D4AF37" fontSize="10" fontFamily="monospace">HRC: 150 kgf</text>
+      <text x="100" y="20" textAnchor="middle" fontSize="10" fontFamily="monospace" className="fill-gold-400">HRC: 150 kgf</text>
       <rect x="330" y="5" width="140" height="22" rx="4" fill="#1F2937" />
       <text x="400" y="20" textAnchor="middle" fill="#60A5FA" fontSize="10" fontFamily="monospace">HRB: 100 kgf</text>
       {/* Arrow markers */}
@@ -50,9 +50,9 @@ function VickersDiagram() {
       {/* Specimen */}
       <rect x="50" y="150" width="400" height="110" rx="4" fill="#374151" stroke="#4B5563" strokeWidth="1" />
       {/* Diamond pyramid */}
-      <polygon points="250,50 225,145 275,145" fill="none" stroke="#D4AF37" strokeWidth="2" />
-      <line x1="250" y1="50" x2="250" y2="145" stroke="#D4AF37" strokeWidth="1" strokeDasharray="4,3" />
-      <text x="250" y="40" textAnchor="middle" fill="#D4AF37" fontSize="11" fontFamily="sans-serif" fontWeight="600">136° Diamond Pyramid</text>
+      <polygon points="250,50 225,145 275,145" fill="none" strokeWidth="2"  className="stroke-gold-400"/>
+      <line x1="250" y1="50" x2="250" y2="145" strokeWidth="1" strokeDasharray="4,3"  className="stroke-gold-400"/>
+      <text x="250" y="40" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fontWeight="600" className="fill-gold-400">136° Diamond Pyramid</text>
       {/* Indent impression (top view) */}
       <rect x="350" y="60" width="60" height="60" rx="0" fill="none" stroke="#EF4444" strokeWidth="1.5" transform="rotate(45, 380, 90)" />
       <line x1="352" y1="90" x2="408" y2="90" stroke="#60A5FA" strokeWidth="1" markerStart="url(#arrowBlueS)" markerEnd="url(#arrowBlueE)" />
@@ -62,7 +62,7 @@ function VickersDiagram() {
       <text x="380" y="55" textAnchor="middle" fill="#9CA3AF" fontSize="9" fontFamily="monospace">Top View</text>
       {/* Formula */}
       <rect x="50" y="10" width="200" height="25" rx="4" fill="#1F2937" />
-      <text x="150" y="27" textAnchor="middle" fill="#D4AF37" fontSize="11" fontFamily="monospace">HV = 1.854 × F / d²</text>
+      <text x="150" y="27" textAnchor="middle" fontSize="11" fontFamily="monospace" className="fill-gold-400">HV = 1.854 × F / d²</text>
       {/* Markers */}
       <defs>
         <marker id="arrowBlueS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M6,0 L0,3 L6,6 Z" fill="#60A5FA" /></marker>
@@ -78,9 +78,9 @@ function BrinellDiagram() {
       {/* Specimen */}
       <rect x="50" y="160" width="400" height="100" rx="4" fill="#374151" stroke="#4B5563" strokeWidth="1" />
       {/* Ball indenter */}
-      <circle cx="250" cy="120" r="40" fill="none" stroke="#D4AF37" strokeWidth="2" />
-      <circle cx="250" cy="120" r="2" fill="#D4AF37" />
-      <text x="250" y="70" textAnchor="middle" fill="#D4AF37" fontSize="11" fontFamily="sans-serif" fontWeight="600">10mm WC Ball</text>
+      <circle cx="250" cy="120" r="40" fill="none" strokeWidth="2"  className="stroke-gold-400"/>
+      <circle cx="250" cy="120" r="2"  className="fill-gold-400"/>
+      <text x="250" y="70" textAnchor="middle" fontSize="11" fontFamily="sans-serif" fontWeight="600" className="fill-gold-400">10mm WC Ball</text>
       {/* Indent impression */}
       <path d="M220,160 Q250,185 280,160" fill="none" stroke="#EF4444" strokeWidth="1.5" strokeDasharray="3,2" />
       {/* Diameter measurement */}
@@ -88,8 +88,8 @@ function BrinellDiagram() {
       <text x="250" y="218" textAnchor="middle" fill="#60A5FA" fontSize="11" fontFamily="monospace">d (mm)</text>
       {/* Formula */}
       <rect x="300" y="80" width="180" height="50" rx="6" fill="#1F2937" />
-      <text x="390" y="100" textAnchor="middle" fill="#D4AF37" fontSize="10" fontFamily="monospace">HB = 2F</text>
-      <text x="390" y="120" textAnchor="middle" fill="#D4AF37" fontSize="10" fontFamily="monospace">πD(D-√(D²-d²))</text>
+      <text x="390" y="100" textAnchor="middle" fontSize="10" fontFamily="monospace" className="fill-gold-400">HB = 2F</text>
+      <text x="390" y="120" textAnchor="middle" fontSize="10" fontFamily="monospace" className="fill-gold-400">πD(D-√(D²-d²))</text>
       {/* Load */}
       <line x1="250" y1="20" x2="250" y2="75" stroke="#F59E0B" strokeWidth="2" markerEnd="url(#arrowGold2)" />
       <text x="250" y="15" textAnchor="middle" fill="#F59E0B" fontSize="11" fontFamily="sans-serif" fontWeight="600">3000 kgf</text>

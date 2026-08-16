@@ -211,7 +211,7 @@ export default function Footer() {
       <div className="px-6 py-6 max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-md flex items-center justify-center font-bold font-mono text-dark-800 text-sm"
-               style={{ background: "linear-gradient(135deg, #d4af37, #b8962e)" }}>
+               style={{ background: "linear-gradient(135deg, rgb(var(--gold-400)), #b8962e)" }}>
             M
           </div>
           <span className="text-dark-400 text-[13px]">

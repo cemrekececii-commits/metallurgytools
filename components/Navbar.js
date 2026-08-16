@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { useLang } from "@/lib/LanguageContext";
-import { useTheme } from "@/lib/ThemeContext";
+import { useTheme, PALETTES, PALETTE_LABELS } from "@/lib/ThemeContext";
 import SearchModal from "./SearchModal";
 
 // PUBLIC MODE (geri alinabilir): NEXT_PUBLIC_OPEN_ACCESS=true iken giris
@@ -25,12 +25,14 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileCat, setMobileCat] = useState(null); // expanded category on mobile
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const { isSignedIn } = useUser();
   const { lang, switchLang, t } = useLang();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, palette, setPalette } = useTheme();
   const dropdownRef = useRef(null);
   const langRef = useRef(null);
   const moreRef = useRef(null);
+  const paletteRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -43,6 +45,7 @@ export default function Navbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setToolsOpen(false);
       if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
       if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+      if (paletteRef.current && !paletteRef.current.contains(e.target)) setPaletteOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -310,6 +313,42 @@ export default function Navbar() {
             {theme === "dark" ? "☀" : "🌙"}
           </button>
 
+          {/* Palette picker — renk şeması seçimi (localStorage: mt-palette) */}
+          <div className="relative shrink-0" ref={paletteRef}>
+            <button
+              onClick={() => setPaletteOpen(!paletteOpen)}
+              title={lang === "tr" ? "Renk şeması" : "Color scheme"}
+              aria-label={lang === "tr" ? "Renk şeması seç" : "Select color scheme"}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.05] border border-white/10 hover:border-gold-400/40 transition-all cursor-pointer shrink-0"
+            >
+              <span
+                className="w-3.5 h-3.5 rounded-full border border-white/25 block"
+                style={{ background: PALETTE_LABELS[palette]?.swatch }}
+              />
+            </button>
+            {paletteOpen && (
+              <div className="absolute top-10 right-0 bg-dark-800 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[190px] animate-fade-in z-50">
+                <p className="text-[10px] text-dark-400 font-mono uppercase tracking-widest px-3 py-1.5 m-0">
+                  {lang === "tr" ? "Renk şeması" : "Color scheme"}
+                </p>
+                {PALETTES.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => { setPalette(p); setPaletteOpen(false); }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm bg-transparent border-none cursor-pointer font-sans transition-colors hover:bg-white/5 ${palette === p ? "text-gold-400" : "text-dark-200"}`}
+                  >
+                    <span className="flex shrink-0">
+                      <span className="w-3.5 h-3.5 rounded-l-full border border-white/20 block" style={{ background: PALETTE_LABELS[p].bg }} />
+                      <span className="w-3.5 h-3.5 rounded-r-full border border-l-0 border-white/20 block" style={{ background: PALETTE_LABELS[p].swatch }} />
+                    </span>
+                    <span className="flex-1">{PALETTE_LABELS[p][lang === "tr" ? "tr" : "en"]}</span>
+                    {palette === p && <span className="text-xs">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Language */}
           <div className="relative shrink-0" ref={langRef}>
             <button
@@ -477,6 +516,34 @@ export default function Navbar() {
                       }`}
                     >
                       {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Palette picker — mobil */}
+              <div className="px-2 pb-3">
+                <p className="text-[10px] text-gold-400 font-mono font-bold uppercase tracking-widest px-1 mb-2">
+                  {lang === "tr" ? "Renk şeması" : "Color scheme"}
+                </p>
+                <div className="flex gap-2">
+                  {PALETTES.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPalette(p)}
+                      className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-lg cursor-pointer font-sans border transition-all ${
+                        palette === p
+                          ? "bg-gold-400/10 border-gold-400/40 text-gold-400"
+                          : "bg-white/[0.04] border-white/10 text-dark-300"
+                      }`}
+                    >
+                      <span className="flex">
+                        <span className="w-4 h-4 rounded-l-full border border-white/20 block" style={{ background: PALETTE_LABELS[p].bg }} />
+                        <span className="w-4 h-4 rounded-r-full border border-l-0 border-white/20 block" style={{ background: PALETTE_LABELS[p].swatch }} />
+                      </span>
+                      <span className="text-[10px] leading-tight text-center px-1">
+                        {PALETTE_LABELS[p][lang === "tr" ? "tr" : "en"]}
+                      </span>
                     </button>
                   ))}
                 </div>

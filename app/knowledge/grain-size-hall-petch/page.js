@@ -11,19 +11,19 @@ function HallPetchSVG() {
       <text x="260" y="310" textAnchor="middle" fill="#9CA3AF" fontSize="11">d⁻¹ᐟ² (mm⁻¹ᐟ²)</text>
       <text x="20" y="160" textAnchor="middle" fill="#9CA3AF" fontSize="11" transform="rotate(-90,20,160)">σy (MPa)</text>
       {/* Hall-Petch line */}
-      <line x1="80" y1="240" x2="420" y2="60" stroke="#D4AF37" strokeWidth="2.5" />
+      <line x1="80" y1="240" x2="420" y2="60" strokeWidth="2.5"  className="stroke-gold-400"/>
       {/* Data points */}
       {[[100,225],[150,200],[200,175],[250,148],[300,120],[350,95],[400,72]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="4" fill="#D4AF37" stroke="#B8860B" strokeWidth="1" />
+        <circle key={i} cx={x} cy={y} r="4" strokeWidth="1"  className="fill-gold-400 stroke-gold-500"/>
       ))}
       {/* σ₀ intercept */}
       <line x1="55" y1="240" x2="85" y2="240" stroke="#60A5FA" strokeWidth="1" strokeDasharray="4,3" />
       <text x="50" y="243" textAnchor="end" fill="#60A5FA" fontSize="10" fontFamily="monospace">σ₀</text>
       {/* Slope label */}
-      <text x="280" y="120" fill="#D4AF37" fontSize="12" fontFamily="monospace" fontWeight="600">slope = k</text>
+      <text x="280" y="120" fontSize="12" fontFamily="monospace" fontWeight="600" className="fill-gold-400">slope = k</text>
       {/* Equation */}
       <rect x="280" y="40" width="180" height="30" rx="6" fill="#1F2937" />
-      <text x="370" y="60" textAnchor="middle" fill="#D4AF37" fontSize="12" fontFamily="monospace" fontWeight="600">σy = σ₀ + k·d⁻¹ᐟ²</text>
+      <text x="370" y="60" textAnchor="middle" fontSize="12" fontFamily="monospace" fontWeight="600" className="fill-gold-400">σy = σ₀ + k·d⁻¹ᐟ²</text>
       {/* Grain size labels */}
       <text x="100" y="270" textAnchor="middle" fill="#6B7280" fontSize="8">Coarse grain</text>
       <text x="400" y="270" textAnchor="middle" fill="#6B7280" fontSize="8">Fine grain</text>
